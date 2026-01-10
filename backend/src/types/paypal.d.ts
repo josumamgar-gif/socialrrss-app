@@ -6,7 +6,7 @@ declare module '@paypal/checkout-server-sdk' {
   }
 
   export class PayPalHttpClient {
-    constructor(environment: Environment);
+    constructor(environment: LiveEnvironment | SandboxEnvironment);
     execute(request: any): Promise<any>;
   }
 
@@ -21,21 +21,27 @@ declare module '@paypal/checkout-server-sdk' {
     requestBody(body: any): OrdersCaptureRequest;
   }
 
-  export class SandboxEnvironment extends Environment {
+  export class SandboxEnvironment implements Environment {
     constructor(clientId: string, clientSecret: string);
+    clientId(): string;
+    clientSecret(): string;
+    baseUrl(): string;
   }
 
-  export class LiveEnvironment extends Environment {
+  export class LiveEnvironment implements Environment {
     constructor(clientId: string, clientSecret: string);
+    clientId(): string;
+    clientSecret(): string;
+    baseUrl(): string;
   }
 
-  const core: {
+  export const core: {
     SandboxEnvironment: typeof SandboxEnvironment;
     LiveEnvironment: typeof LiveEnvironment;
     PayPalHttpClient: typeof PayPalHttpClient;
   };
 
-  const orders: {
+  export const orders: {
     OrdersCreateRequest: typeof OrdersCreateRequest;
     OrdersCaptureRequest: typeof OrdersCaptureRequest;
   };
