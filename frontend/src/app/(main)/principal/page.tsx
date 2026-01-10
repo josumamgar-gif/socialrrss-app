@@ -25,18 +25,24 @@ export default function PrincipalPage() {
     }
   }, []);
 
-  // Obtener perfiles vistos por el usuario actual
+  // Obtener perfiles vistos por el usuario actual (funciona incluso sin usuario autenticado)
   const getViewedProfiles = useCallback((): string[] => {
-    if (!user || typeof window === 'undefined') return [];
-    const key = `viewedProfiles_${user.id}`;
+    if (typeof window === 'undefined') return [];
+    
+    // Si hay usuario, usar su ID, sino usar 'anonymous'
+    const userId = user?.id || 'anonymous';
+    const key = `viewedProfiles_${userId}`;
     const viewed = localStorage.getItem(key);
     return viewed ? JSON.parse(viewed) : [];
   }, [user]);
 
   // Marcar un perfil como visto
   const markProfileAsViewed = useCallback((profileId: string) => {
-    if (!user || typeof window === 'undefined') return;
-    const key = `viewedProfiles_${user.id}`;
+    if (typeof window === 'undefined') return;
+    
+    // Si hay usuario, usar su ID, sino usar 'anonymous'
+    const userId = user?.id || 'anonymous';
+    const key = `viewedProfiles_${userId}`;
     const viewed = getViewedProfiles();
     if (!viewed.includes(profileId)) {
       viewed.push(profileId);
@@ -46,6 +52,7 @@ export default function PrincipalPage() {
 
   const loadProfiles = useCallback(async () => {
     try {
+      setLoading(true);
       const response = await profilesAPI.getAll();
       const viewedProfiles = getViewedProfiles();
       
@@ -56,14 +63,12 @@ export default function PrincipalPage() {
       // Los perfiles demo solo aparecen si el tutorial NO está completado (primera vez)
       const tutorialCompleted = typeof window !== 'undefined' ? 
         localStorage.getItem('tutorialCompleted') === 'true' : false;
-      const demoCompleted = typeof window !== 'undefined' ? 
-        localStorage.getItem('demoCompleted') === 'true' : false;
       
       // Solo incluir demos si el tutorial NO está completado (primera vez)
       let profilesToShow: Profile[] = [];
-      if (!tutorialCompleted && !demoCompleted) {
-        // Si el tutorial no está completado, mostrar demos sin filtrar por vistos
-        // Los demos nunca se marcan como vistos permanentemente
+      if (!tutorialCompleted) {
+        // Si el tutorial no está completado, mostrar demos
+        // Filtrar demos que no han sido vistos para evitar repetirlos durante el tutorial
         const demosNotViewed = demoProfiles.filter((p: Profile) => !viewedProfiles.includes(p._id));
         profilesToShow = [...demosNotViewed, ...realProfiles];
       } else {
@@ -74,13 +79,11 @@ export default function PrincipalPage() {
       setProfiles(profilesToShow);
     } catch (error) {
       console.error('Error cargando perfiles:', error);
-      // Si falla, solo mostrar demos si el tutorial no está completado
+      // Si falla, mostrar demos si el tutorial no está completado
       const tutorialCompleted = typeof window !== 'undefined' ? 
         localStorage.getItem('tutorialCompleted') === 'true' : false;
-      const demoCompleted = typeof window !== 'undefined' ? 
-        localStorage.getItem('demoCompleted') === 'true' : false;
       
-      if (!tutorialCompleted && !demoCompleted) {
+      if (!tutorialCompleted) {
         setProfiles(demoProfiles);
       } else {
         setProfiles([]);
@@ -91,11 +94,9 @@ export default function PrincipalPage() {
   }, [getViewedProfiles]);
 
   useEffect(() => {
-    if (user) {
-      loadProfiles();
-      checkDemoCompletion();
-    }
-  }, [loadProfiles, checkDemoCompletion, user]);
+    loadProfiles();
+    checkDemoCompletion();
+  }, [loadProfiles, checkDemoCompletion]);
 
   const handleSwipeLeft = () => {
     const currentProfile = profiles[currentIndex];
@@ -186,18 +187,19 @@ export default function PrincipalPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
+      <div className="flex justify-center items-center min-h-screen pt-20">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
       </div>
     );
   }
 
-  // Mostrar mensaje si no hay perfiles
-  if (profiles.length === 0) {
+  // Mostrar mensaje si no hay perfiles después de cargar
+  if (!loading && profiles.length === 0) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
+      <div className="flex justify-center items-center min-h-screen pt-20">
         <div className="text-center">
-          <p className="text-gray-600 text-lg">No hay perfiles disponibles por el momento</p>
+          <p className="text-gray-600 text-lg mb-2">No hay perfiles disponibles por el momento</p>
+          <p className="text-gray-500 text-sm">Intenta recargar la página o contacta al administrador</p>
         </div>
       </div>
     );
@@ -207,7 +209,7 @@ export default function PrincipalPage() {
   // Solo mostrar interacción demo si el tutorial NO está completado
   const tutorialCompleted = typeof window !== 'undefined' ? 
     localStorage.getItem('tutorialCompleted') === 'true' : false;
-  const needsDemoInteraction = !tutorialCompleted && !hasCompletedDemo && currentIndex < demoProfiles.length;
+  const needsDemoInteraction = !tutorialCompleted && !hasCompletedDemo && profiles.length > 0 && currentIndex < demoProfiles.length;
   const currentProfile = profiles[currentIndex];
   const isDemoProfile = currentProfile?._id.startsWith('demo-');
 
@@ -233,28 +235,29 @@ export default function PrincipalPage() {
         </div>
       )}
 
-
-      <div className="relative w-full max-w-md mx-auto profile-card-container" style={{ overflow: 'hidden' }}>
-        {profiles.slice(currentIndex, currentIndex + 3).map((profile, idx) => (
-          <div
-            key={profile._id}
-            className={idx === 0 ? 'relative z-10' : 'absolute top-0 left-0 right-0 opacity-50 scale-95'}
-            style={{ zIndex: 10 - idx }}
-          >
-            <ProfileCard
-              profile={profile}
-              onSwipeLeft={handleSwipeLeft}
-              onSwipeRight={handleSwipeRight}
-              onSwipeUp={handleSwipeUp}
-              onGoBack={handleGoBack}
-              onShowDetail={(profile) => setSelectedProfile(profile)}
-              index={idx}
-              canGoBack={history.length > 0 && idx === 0}
-              currentProfileIndex={currentIndex + idx}
-            />
-          </div>
-        ))}
-      </div>
+      {profiles.length > 0 && currentProfile && (
+        <div className="relative w-full max-w-md mx-auto profile-card-container" style={{ overflow: 'hidden' }}>
+          {profiles.slice(currentIndex, currentIndex + 3).map((profile, idx) => (
+            <div
+              key={profile._id}
+              className={idx === 0 ? 'relative z-10' : 'absolute top-0 left-0 right-0 opacity-50 scale-95'}
+              style={{ zIndex: 10 - idx }}
+            >
+              <ProfileCard
+                profile={profile}
+                onSwipeLeft={handleSwipeLeft}
+                onSwipeRight={handleSwipeRight}
+                onSwipeUp={handleSwipeUp}
+                onGoBack={handleGoBack}
+                onShowDetail={(profile) => setSelectedProfile(profile)}
+                index={idx}
+                canGoBack={history.length > 0 && idx === 0}
+                currentProfileIndex={currentIndex + idx}
+              />
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Modal de detalles - renderizado fuera del contenedor para z-index correcto */}
       {selectedProfile && (
