@@ -315,14 +315,14 @@ export default function WelcomeTutorial({ onClose }: WelcomeTutorialProps) {
           </div>
 
           {/* Instrucciones de instalación PWA */}
-          {currentStepData.installInstructions && typeof window !== 'undefined' && (
+          {currentStepData.installInstructions && typeof window !== 'undefined' && (currentStepData.installInstructions === 'android' || currentStepData.installInstructions === 'ios') && (
             <div className="mb-4 sm:mb-6 p-4 sm:p-5 bg-gradient-to-br from-primary-50 to-blue-50 border-2 border-primary-200 rounded-lg">
               <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4 flex items-center gap-2">
                 <span className="text-xl sm:text-2xl">{currentStepData.installInstructions === 'android' ? '🤖' : '🍎'}</span>
-                Instrucciones paso a paso para {getInstallInstructions(currentStepData.installInstructions).platform}
+                Instrucciones paso a paso para {getInstallInstructions(currentStepData.installInstructions as 'android' | 'ios').platform}
               </h3>
               <ol className="space-y-2.5 sm:space-y-3 ml-2 sm:ml-4">
-                {getInstallInstructions(currentStepData.installInstructions).steps.map((step, idx) => (
+                {getInstallInstructions(currentStepData.installInstructions as 'android' | 'ios').steps.map((step, idx) => (
                   <li key={idx} className="text-sm sm:text-base text-gray-700 leading-relaxed flex items-start gap-3">
                     <span className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary-600 text-white flex items-center justify-center font-bold text-xs sm:text-sm shadow-md">
                       {idx + 1}
