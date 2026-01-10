@@ -23,7 +23,7 @@ interface ProfileCardProps {
 }
 
 interface DragAction {
-  type: 'left' | 'right' | 'up' | null;
+  type: 'left' | 'right' | 'up' | 'back' | null;
   intensity: number; // 0-1
 }
 
