@@ -36,9 +36,14 @@ export default function PrincipalPage() {
     return viewed ? JSON.parse(viewed) : [];
   }, [user]);
 
-  // Marcar un perfil como visto
+  // Marcar un perfil como visto (pero NO marcar demos como vistos permanentemente)
   const markProfileAsViewed = useCallback((profileId: string) => {
     if (typeof window === 'undefined') return;
+    
+    // NO marcar perfiles demo como vistos - solo los perfiles reales
+    if (profileId.startsWith('demo-')) {
+      return; // Los demos nunca se marcan como vistos
+    }
     
     // Si hay usuario, usar su ID, sino usar 'anonymous'
     const userId = user?.id || 'anonymous';
@@ -60,17 +65,15 @@ export default function PrincipalPage() {
       const realProfiles = (response.profiles || [])
         .filter((p: Profile) => !p._id.startsWith('demo-') && !viewedProfiles.includes(p._id));
       
-      // Los perfiles demo solo aparecen si el tutorial NO está completado (primera vez)
+      // Los perfiles demo solo aparecen si el tutorial NO está completado
       const tutorialCompleted = typeof window !== 'undefined' ? 
         localStorage.getItem('tutorialCompleted') === 'true' : false;
       
-      // Solo incluir demos si el tutorial NO está completado (primera vez)
       let profilesToShow: Profile[] = [];
       if (!tutorialCompleted) {
-        // Si el tutorial no está completado, mostrar demos
-        // Filtrar demos que no han sido vistos para evitar repetirlos durante el tutorial
-        const demosNotViewed = demoProfiles.filter((p: Profile) => !viewedProfiles.includes(p._id));
-        profilesToShow = [...demosNotViewed, ...realProfiles];
+        // Si el tutorial NO está completado, MOSTRAR TODOS LOS DEMOS siempre
+        // No filtrar demos por vistos - deben aparecer siempre durante el tutorial
+        profilesToShow = [...demoProfiles, ...realProfiles];
       } else {
         // Si el tutorial está completado, NO mostrar demos nunca más
         profilesToShow = realProfiles;

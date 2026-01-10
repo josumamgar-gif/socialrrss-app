@@ -15,20 +15,37 @@ import {
 
 interface WelcomeTutorialProps {
   onClose?: () => void;
+  forceOpen?: boolean; // Permite forzar la apertura del tutorial
+  onForceOpenChange?: (open: boolean) => void; // Callback cuando se cierra manualmente
 }
 
-export default function WelcomeTutorial({ onClose }: WelcomeTutorialProps) {
+export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange }: WelcomeTutorialProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const tutorialCompleted = localStorage.getItem('tutorialCompleted');
-      if (!tutorialCompleted) {
+      // Si forceOpen es true, mostrar el tutorial forzadamente
+      if (forceOpen === true) {
         setIsVisible(true);
+        return;
+      }
+      
+      // Si forceOpen es false explícitamente, ocultar
+      if (forceOpen === false) {
+        setIsVisible(false);
+        return;
+      }
+      
+      // Si forceOpen es undefined, verificar si debe mostrarse automáticamente (comportamiento por defecto)
+      if (forceOpen === undefined) {
+        const tutorialCompleted = localStorage.getItem('tutorialCompleted');
+        if (!tutorialCompleted) {
+          setIsVisible(true);
+        }
       }
     }
-  }, []);
+  }, [forceOpen]);
 
   const steps = [
     {
@@ -189,7 +206,13 @@ export default function WelcomeTutorial({ onClose }: WelcomeTutorialProps) {
   const handleClose = () => {
     setIsVisible(false);
     if (typeof window !== 'undefined') {
-      localStorage.setItem('tutorialCompleted', 'true');
+      // Solo marcar como completado si no fue forzado a abrir (es decir, es la primera vez)
+      if (!forceOpen) {
+        localStorage.setItem('tutorialCompleted', 'true');
+      }
+    }
+    if (onForceOpenChange) {
+      onForceOpenChange(false);
     }
     if (onClose) {
       onClose();

@@ -9,11 +9,14 @@ import PendingPaymentsSection from '@/components/ajustes/PendingPaymentsSection'
 import StatisticsSection from '@/components/ajustes/StatisticsSection';
 import AutoRenewalSection from '@/components/ajustes/AutoRenewalSection';
 import SupportSection from '@/components/ajustes/SupportSection';
+import WelcomeTutorial from '@/components/shared/WelcomeTutorial';
+import { InformationCircleIcon } from '@heroicons/react/24/outline';
 
 type TabType = 'profile' | 'payments' | 'statistics' | 'settings' | 'support';
 
 export default function AjustesPage() {
   const [activeTab, setActiveTab] = useState<TabType>('profile');
+  const [showTutorial, setShowTutorial] = useState(false);
 
   const tabs = [
     { id: 'profile' as TabType, name: 'Mi Perfil', icon: '👤' },
@@ -23,12 +26,34 @@ export default function AjustesPage() {
     { id: 'support' as TabType, name: 'Soporte', icon: '💬' },
   ];
 
+  const handleOpenTutorial = () => {
+    setShowTutorial(true);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 pt-16 sm:pt-20 pb-20 sm:pb-24 px-0 sm:px-4">
+      {/* Tutorial - se muestra cuando showTutorial es true */}
+      {showTutorial && (
+        <WelcomeTutorial 
+          forceOpen={showTutorial}
+          onForceOpenChange={setShowTutorial}
+          onClose={() => setShowTutorial(false)}
+        />
+      )}
+
       <div className="max-w-6xl mx-auto w-full">
-        <div className="mb-6 text-center">
+        <div className="mb-6 text-center px-4">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Ajustes</h1>
-          <p className="text-gray-600">Gestiona tu cuenta, pagos y configuración</p>
+          <p className="text-gray-600 mb-4">Gestiona tu cuenta, pagos y configuración</p>
+          
+          {/* Botón para abrir tutorial */}
+          <button
+            onClick={handleOpenTutorial}
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all text-sm font-semibold transform hover:scale-105"
+          >
+            <InformationCircleIcon className="h-5 w-5" />
+            <span>📚 Ver Tutorial de la App</span>
+          </button>
         </div>
 
         {/* Tabs de navegación */}
