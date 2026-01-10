@@ -152,15 +152,26 @@ export default function WelcomeTutorial({ onClose }: WelcomeTutorialProps) {
       highlight: 'ajustes',
     },
     {
-      title: '📱 Añade la App a tu Escritorio',
+      title: '📱 Instalar en Android',
       content: [
-        '¡Mejora tu experiencia usando la app como una aplicación nativa!',
-        'Puedes añadir esta web app a la pantalla de inicio de tu móvil para acceder rápidamente.',
-        'Esto te dará una experiencia similar a una app nativa instalada en tu dispositivo.',
+        '¡Mejora tu experiencia usando la app como una aplicación nativa en Android!',
+        'Puedes instalar esta web app directamente desde tu navegador Chrome.',
+        'Una vez instalada, aparecerá como una aplicación normal en tu escritorio.',
       ],
-      icon: '📱',
+      icon: '🤖',
       highlight: null,
-      installInstructions: true,
+      installInstructions: 'android',
+    },
+    {
+      title: '🍎 Instalar en iOS (iPhone/iPad)',
+      content: [
+        '¡Mejora tu experiencia usando la app como una aplicación nativa en iOS!',
+        'Puedes añadir esta web app a la pantalla de inicio desde Safari.',
+        'Una vez añadida, tendrás acceso rápido desde tu escritorio.',
+      ],
+      icon: '🍎',
+      highlight: null,
+      installInstructions: 'ios',
     },
     {
       title: '✅ ¡Ya estás listo!',
@@ -199,6 +210,18 @@ export default function WelcomeTutorial({ onClose }: WelcomeTutorialProps) {
     }
   };
 
+  // Prevenir scroll del body cuando el tutorial está abierto
+  useEffect(() => {
+    if (isVisible) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isVisible]);
+
   if (!isVisible) return null;
 
   const currentStepData = steps[currentStep];
@@ -232,67 +255,60 @@ export default function WelcomeTutorial({ onClose }: WelcomeTutorialProps) {
     return colors[color] || { bg: 'bg-gray-50', border: 'border-gray-300', text: 'text-gray-700', icon: 'text-gray-600' };
   };
 
-  const getInstallInstructions = () => {
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    const isAndroid = /Android/.test(navigator.userAgent);
-    
-    if (isIOS) {
-      return {
-        platform: 'iOS',
-        steps: [
-          'Toca el botón "Compartir" en la parte inferior (cuadrado con flecha hacia arriba)',
-          'Desplázate hacia abajo y busca "Añadir a la pantalla de inicio"',
-          'Toca "Añadir a la pantalla de inicio"',
-          'Personaliza el nombre si quieres y toca "Añadir"',
-          '¡Listo! Ya tienes la app en tu escritorio',
-        ],
-      };
-    } else if (isAndroid) {
+  const getInstallInstructions = (platform: 'android' | 'ios') => {
+    if (platform === 'android') {
       return {
         platform: 'Android',
         steps: [
-          'Toca el menú de opciones (tres puntos) en la esquina superior derecha del navegador',
-          'Selecciona "Añadir a la pantalla de inicio" o "Instalar app"',
-          'Confirma la instalación tocando "Añadir" o "Instalar"',
-          '¡Listo! La app aparecerá en tu escritorio como una aplicación',
+          'Abre la app en tu navegador Chrome (es necesario usar Chrome)',
+          'Toca el menú de opciones (tres puntos ⋮) en la esquina superior derecha',
+          'Busca y selecciona "Añadir a la pantalla de inicio" o "Instalar app"',
+          'Si ves "Instalar", tócalo. Si ves "Añadir", también funciona igual',
+          'Confirma tocando "Instalar" o "Añadir" en el diálogo que aparece',
+          '¡Listo! La app aparecerá en tu escritorio como una aplicación normal',
+          'Abre la app desde tu escritorio para una experiencia nativa completa',
         ],
       };
     } else {
       return {
-        platform: 'Desktop',
+        platform: 'iOS',
         steps: [
-          'Busca el icono de instalación en la barra de direcciones de tu navegador',
-          'Haz clic en el icono de instalación o en el menú del navegador',
-          'Selecciona "Instalar" o "Añadir a la pantalla de inicio"',
-          '¡Listo! La app se instalará como una aplicación de escritorio',
+          'Abre la app en Safari (es necesario usar Safari, no Chrome)',
+          'Toca el botón "Compartir" (cuadrado con flecha hacia arriba) en la parte inferior',
+          'Desplázate hacia abajo en el menú de compartir',
+          'Busca y toca "Añadir a la pantalla de inicio"',
+          'Personaliza el nombre si quieres (opcional)',
+          'Toca "Añadir" en la esquina superior derecha',
+          '¡Listo! La app aparecerá en tu escritorio con un icono personalizado',
         ],
       };
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-2 sm:p-4">
-      <div className="bg-white rounded-lg max-w-3xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto shadow-lg border border-gray-200 animate-fadeIn">
-        {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-primary-600 to-primary-700 text-white px-4 sm:px-6 py-3 sm:py-5 flex items-center justify-between z-10 rounded-t-lg sm:rounded-t-2xl">
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-            <div className="text-2xl sm:text-3xl flex-shrink-0">{currentStepData.icon}</div>
-            <h2 className="text-lg sm:text-xl md:text-2xl font-bold truncate">{currentStepData.title}</h2>
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-0 sm:p-4 overflow-hidden">
+      <div className="bg-white rounded-none sm:rounded-lg max-w-3xl w-full h-full sm:h-auto sm:max-h-[90vh] shadow-lg border-0 sm:border border-gray-200 animate-fadeIn flex flex-col overflow-hidden">
+        {/* Header - Fixed */}
+        <div className="bg-gradient-to-r from-primary-600 via-primary-500 to-primary-700 text-white px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between flex-shrink-0 shadow-xl">
+          <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+            <div className="text-3xl sm:text-4xl flex-shrink-0 drop-shadow-lg">{currentStepData.icon}</div>
+            <h2 className="text-lg sm:text-xl md:text-2xl font-extrabold break-words drop-shadow-md leading-tight">{currentStepData.title}</h2>
           </div>
           <button
             onClick={handleClose}
-            className="text-white/90 hover:text-white transition-colors flex-shrink-0 ml-2"
+            className="text-white/90 hover:text-white transition-colors flex-shrink-0 ml-2 p-2 rounded-full hover:bg-white/20 active:bg-white/30"
+            aria-label="Cerrar tutorial"
           >
             <XMarkIcon className="h-5 w-5 sm:h-6 sm:w-6" />
           </button>
         </div>
 
-        {/* Content */}
-        <div className="p-4 sm:p-6">
+        {/* Content - Scrollable */}
+        <div className="p-4 sm:p-6 flex-1 overflow-y-auto overscroll-contain scroll-smooth">
           {/* Información principal */}
           <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
             {currentStepData.content.map((text, idx) => (
-              <p key={idx} className="text-sm sm:text-base md:text-lg text-gray-700 leading-relaxed">
+              <p key={idx} className="text-sm sm:text-base md:text-lg text-gray-700 leading-relaxed text-justify sm:text-left">
                 {text}
               </p>
             ))}
@@ -302,22 +318,22 @@ export default function WelcomeTutorial({ onClose }: WelcomeTutorialProps) {
           {currentStepData.installInstructions && typeof window !== 'undefined' && (
             <div className="mb-4 sm:mb-6 p-4 sm:p-5 bg-gradient-to-br from-primary-50 to-blue-50 border-2 border-primary-200 rounded-lg">
               <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4 flex items-center gap-2">
-                <span className="text-xl sm:text-2xl">📲</span>
-                Instrucciones para {getInstallInstructions().platform}
+                <span className="text-xl sm:text-2xl">{currentStepData.installInstructions === 'android' ? '🤖' : '🍎'}</span>
+                Instrucciones paso a paso para {getInstallInstructions(currentStepData.installInstructions).platform}
               </h3>
-              <ol className="space-y-2 sm:space-y-3 ml-4 sm:ml-6">
-                {getInstallInstructions().steps.map((step, idx) => (
-                  <li key={idx} className="text-sm sm:text-base text-gray-700 leading-relaxed flex items-start gap-2">
-                    <span className="flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-primary-600 text-white flex items-center justify-center font-bold text-xs sm:text-sm mt-0.5">
+              <ol className="space-y-2.5 sm:space-y-3 ml-2 sm:ml-4">
+                {getInstallInstructions(currentStepData.installInstructions).steps.map((step, idx) => (
+                  <li key={idx} className="text-sm sm:text-base text-gray-700 leading-relaxed flex items-start gap-3">
+                    <span className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary-600 text-white flex items-center justify-center font-bold text-xs sm:text-sm shadow-md">
                       {idx + 1}
                     </span>
                     <span className="flex-1 pt-0.5">{step}</span>
                   </li>
                 ))}
               </ol>
-              <div className="mt-4 sm:mt-5 p-3 sm:p-4 bg-white/60 rounded-lg border border-primary-200">
-                <p className="text-xs sm:text-sm text-gray-600">
-                  <span className="font-semibold">💡 Consejo:</span> Una vez instalada, podrás acceder a la app desde tu escritorio como si fuera una aplicación nativa. ¡Mucho más rápido y cómodo!
+              <div className="mt-4 sm:mt-5 p-3 sm:p-4 bg-white/70 rounded-lg border border-primary-200 shadow-sm">
+                <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
+                  <span className="font-semibold text-primary-700">💡 Consejo:</span> Una vez instalada, podrás acceder a la app desde tu escritorio como si fuera una aplicación nativa. ¡Mucho más rápido y cómodo! La app se abrirá en pantalla completa sin la barra del navegador.
                 </p>
               </div>
             </div>
@@ -399,8 +415,8 @@ export default function WelcomeTutorial({ onClose }: WelcomeTutorialProps) {
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="sticky bottom-0 bg-white border-t border-gray-200 px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between rounded-b-lg sm:rounded-b-2xl gap-2">
+        {/* Footer - Fixed */}
+        <div className="bg-white border-t border-gray-200 px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-2 flex-shrink-0 shadow-lg rounded-b-none sm:rounded-b-lg">
           <button
             onClick={handlePrev}
             disabled={currentStep === 0}

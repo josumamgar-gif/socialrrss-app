@@ -60,7 +60,7 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork }: Pro
                 type="text"
                 value={profileData.username || ''}
                 onChange={(e) => setProfileData({ ...profileData, username: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 placeholder:text-gray-400"
                 placeholder="@usuario"
               />
             </div>
@@ -72,7 +72,7 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork }: Pro
                 type="number"
                 value={profileData.followers || ''}
                 onChange={(e) => setProfileData({ ...profileData, followers: parseInt(e.target.value) || 0 })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 placeholder:text-gray-400"
                 placeholder="1000000"
               />
             </div>
@@ -84,7 +84,7 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork }: Pro
                 type="number"
                 value={profileData.videos || ''}
                 onChange={(e) => setProfileData({ ...profileData, videos: parseInt(e.target.value) || 0 })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 placeholder:text-gray-400"
                 placeholder="500"
               />
             </div>
@@ -102,7 +102,7 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork }: Pro
                 type="text"
                 value={profileData.channelName || ''}
                 onChange={(e) => setProfileData({ ...profileData, channelName: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 placeholder:text-gray-400"
                 placeholder="Mi Canal"
               />
             </div>
@@ -114,7 +114,7 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork }: Pro
                 type="number"
                 value={profileData.subscribers || ''}
                 onChange={(e) => setProfileData({ ...profileData, subscribers: parseInt(e.target.value) || 0 })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 placeholder:text-gray-400"
                 placeholder="50000"
               />
             </div>
@@ -126,7 +126,7 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork }: Pro
                 type="number"
                 value={profileData.videoCount || ''}
                 onChange={(e) => setProfileData({ ...profileData, videoCount: parseInt(e.target.value) || 0 })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 placeholder:text-gray-400"
                 placeholder="200"
               />
             </div>
@@ -144,7 +144,7 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork }: Pro
                 type="text"
                 value={profileData.handle || ''}
                 onChange={(e) => setProfileData({ ...profileData, handle: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 placeholder:text-gray-400"
                 placeholder="@usuario"
               />
             </div>
@@ -156,7 +156,7 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork }: Pro
                 type="number"
                 value={profileData.followers || ''}
                 onChange={(e) => setProfileData({ ...profileData, followers: parseInt(e.target.value) || 0 })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 placeholder:text-gray-400"
                 placeholder="100000"
               />
             </div>
@@ -168,7 +168,7 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork }: Pro
                 type="number"
                 value={profileData.posts || ''}
                 onChange={(e) => setProfileData({ ...profileData, posts: parseInt(e.target.value) || 0 })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 placeholder:text-gray-400"
                 placeholder="500"
               />
             </div>
@@ -186,7 +186,7 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork }: Pro
                 type="text"
                 value={profileData.streamerName || ''}
                 onChange={(e) => setProfileData({ ...profileData, streamerName: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 placeholder:text-gray-400"
                 placeholder="StreamerName"
               />
             </div>
@@ -198,7 +198,7 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork }: Pro
                 type="number"
                 value={profileData.followers || ''}
                 onChange={(e) => setProfileData({ ...profileData, followers: parseInt(e.target.value) || 0 })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 placeholder:text-gray-400"
                 placeholder="50000"
               />
             </div>
@@ -210,7 +210,7 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork }: Pro
                 type="text"
                 value={profileData.game || ''}
                 onChange={(e) => setProfileData({ ...profileData, game: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 placeholder:text-gray-400"
                 placeholder="Just Chatting"
               />
             </div>
@@ -228,7 +228,7 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork }: Pro
                 type="text"
                 value={profileData.pageName || ''}
                 onChange={(e) => setProfileData({ ...profileData, pageName: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 placeholder:text-gray-400"
                 placeholder="Mi Página"
               />
             </div>
@@ -240,7 +240,7 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork }: Pro
                 type="number"
                 value={profileData.likes || ''}
                 onChange={(e) => setProfileData({ ...profileData, likes: parseInt(e.target.value) || 0 })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 placeholder:text-gray-400"
                 placeholder="10000"
               />
             </div>
@@ -258,7 +258,7 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork }: Pro
                 type="text"
                 value={profileData.twitterHandle || ''}
                 onChange={(e) => setProfileData({ ...profileData, twitterHandle: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 placeholder:text-gray-400"
                 placeholder="@usuario"
               />
             </div>
@@ -270,7 +270,7 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork }: Pro
                 type="number"
                 value={profileData.followers || ''}
                 onChange={(e) => setProfileData({ ...profileData, followers: parseInt(e.target.value) || 0 })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 placeholder:text-gray-400"
                 placeholder="50000"
               />
             </div>
@@ -282,7 +282,7 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork }: Pro
                 type="number"
                 value={profileData.tweets || ''}
                 onChange={(e) => setProfileData({ ...profileData, tweets: parseInt(e.target.value) || 0 })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 placeholder:text-gray-400"
                 placeholder="1000"
               />
             </div>
@@ -300,7 +300,7 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork }: Pro
                 type="text"
                 value={profileData.title || ''}
                 onChange={(e) => setProfileData({ ...profileData, title: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 placeholder:text-gray-400"
                 placeholder="Título"
               />
             </div>
@@ -311,7 +311,7 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork }: Pro
               <textarea
                 value={profileData.description || ''}
                 onChange={(e) => setProfileData({ ...profileData, description: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 placeholder:text-gray-400 resize-none"
                 rows={4}
                 placeholder="Descripción..."
               />
@@ -330,7 +330,7 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork }: Pro
         <select
           value={socialNetwork}
           onChange={(e) => setSocialNetwork(e.target.value as SocialNetwork)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 bg-white"
         >
           <option value="tiktok">TikTok</option>
           <option value="youtube">YouTube</option>
@@ -351,7 +351,7 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork }: Pro
           value={link}
           onChange={(e) => setLink(e.target.value)}
           required
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 placeholder:text-gray-400"
           placeholder="https://..."
         />
       </div>

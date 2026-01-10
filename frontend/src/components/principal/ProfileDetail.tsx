@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Profile } from '@/types';
 import { XMarkIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import SocialNetworkLogo from '@/components/shared/SocialNetworkLogo';
@@ -54,11 +54,26 @@ export default function ProfileDetail({ profile, onClose }: ProfileDetailProps) 
     }
   };
 
+  // Prevenir scroll del body cuando el modal está abierto
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, []);
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4" style={{ zIndex: 9999 }}>
-      <div className="bg-white rounded-lg max-w-4xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto shadow-lg border border-gray-200 animate-fadeIn relative z-[10000]">
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-0 sm:p-4 overflow-hidden" 
+      style={{ zIndex: 9999 }}
+      onClick={onClose}
+    >
+      <div 
+        className="bg-white rounded-none sm:rounded-lg max-w-4xl w-full h-full sm:h-auto sm:max-h-[90vh] overflow-y-auto sm:overflow-y-auto shadow-lg border-0 sm:border border-gray-200 animate-fadeIn relative z-[10000] flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
-        <div className={`${getNetworkColor(profile.socialNetwork)} text-white p-4 sm:p-6 rounded-t-lg sm:rounded-t-2xl sticky top-0 z-10`}>
+        <div className={`${getNetworkColor(profile.socialNetwork)} text-white p-4 sm:p-6 rounded-none sm:rounded-t-lg flex-shrink-0`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
               <div className="bg-white/20 p-1.5 sm:p-2 rounded-lg flex-shrink-0">
@@ -87,7 +102,7 @@ export default function ProfileDetail({ profile, onClose }: ProfileDetailProps) 
         </div>
 
         {/* Contenido */}
-        <div className="p-3 sm:p-6">
+        <div className="p-3 sm:p-6 flex-1 overflow-y-auto">
           <div className="flex flex-col md:grid md:grid-cols-2 gap-4 sm:gap-6">
             {/* Imágenes */}
             <div className="space-y-3 sm:space-y-4 order-1 md:order-1">
