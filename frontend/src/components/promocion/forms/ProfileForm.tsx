@@ -45,22 +45,22 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork }: Pro
 
       // Limpiar profileData: eliminar campos vacíos, undefined, null y strings vacíos
       // Pero mantener valores numéricos válidos (incluyendo 0 si el usuario lo introdujo)
-      const cleanedProfileData: Partial<ProfileData> = {};
+      const cleanedProfileData: Record<string, any> = {};
       Object.entries(profileData).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== '') {
           if (typeof value === 'string') {
             // Incluir strings no vacíos
             if (value.trim() !== '') {
-              cleanedProfileData[key as keyof ProfileData] = value;
+              cleanedProfileData[key] = value;
             }
           } else if (typeof value === 'number') {
             // Incluir números válidos (no NaN, no infinito, >= 0)
             if (!isNaN(value) && isFinite(value) && value >= 0) {
-              cleanedProfileData[key as keyof ProfileData] = value;
+              cleanedProfileData[key] = value;
             }
           } else {
             // Incluir otros tipos (objetos, arrays, boolean, etc.)
-            cleanedProfileData[key as keyof ProfileData] = value;
+            cleanedProfileData[key] = value;
           }
         }
       });
