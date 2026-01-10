@@ -38,7 +38,7 @@ export default function StatisticsSection() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow p-6 max-w-5xl w-full mx-auto">
+      <div className="bg-white rounded-none sm:rounded-lg shadow p-4 sm:p-6 max-w-5xl w-full mx-auto">
         <h2 className="text-xl font-semibold text-gray-900 mb-4 text-center">Estadísticas</h2>
         <div className="flex justify-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary-600"></div>
@@ -48,7 +48,7 @@ export default function StatisticsSection() {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow p-6 max-w-5xl w-full mx-auto">
+    <div className="bg-white rounded-none sm:rounded-lg shadow p-4 sm:p-6 max-w-5xl w-full mx-auto">
       <h2 className="text-xl font-semibold text-gray-900 mb-6 text-center">Estadísticas de Interacciones</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6 max-w-4xl mx-auto">

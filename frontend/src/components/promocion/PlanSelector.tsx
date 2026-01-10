@@ -177,7 +177,7 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
 
       {/* Preview del perfil */}
       {profileData && (
-        <div className="bg-gray-50 border border-gray-300 rounded-md p-6 max-w-2xl mx-auto">
+        <div className="bg-gray-50 border border-gray-300 rounded-none sm:rounded-md p-4 sm:p-6 max-w-2xl mx-auto">
           <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">
             👁️ Vista Previa de tu Perfil Promocionado
           </h3>
@@ -191,7 +191,7 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
             key={plan.type}
             onClick={() => setSelectedPlan(plan.type)}
             className={`
-              relative border rounded-lg p-6 pt-8 cursor-pointer transition-all overflow-visible
+              relative border rounded-none sm:rounded-lg p-4 sm:p-6 pt-6 sm:pt-8 cursor-pointer transition-all overflow-visible
               ${selectedPlan === plan.type 
                 ? `${getPlanColor(plan.type)} shadow-md border-2` 
                 : 'border-gray-300 bg-white hover:border-gray-400 hover:shadow-sm'
@@ -237,7 +237,7 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
         ))}
       </div>
 
-      <div className="bg-gray-50 rounded-md border border-gray-200 p-6 max-w-2xl mx-auto">
+      <div className="bg-gray-50 rounded-none sm:rounded-md border border-gray-200 p-4 sm:p-6 max-w-2xl mx-auto">
         <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">Método de Pago</h3>
         <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
           <button
@@ -277,7 +277,7 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
       )}
 
       {paymentCreated && clientSecret && (selectedPaymentMethod === 'card' || selectedPaymentMethod === 'sepa') && (
-        <div className="bg-white rounded-xl p-6 border-2 border-primary-200">
+        <div className="bg-white rounded-none sm:rounded-xl p-4 sm:p-6 border-2 border-primary-200">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Completa tu Pago</h3>
           <StripePayment
             clientSecret={clientSecret}

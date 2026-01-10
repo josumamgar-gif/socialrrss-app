@@ -289,14 +289,14 @@ export default function WelcomeTutorial({ onClose }: WelcomeTutorialProps) {
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-0 sm:p-4 overflow-hidden">
       <div className="bg-white rounded-none sm:rounded-lg max-w-3xl w-full h-full sm:h-auto sm:max-h-[90vh] shadow-lg border-0 sm:border border-gray-200 animate-fadeIn flex flex-col overflow-hidden">
         {/* Header - Fixed */}
-        <div className="bg-gradient-to-r from-primary-600 via-primary-500 to-primary-700 text-white px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between flex-shrink-0 shadow-xl">
+        <div className="bg-gradient-to-r from-primary-600 via-primary-500 to-primary-700 text-white px-4 py-3 sm:px-6 sm:py-5 flex items-center justify-between flex-shrink-0 shadow-xl">
           <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
             <div className="text-3xl sm:text-4xl flex-shrink-0 drop-shadow-lg">{currentStepData.icon}</div>
             <h2 className="text-lg sm:text-xl md:text-2xl font-extrabold break-words drop-shadow-md leading-tight">{currentStepData.title}</h2>
           </div>
           <button
             onClick={handleClose}
-            className="text-white/90 hover:text-white transition-colors flex-shrink-0 ml-2 p-2 rounded-full hover:bg-white/20 active:bg-white/30"
+            className="text-white/90 hover:text-white transition-colors flex-shrink-0 ml-2 p-1.5 sm:p-2 rounded-full hover:bg-white/20 active:bg-white/30"
             aria-label="Cerrar tutorial"
           >
             <XMarkIcon className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -304,7 +304,7 @@ export default function WelcomeTutorial({ onClose }: WelcomeTutorialProps) {
         </div>
 
         {/* Content - Scrollable */}
-        <div className="p-4 sm:p-6 flex-1 overflow-y-auto overscroll-contain scroll-smooth">
+        <div className="px-4 py-3 sm:px-6 sm:py-6 flex-1 overflow-y-auto overscroll-contain scroll-smooth">
           {/* Información principal */}
           <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
             {currentStepData.content.map((text, idx) => (
@@ -416,7 +416,7 @@ export default function WelcomeTutorial({ onClose }: WelcomeTutorialProps) {
         </div>
 
         {/* Footer - Fixed */}
-        <div className="bg-white border-t border-gray-200 px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-2 flex-shrink-0 shadow-lg rounded-b-none sm:rounded-b-lg">
+        <div className="bg-white border-t border-gray-200 px-4 py-3 sm:px-6 sm:py-4 flex items-center justify-between gap-2 flex-shrink-0 shadow-lg rounded-b-none sm:rounded-b-lg">
           <button
             onClick={handlePrev}
             disabled={currentStep === 0}

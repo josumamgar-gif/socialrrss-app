@@ -24,7 +24,7 @@ export default function PaymentHistorySection() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow p-6 max-w-4xl w-full mx-auto">
+      <div className="bg-white rounded-none sm:rounded-lg shadow p-4 sm:p-6 max-w-4xl w-full mx-auto">
         <h2 className="text-xl font-semibold text-gray-900 mb-4 text-center">Historial de Pagos</h2>
         <div className="flex justify-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary-600"></div>
@@ -34,7 +34,7 @@ export default function PaymentHistorySection() {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow p-6 max-w-4xl w-full mx-auto">
+    <div className="bg-white rounded-none sm:rounded-lg shadow p-4 sm:p-6 max-w-4xl w-full mx-auto">
       <h2 className="text-xl font-semibold text-gray-900 mb-4 text-center">Historial de Pagos</h2>
       {payments.length > 0 ? (
         <div className="space-y-4">

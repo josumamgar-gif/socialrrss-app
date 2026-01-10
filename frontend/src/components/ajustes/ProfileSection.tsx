@@ -97,7 +97,7 @@ export default function ProfileSection() {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-6 space-y-6 max-w-3xl w-full mx-auto">
+    <div className="bg-white rounded-none sm:rounded-lg shadow p-4 sm:p-6 space-y-4 sm:space-y-6 max-w-3xl w-full mx-auto">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold text-gray-900">Información de Cuenta</h2>
         {!editingProfile && (

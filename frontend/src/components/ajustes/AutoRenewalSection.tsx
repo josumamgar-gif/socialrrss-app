@@ -34,7 +34,7 @@ export default function AutoRenewalSection() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow p-6 max-w-4xl w-full mx-auto">
+      <div className="bg-white rounded-none sm:rounded-lg shadow p-4 sm:p-6 max-w-4xl w-full mx-auto">
         <div className="flex justify-center py-4">
           <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary-600"></div>
         </div>
@@ -43,7 +43,7 @@ export default function AutoRenewalSection() {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow p-6 max-w-4xl w-full mx-auto">
+    <div className="bg-white rounded-none sm:rounded-lg shadow p-4 sm:p-6 max-w-4xl w-full mx-auto">
       <div className="text-center mb-6">
         <h2 className="text-xl font-semibold text-gray-900 mb-2">
           Renovación Automática

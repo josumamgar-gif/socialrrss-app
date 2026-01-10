@@ -73,7 +73,7 @@ export default function ProfileDetail({ profile, onClose }: ProfileDetailProps) 
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className={`${getNetworkColor(profile.socialNetwork)} text-white p-4 sm:p-6 rounded-none sm:rounded-t-lg flex-shrink-0`}>
+        <div className={`${getNetworkColor(profile.socialNetwork)} text-white px-4 py-3 sm:px-6 sm:py-6 rounded-none sm:rounded-t-lg flex-shrink-0`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
               <div className="bg-white/20 p-1.5 sm:p-2 rounded-lg flex-shrink-0">
@@ -94,7 +94,7 @@ export default function ProfileDetail({ profile, onClose }: ProfileDetailProps) 
             </div>
             <button
               onClick={onClose}
-              className="text-white hover:text-gray-200 transition-colors flex-shrink-0 ml-2"
+              className="text-white hover:text-gray-200 transition-colors flex-shrink-0 ml-2 p-1"
             >
               <XMarkIcon className="h-5 w-5 sm:h-6 sm:w-6" />
             </button>
@@ -102,7 +102,7 @@ export default function ProfileDetail({ profile, onClose }: ProfileDetailProps) 
         </div>
 
         {/* Contenido */}
-        <div className="p-3 sm:p-6 flex-1 overflow-y-auto">
+        <div className="px-4 py-3 sm:px-6 sm:py-6 flex-1 overflow-y-auto">
           <div className="flex flex-col md:grid md:grid-cols-2 gap-4 sm:gap-6">
             {/* Imágenes */}
             <div className="space-y-3 sm:space-y-4 order-1 md:order-1">

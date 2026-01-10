@@ -24,15 +24,15 @@ export default function AjustesPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20 pb-24 px-4">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gray-50 pt-16 sm:pt-20 pb-20 sm:pb-24 px-0 sm:px-4">
+      <div className="max-w-6xl mx-auto w-full">
         <div className="mb-6 text-center">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Ajustes</h1>
           <p className="text-gray-600">Gestiona tu cuenta, pagos y configuración</p>
         </div>
 
         {/* Tabs de navegación */}
-        <div className="bg-white rounded-lg shadow mb-6 overflow-x-auto">
+        <div className="bg-white rounded-none sm:rounded-lg shadow mb-4 sm:mb-6 overflow-x-auto">
           <div className="flex border-b border-gray-200">
             {tabs.map((tab) => (
               <button
@@ -68,7 +68,7 @@ export default function AjustesPage() {
         </div>
 
         {/* CTA para promocionar */}
-        <div className="mt-8 bg-primary-600 rounded-md shadow-sm border border-primary-700 p-6 text-white text-center max-w-2xl mx-auto">
+        <div className="mt-6 sm:mt-8 bg-primary-600 rounded-none sm:rounded-md shadow-sm border-0 sm:border border-primary-700 p-4 sm:p-6 text-white text-center max-w-2xl mx-auto">
           <h2 className="text-xl font-semibold mb-2">¡Promociona tu Perfil!</h2>
           <p className="mb-4 opacity-90">
             Lleva tu perfil al siguiente nivel y aumenta tu visibilidad

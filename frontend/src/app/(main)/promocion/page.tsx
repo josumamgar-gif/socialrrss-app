@@ -152,8 +152,8 @@ export default function PromocionPage() {
   // Vista de selección de planes
   if (showPlanSelector && selectedProfile) {
     return (
-      <div className="min-h-screen bg-gray-50 pt-20 pb-24 px-4">
-        <div className="max-w-4xl mx-auto">
+      <div className="min-h-screen bg-gray-50 pt-16 sm:pt-20 pb-20 sm:pb-24 px-0 sm:px-4">
+        <div className="max-w-4xl mx-auto w-full">
           <div className="text-center mb-6">
             <button
               onClick={handleBack}
@@ -175,9 +175,9 @@ export default function PromocionPage() {
   // Vista de formulario de RRSS
   if (selectedNetwork) {
     return (
-      <div className="min-h-screen bg-gray-50 pt-20 pb-24 px-4">
-        <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-6">
+      <div className="min-h-screen bg-gray-50 pt-16 sm:pt-20 pb-20 sm:pb-24 px-0 sm:px-4">
+        <div className="max-w-2xl mx-auto w-full">
+          <div className="text-center mb-4 sm:mb-6 px-4 sm:px-0">
             <button
               onClick={handleBack}
               className="text-primary-600 hover:text-primary-700 font-medium"
@@ -185,7 +185,7 @@ export default function PromocionPage() {
               ← Volver a redes sociales
             </button>
           </div>
-          <div className="bg-white rounded-lg shadow-lg p-6">
+          <div className="bg-white rounded-none sm:rounded-lg shadow-lg p-4 sm:p-6">
             <div className="mb-6">
               {(() => {
                 const network = socialNetworks.find(n => n.id === selectedNetwork);
@@ -223,8 +223,8 @@ export default function PromocionPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20 pb-24 px-4">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gray-50 pt-16 sm:pt-20 pb-20 sm:pb-24 px-0 sm:px-4">
+      <div className="max-w-7xl mx-auto w-full">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Promociona tu Perfil</h1>
           <p className="text-gray-600">Selecciona la red social que quieres promocionar</p>
@@ -275,7 +275,7 @@ export default function PromocionPage() {
               {profiles.map((profile) => {
                 const network = socialNetworks.find(n => n.id === profile.socialNetwork);
                 return (
-                  <div key={profile._id} className="bg-white rounded-lg shadow p-6">
+                  <div key={profile._id} className="bg-white rounded-none sm:rounded-lg shadow p-4 sm:p-6">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center space-x-3">
                         {network && (
