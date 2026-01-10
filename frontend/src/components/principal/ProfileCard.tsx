@@ -1,0 +1,641 @@
+'use client';
+
+import { useState, useRef, useEffect } from 'react';
+import { Profile } from '@/types';
+import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  ArrowUpIcon,
+  ArrowUturnLeftIcon,
+} from '@heroicons/react/24/outline';
+import SocialNetworkLogo from '@/components/shared/SocialNetworkLogo';
+
+interface ProfileCardProps {
+  profile: Profile;
+  onSwipeLeft?: () => void;
+  onSwipeRight?: () => void;
+  onSwipeUp?: () => void;
+  onGoBack?: () => void;
+  onShowDetail?: (profile: Profile) => void;
+  index: number;
+  canGoBack?: boolean;
+  currentProfileIndex?: number; // Índice global del perfil actual
+}
+
+interface DragAction {
+  type: 'left' | 'right' | 'up' | null;
+  intensity: number; // 0-1
+}
+
+function Tooltip({ text, children }: { text: string; children: React.ReactNode }) {
+  const [isVisible, setIsVisible] = useState(false);
+  return (
+    <div className="relative flex items-center">
+      <div
+        onMouseEnter={() => setIsVisible(true)}
+        onMouseLeave={() => setIsVisible(false)}
+      >
+        {children}
+      </div>
+      {isVisible && (
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1 bg-gray-800 text-white text-xs rounded-md shadow-lg whitespace-nowrap z-50">
+          {text}
+          <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-gray-800" />
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function ProfileCard({
+  profile,
+  onSwipeLeft,
+  onSwipeRight,
+  onSwipeUp,
+  onGoBack,
+  onShowDetail,
+  index,
+  canGoBack = false,
+  currentProfileIndex,
+}: ProfileCardProps) {
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [startPos, setStartPos] = useState({ x: 0, y: 0 });
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [dragAction, setDragAction] = useState<DragAction>({ type: null, intensity: 0 });
+  const [buttonAction, setButtonAction] = useState<DragAction>({ type: null, intensity: 0 });
+  const [backUsed, setBackUsed] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const getActionForPosition = (x: number, y: number, width: number, height: number): DragAction => {
+    const threshold = 50; // Distancia mínima para activar acción
+    
+    // Calcular distancia desde el centro
+    const distanceFromCenter = Math.sqrt(x * x + y * y);
+    const intensity = Math.min(1, distanceFromCenter / threshold);
+    
+    // Si no ha alcanzado el umbral, no hay acción
+    if (intensity < 0.2) {
+      return { type: null, intensity: 0 };
+    }
+    
+    const absX = Math.abs(x);
+    const absY = Math.abs(y);
+    
+    // Determinar dirección principal
+    if (absX > absY * 1.2) {
+      // Movimiento horizontal dominante (con margen para evitar diagonales)
+      if (x < 0) {
+        return { type: 'left', intensity };
+      } else {
+        return { type: 'right', intensity };
+      }
+    } else if (absY > absX * 1.2 && y < 0) {
+      // Movimiento vertical hacia arriba dominante
+      return { type: 'up', intensity };
+    }
+    
+    return { type: null, intensity: 0 };
+  };
+
+  const handleStart = (clientX: number, clientY: number) => {
+    if (isAnimating) return;
+    setIsDragging(true);
+    setStartPos({ x: clientX, y: clientY });
+    setDragAction({ type: null, intensity: 0 });
+  };
+
+  const handleMove = (clientX: number, clientY: number) => {
+    if (!isDragging || isAnimating) return;
+    
+    const deltaX = clientX - startPos.x;
+    const deltaY = clientY - startPos.y;
+    setPosition({ x: deltaX, y: deltaY });
+    
+    // Obtener dimensiones del contenedor
+    if (cardRef.current && containerRef.current) {
+      const cardRect = cardRef.current.getBoundingClientRect();
+      const action = getActionForPosition(deltaX, deltaY, cardRect.width, cardRect.height);
+      setDragAction(action);
+    }
+  };
+
+  const handleEnd = () => {
+    if (!isDragging || isAnimating) {
+      setIsDragging(false);
+      return;
+    }
+    
+    const threshold = 80;
+    const absX = Math.abs(position.x);
+    const absY = Math.abs(position.y);
+
+    // Si hay una acción de arrastre detectada con suficiente intensidad
+    if (dragAction.type && dragAction.intensity > 0.3) {
+      if (dragAction.type === 'left' && onSwipeLeft) {
+        triggerSwipeAnimation('left', onSwipeLeft);
+        return;
+      } else if (dragAction.type === 'right') {
+        // Para el gesto a la derecha, primero abrimos el enlace si existe
+        if (profile.link) {
+          window.open(profile.link, '_blank');
+        }
+        if (onSwipeRight) {
+          triggerSwipeAnimation('right', onSwipeRight);
+        } else {
+          resetPosition();
+        }
+        return;
+      } else if (dragAction.type === 'up') {
+        if (onShowDetail) {
+          onShowDetail(profile);
+        } else if (onSwipeUp) {
+          onSwipeUp();
+        }
+        resetPosition();
+        return;
+      }
+    }
+    
+    // Fallback al sistema basado en posición absoluta
+    if (absX > threshold || absY > threshold) {
+      if (absX > absY) {
+        // Movimiento horizontal
+        if (position.x > 0) {
+          // Derecha
+          if (profile.link) {
+            window.open(profile.link, '_blank');
+          }
+          if (onSwipeRight) {
+            triggerSwipeAnimation('right', onSwipeRight);
+          } else {
+            resetPosition();
+          }
+          return;
+        } else if (position.x < 0 && onSwipeLeft) {
+          // Izquierda
+          triggerSwipeAnimation('left', onSwipeLeft);
+          return;
+        }
+      } else if (position.y < 0 && absY > threshold) {
+        // Movimiento hacia arriba
+        if (onShowDetail) {
+          onShowDetail(profile);
+        } else if (onSwipeUp) {
+          onSwipeUp();
+        }
+        resetPosition();
+        return;
+      }
+    }
+    
+    // Si no se ejecutó ninguna acción, resetear
+    resetPosition();
+  };
+
+  const resetPosition = () => {
+    setPosition({ x: 0, y: 0 });
+    setIsAnimating(false);
+    setIsDragging(false);
+    setDragAction({ type: null, intensity: 0 });
+    if (cardRef.current) {
+      cardRef.current.style.transform = '';
+      cardRef.current.style.opacity = '';
+      cardRef.current.style.transition = '';
+    }
+  };
+
+  const triggerSwipeAnimation = (direction: 'left' | 'right', callback: () => void) => {
+    setIsAnimating(true);
+    setIsDragging(false);
+    setDragAction({ type: null, intensity: 0 });
+    
+    const card = cardRef.current;
+    if (!card) {
+      setIsAnimating(false);
+      return;
+    }
+
+    const translateX = direction === 'left' ? '-100vw' : '100vw';
+    
+    // Forzar el estilo inline para la animación
+    card.style.transform = `translate(${translateX}, ${position.y}px) rotate(${direction === 'left' ? '-30deg' : '30deg'})`;
+    card.style.opacity = '0';
+    card.style.transition = 'transform 0.3s ease-out, opacity 0.3s ease-out';
+
+    // Esperar a que termine la animación antes de ejecutar el callback y resetear
+    setTimeout(() => {
+      // Resetear todos los estilos antes de ejecutar el callback
+      if (card) {
+        card.style.transform = '';
+        card.style.opacity = '';
+        card.style.transition = '';
+      }
+      setPosition({ x: 0, y: 0 });
+      setIsAnimating(false);
+      
+      // Ejecutar callback después de resetear todo
+      setTimeout(() => {
+        callback();
+      }, 50);
+    }, 350);
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => handleMove(e.clientX, e.clientY);
+    const handleMouseUp = () => handleEnd();
+    const handleTouchMove = (e: TouchEvent) => {
+      e.preventDefault();
+      if (e.touches[0]) handleMove(e.touches[0].clientX, e.touches[0].clientY);
+    };
+    const handleTouchEnd = () => handleEnd();
+
+    if (isDragging) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+      window.addEventListener('touchmove', handleTouchMove, { passive: false });
+      window.addEventListener('touchend', handleTouchEnd);
+    }
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [isDragging, position, startPos, isAnimating, dragAction]);
+
+  // Resetear backUsed cada vez que cambia el perfil actual visible
+  // Se resetea cuando cambias de perfil (avanzar o retroceder)
+  // Usamos currentProfileIndex para saber cuándo cambias a un nuevo perfil
+  useEffect(() => {
+    // Solo resetear para la tarjeta activa (index === 0) y cuando cambia el perfil actual
+    if (index === 0) {
+      setBackUsed(false);
+    }
+  }, [currentProfileIndex]);
+
+  const getNetworkColor = (network: string) => {
+    const colors: Record<string, string> = {
+      tiktok: 'bg-pink-500',
+      youtube: 'bg-red-500',
+      instagram: 'bg-purple-600',
+      facebook: 'bg-blue-600',
+      twitch: 'bg-purple-600',
+      x: 'bg-black',
+      otros: 'bg-gray-500',
+    };
+    return colors[network] || 'bg-gray-500';
+  };
+
+  const getActionConfig = (action: DragAction | null) => {
+    const activeAction = action || dragAction;
+    if (!activeAction || !activeAction.type) return null;
+    
+    const configs = {
+      left: {
+        text: 'Siguiente Perfil',
+        gradient: 'bg-red-500',
+        icon: '←',
+      },
+      right: {
+        text: 'Ir al Enlace',
+        gradient: 'bg-blue-500',
+        icon: '→',
+      },
+      up: {
+        text: 'Ver Detalles',
+        gradient: 'bg-yellow-500',
+        icon: '↑',
+      },
+      back: {
+        text: 'Retroceder',
+        gradient: 'bg-green-500',
+        icon: '↩',
+      },
+    };
+    
+    return configs[activeAction.type];
+  };
+
+  const triggerBackAnimation = (callback: () => void) => {
+    // Solo funciona si no se ha usado y está disponible
+    if (isAnimating || backUsed || !canGoBack || !callback) return;
+    
+    setIsAnimating(true);
+    setBackUsed(true);
+    // Mostrar overlay verde inmediatamente
+    setButtonAction({ type: 'back', intensity: 1 });
+    
+    // Forzar un pequeño delay para asegurar que el overlay se muestre
+    requestAnimationFrame(() => {
+      const card = cardRef.current;
+      if (!card) {
+        setIsAnimating(false);
+        setButtonAction({ type: null, intensity: 0 });
+        return;
+      }
+
+      // Animación hacia atrás (desde abajo/derecha hacia el centro)
+      // Primero la tarjeta aparece desde atrás
+      card.style.transform = 'translate(100px, 100px) rotate(15deg)';
+      card.style.opacity = '0';
+      card.style.transition = 'none';
+      
+      // Forzar reflow
+      card.offsetHeight;
+      
+      // Animar hacia la posición original (centro)
+      card.style.transform = 'translate(0, 0) rotate(0deg)';
+      card.style.opacity = '1';
+      card.style.transition = 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+      
+      // Después de la animación completa (500ms), ejecutar callback y resetear
+      setTimeout(() => {
+        // Resetear estilos
+        card.style.transform = '';
+        card.style.opacity = '';
+        card.style.transition = '';
+        
+        // Resetear estados
+        setButtonAction({ type: null, intensity: 0 });
+        setIsAnimating(false);
+        
+        // Ejecutar callback
+        callback();
+      }, 500);
+    });
+  };
+
+  const triggerButtonAnimation = (actionType: 'left' | 'right' | 'up', callback: () => void) => {
+    // Completamente independiente del arrastre
+    if (isAnimating) return;
+    
+    setIsAnimating(true);
+    // Mostrar overlay inmediatamente al hacer clic
+    setButtonAction({ type: actionType, intensity: 1 });
+    
+    // Forzar un pequeño delay para asegurar que el overlay se muestre
+    requestAnimationFrame(() => {
+      // Animar la tarjeta completamente hacia la esquina
+      const card = cardRef.current;
+      if (!card) {
+        setIsAnimating(false);
+        setButtonAction({ type: null, intensity: 0 });
+        return;
+      }
+
+      const translateX = actionType === 'left' ? '-100vw' : actionType === 'right' ? '100vw' : '0';
+      const translateY = actionType === 'up' ? '-100vh' : '0';
+      const rotation = actionType === 'left' ? '-30deg' : actionType === 'right' ? '30deg' : '0';
+      
+      // Aplicar transformación completa con animación de 0.5 segundos
+      card.style.transform = `translate(${translateX}, ${translateY}) rotate(${rotation})`;
+      card.style.opacity = '0';
+      card.style.transition = 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+      
+      // Después de la animación completa (500ms), ejecutar callback y resetear
+      setTimeout(() => {
+        // Resetear estilos
+        card.style.transform = '';
+        card.style.opacity = '';
+        card.style.transition = '';
+        
+        // Resetear estados
+        setButtonAction({ type: null, intensity: 0 });
+        setIsAnimating(false);
+        
+        // Ejecutar callback
+        callback();
+      }, 500);
+    });
+  };
+
+  // Lógica independiente: overlay de botón o overlay de arrastre
+  const buttonActionConfig = buttonAction.type ? getActionConfig(buttonAction) : null;
+  const dragActionConfig = isDragging && dragAction.type && dragAction.intensity > 0.3 ? getActionConfig(dragAction) : null;
+  const actionConfig = buttonActionConfig || dragActionConfig;
+  
+  // Rotación solo para arrastre (no para botones)
+  const rotation = isDragging && dragAction.type ? 
+    (dragAction.type === 'left' ? -Math.min(dragAction.intensity * 15, 15) :
+     dragAction.type === 'right' ? Math.min(dragAction.intensity * 15, 15) : 0) :
+    position.x * 0.1;
+
+  return (
+    <>
+      <div ref={containerRef} className="relative w-full max-w-md mx-auto">
+        {/* Overlay cuando se hace clic en botón - 100% opaco */}
+        {buttonAction.type && buttonActionConfig && (
+          <div 
+            className={`absolute inset-0 rounded-lg ${buttonActionConfig.gradient} z-40 pointer-events-none flex items-center justify-center transition-opacity duration-200`}
+            style={{ opacity: 1 }}
+          >
+            <div className="text-center text-white">
+              <div className="text-6xl mb-4 animate-pulse">{buttonActionConfig.icon}</div>
+              <div className="text-2xl font-bold drop-shadow-lg">{buttonActionConfig.text}</div>
+            </div>
+          </div>
+        )}
+
+        {/* Overlay cuando se arrastra - 100% opaco */}
+        {isDragging && dragActionConfig && dragAction.intensity > 0.3 && (
+          <div 
+            className={`absolute inset-0 rounded-lg ${dragActionConfig.gradient} z-40 pointer-events-none flex items-center justify-center transition-opacity duration-200`}
+            style={{ opacity: 1 }}
+          >
+            <div className="text-center text-white">
+              <div className="text-6xl mb-4 animate-pulse">{dragActionConfig.icon}</div>
+              <div className="text-2xl font-bold drop-shadow-lg">{dragActionConfig.text}</div>
+            </div>
+          </div>
+        )}
+
+        <div
+          ref={cardRef}
+          className="relative w-full bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden cursor-grab active:cursor-grabbing select-none"
+          style={{
+            transform: buttonAction.type 
+              ? undefined // La transformación de botones se maneja con style inline
+              : `translate(${position.x}px, ${position.y}px) rotate(${rotation}deg)`,
+            transition: isDragging || buttonAction.type ? 'none' : 'transform 0.1s ease-out',
+            zIndex: 1000 - index,
+          }}
+          onMouseDown={(e) => {
+            // Solo iniciar arrastre si no hay animación de botón activa
+            if (e.button === 0 && !isAnimating && !buttonAction.type) {
+              handleStart(e.clientX, e.clientY);
+            }
+          }}
+          onTouchStart={(e) => {
+            // Solo iniciar arrastre si no hay animación de botón activa
+            if (e.touches[0] && !isAnimating && !buttonAction.type) {
+              handleStart(e.touches[0].clientX, e.touches[0].clientY);
+            }
+          }}
+        >
+          {/* Header con color según red social */}
+          <div className={`${getNetworkColor(profile.socialNetwork)} h-16 flex items-center justify-center gap-2`}>
+            <div className="text-white">
+              <SocialNetworkLogo network={profile.socialNetwork} className="w-6 h-6" />
+            </div>
+            <h2 className="text-white font-bold text-lg">
+              {profile.profileData.username || 
+               profile.profileData.channelName || 
+               profile.profileData.handle || 
+               profile.profileData.streamerName ||
+               profile.profileData.pageName ||
+               profile.profileData.twitterHandle ||
+               'Perfil'}
+            </h2>
+          </div>
+
+          {/* Imagen */}
+          <div className="relative h-64 bg-gray-200">
+            {profile.images && profile.images.length > 0 ? (
+              <img
+                src={profile.images[0].startsWith('http') 
+                  ? profile.images[0] 
+                  : `http://localhost:5000${profile.images[0]}`}
+                alt={profile.profileData.username || 'Perfil'}
+                className="w-full h-full object-cover pointer-events-none"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x600?text=Imagen';
+                }}
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-gray-400">
+                <span className="text-6xl">📷</span>
+              </div>
+            )}
+          </div>
+
+          {/* Información */}
+          <div className="p-6 pb-24">
+            <p className="text-gray-600 mb-4 line-clamp-3">
+              {profile.profileData.description || 'Sin descripción'}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {profile.profileData.followers && (
+                <span className="px-3 py-1 bg-gray-100 rounded-full text-sm">
+                  👥 {profile.profileData.followers.toLocaleString()}
+                </span>
+              )}
+              {profile.profileData.subscribers && (
+                <span className="px-3 py-1 bg-gray-100 rounded-full text-sm">
+                  👥 {profile.profileData.subscribers.toLocaleString()}
+                </span>
+              )}
+              {profile.profileData.videos && (
+                <span className="px-3 py-1 bg-gray-100 rounded-full text-sm">
+                  🎥 {profile.profileData.videos.toLocaleString()}
+                </span>
+              )}
+              {profile.profileData.videoCount && (
+                <span className="px-3 py-1 bg-gray-100 rounded-full text-sm">
+                  🎥 {profile.profileData.videoCount.toLocaleString()}
+                </span>
+              )}
+              {profile.profileData.posts && (
+                <span className="px-3 py-1 bg-gray-100 rounded-full text-sm">
+                  📸 {profile.profileData.posts.toLocaleString()}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Botones de acción */}
+          <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-3 px-4 md:space-x-4 bg-white/95 backdrop-blur-sm py-3 rounded-t-xl border-t border-gray-200 pointer-events-auto">
+            <Tooltip text="Siguiente Perfil">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  if (!isAnimating && onSwipeLeft) {
+                    triggerButtonAnimation('left', onSwipeLeft);
+                  }
+                }}
+                onMouseUp={(e) => e.currentTarget.blur()}
+                disabled={isAnimating}
+                className="bg-red-500 hover:bg-red-600 text-white p-3 rounded-md shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none"
+                aria-label="Siguiente Perfil"
+              >
+                <ArrowLeftIcon className="h-6 w-6" />
+              </button>
+            </Tooltip>
+
+            <Tooltip text="Ver Detalles">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  if (!isAnimating) {
+                    triggerButtonAnimation('up', () => {
+                      if (onShowDetail) {
+                        onShowDetail(profile);
+                      }
+                    });
+                  }
+                }}
+                onMouseUp={(e) => e.currentTarget.blur()}
+                disabled={isAnimating}
+                className="bg-yellow-500 hover:bg-yellow-600 text-white p-3 rounded-md shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none"
+                aria-label="Ver Detalles"
+              >
+                <ArrowUpIcon className="h-6 w-6" />
+              </button>
+            </Tooltip>
+
+            <Tooltip text={backUsed ? "Ya retrocediste" : "Retroceder"}>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  if (!isAnimating && !backUsed && canGoBack && onGoBack) {
+                    triggerBackAnimation(onGoBack);
+                  }
+                }}
+                onMouseUp={(e) => e.currentTarget.blur()}
+                disabled={isAnimating || backUsed || !canGoBack}
+                className={`${
+                  backUsed || !canGoBack
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-green-500 hover:bg-green-600'
+                } text-white p-3 rounded-md shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none`}
+                aria-label="Retroceder"
+              >
+                <ArrowUturnLeftIcon className="h-6 w-6" />
+              </button>
+            </Tooltip>
+
+            <Tooltip text="Ir al Enlace">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  if (!isAnimating && onSwipeRight) {
+                    if (profile.link) {
+                      window.open(profile.link, '_blank');
+                    }
+                    triggerButtonAnimation('right', onSwipeRight);
+                  }
+                }}
+                onMouseUp={(e) => e.currentTarget.blur()}
+                disabled={isAnimating}
+                className="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-md shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none"
+                aria-label="Ir al Enlace"
+              >
+                <ArrowRightIcon className="h-6 w-6" />
+              </button>
+            </Tooltip>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}

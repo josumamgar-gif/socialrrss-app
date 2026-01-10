@@ -1,0 +1,99 @@
+import mongoose, { Schema, Document } from 'mongoose';
+import bcrypt from 'bcrypt';
+
+export interface IUser extends Document {
+  username: string;
+  email: string;
+  password: string;
+  fullName?: string;
+  bio?: string;
+  age?: number;
+  location?: string;
+  interests?: string[];
+  favoriteSocialNetwork?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  comparePassword(candidatePassword: string): Promise<boolean>;
+}
+
+const UserSchema: Schema = new Schema(
+  {
+    username: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      minlength: 3,
+      maxlength: 30,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      lowercase: true,
+      match: [/^\S+@\S+\.\S+$/, 'Por favor ingresa un email válido'],
+    },
+    password: {
+      type: String,
+      required: true,
+      minlength: 6,
+    },
+    fullName: {
+      type: String,
+      trim: true,
+      maxlength: 100,
+    },
+    bio: {
+      type: String,
+      trim: true,
+      maxlength: 500,
+    },
+    age: {
+      type: Number,
+      min: 13,
+      max: 120,
+    },
+    location: {
+      type: String,
+      trim: true,
+      maxlength: 100,
+    },
+    interests: {
+      type: [String],
+      default: [],
+    },
+    favoriteSocialNetwork: {
+      type: String,
+      enum: ['tiktok', 'youtube', 'instagram', 'facebook', 'twitch', 'x', 'otros', null],
+      default: null,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+// Hash password antes de guardar
+UserSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) return next();
+  
+  try {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (error: any) {
+    next(error);
+  }
+});
+
+// Método para comparar passwords
+UserSchema.methods.comparePassword = async function (candidatePassword: string): Promise<boolean> {
+  return bcrypt.compare(candidatePassword, this.password);
+};
+
+UserSchema.index({ email: 1 });
+UserSchema.index({ username: 1 });
+
+export default mongoose.model<IUser>('User', UserSchema);
+
