@@ -43,6 +43,10 @@ api.interceptors.request.use((config) => {
       config.headers.Authorization = `Bearer ${token}`;
     }
   }
+  // Si es FormData, eliminar Content-Type para que axios lo establezca automáticamente con el boundary
+  if (config.data instanceof FormData) {
+    delete config.headers['Content-Type'];
+  }
   return config;
 });
 
@@ -106,11 +110,9 @@ export const profilesAPI = {
   },
 
   create: async (data: FormData): Promise<{ message: string; profile: Profile }> => {
-    const response = await api.post<{ message: string; profile: Profile }>('/profiles', data, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    // Para FormData, axios establece automáticamente el Content-Type con el boundary correcto
+    // El interceptor elimina el Content-Type cuando detecta FormData
+    const response = await api.post<{ message: string; profile: Profile }>('/profiles', data);
     return response.data;
   },
 };

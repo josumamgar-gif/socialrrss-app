@@ -18,6 +18,12 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork }: Pro
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Resetear profileData cuando cambia la red social
+  const handleSocialNetworkChange = (network: SocialNetwork) => {
+    setSocialNetwork(network);
+    setProfileData({}); // Resetear datos al cambiar de red social
+  };
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       setImages(Array.from(e.target.files));
@@ -30,19 +36,95 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork }: Pro
     setLoading(true);
 
     try {
-      const formData = new FormData();
-      formData.append('socialNetwork', socialNetwork);
-      formData.append('link', link);
-      formData.append('profileData', JSON.stringify(profileData));
-      
-      images.forEach((image) => {
-        formData.append('images', image);
+      // Validación básica
+      if (!link || !link.trim()) {
+        setError('El enlace del perfil es requerido');
+        setLoading(false);
+        return;
+      }
+
+      // Limpiar profileData: eliminar campos vacíos, undefined, null y strings vacíos
+      // Pero mantener valores numéricos válidos (incluyendo 0 si el usuario lo introdujo)
+      const cleanedProfileData: Partial<ProfileData> = {};
+      Object.entries(profileData).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          if (typeof value === 'string') {
+            // Incluir strings no vacíos
+            if (value.trim() !== '') {
+              cleanedProfileData[key as keyof ProfileData] = value;
+            }
+          } else if (typeof value === 'number') {
+            // Incluir números válidos (no NaN, no infinito, >= 0)
+            if (!isNaN(value) && isFinite(value) && value >= 0) {
+              cleanedProfileData[key as keyof ProfileData] = value;
+            }
+          } else {
+            // Incluir otros tipos (objetos, arrays, boolean, etc.)
+            cleanedProfileData[key as keyof ProfileData] = value;
+          }
+        }
       });
 
+      // Crear FormData
+      const formData = new FormData();
+      formData.append('socialNetwork', socialNetwork);
+      formData.append('link', link.trim());
+      
+      // Asegurarse de que profileData sea un string JSON válido
+      try {
+        const profileDataString = JSON.stringify(cleanedProfileData);
+        formData.append('profileData', profileDataString);
+      } catch (jsonError) {
+        console.error('Error serializando profileData:', jsonError);
+        setError('Error al procesar los datos del perfil. Por favor, intenta de nuevo.');
+        setLoading(false);
+        return;
+      }
+      
+      // Añadir imágenes si existen
+      if (images && images.length > 0) {
+        images.forEach((image) => {
+          formData.append('images', image);
+        });
+      }
+
+      console.log('📤 Enviando perfil:', { socialNetwork, link, profileData: cleanedProfileData, imagesCount: images.length });
+      
       const response = await profilesAPI.create(formData);
-      onSuccess(response.profile._id);
+      
+      console.log('✅ Perfil creado exitosamente:', response);
+      
+      // Resetear formulario antes de llamar onSuccess
+      setLink('');
+      setImages([]);
+      setProfileData({});
+      setError('');
+      setLoading(false);
+      
+      // Llamar onSuccess con el ID del perfil
+      if (response && response.profile && response.profile._id) {
+        onSuccess(response.profile._id);
+      } else {
+        throw new Error('El servidor no devolvió un perfil válido');
+      }
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Error al crear el perfil');
+      console.error('❌ Error creando perfil:', err);
+      let errorMessage = 'Error al crear el perfil. Por favor, intenta de nuevo.';
+      
+      if (err.response) {
+        // El servidor respondió con un error
+        const serverError = err.response.data?.error || err.response.data?.message;
+        errorMessage = serverError || `Error ${err.response.status}: No se pudo crear el perfil`;
+        console.error('Error del servidor:', err.response.data);
+      } else if (err.request) {
+        // No se pudo conectar al servidor
+        errorMessage = 'No se pudo conectar al servidor. Por favor, verifica tu conexión.';
+        console.error('Error de conexión:', err.request);
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
       setLoading(false);
     }
   };
@@ -70,10 +152,14 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork }: Pro
               </label>
               <input
                 type="number"
-                value={profileData.followers || ''}
-                onChange={(e) => setProfileData({ ...profileData, followers: parseInt(e.target.value) || 0 })}
+                value={profileData.followers ?? ''}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setProfileData({ ...profileData, followers: val === '' ? undefined : parseInt(val) || undefined });
+                }}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 placeholder:text-gray-400"
                 placeholder="1000000"
+                min="0"
               />
             </div>
             <div>
@@ -82,10 +168,26 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork }: Pro
               </label>
               <input
                 type="number"
-                value={profileData.videos || ''}
-                onChange={(e) => setProfileData({ ...profileData, videos: parseInt(e.target.value) || 0 })}
+                value={profileData.videos ?? ''}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setProfileData({ ...profileData, videos: val === '' ? undefined : parseInt(val) || undefined });
+                }}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 placeholder:text-gray-400"
                 placeholder="500"
+                min="0"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Descripción (opcional)
+              </label>
+              <textarea
+                value={profileData.description || ''}
+                onChange={(e) => setProfileData({ ...profileData, description: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 placeholder:text-gray-400 resize-none"
+                rows={3}
+                placeholder="Describe tu perfil de TikTok..."
               />
             </div>
           </>
@@ -112,10 +214,14 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork }: Pro
               </label>
               <input
                 type="number"
-                value={profileData.subscribers || ''}
-                onChange={(e) => setProfileData({ ...profileData, subscribers: parseInt(e.target.value) || 0 })}
+                value={profileData.subscribers ?? ''}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setProfileData({ ...profileData, subscribers: val === '' ? undefined : parseInt(val) || undefined });
+                }}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 placeholder:text-gray-400"
                 placeholder="50000"
+                min="0"
               />
             </div>
             <div>
@@ -124,10 +230,26 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork }: Pro
               </label>
               <input
                 type="number"
-                value={profileData.videoCount || ''}
-                onChange={(e) => setProfileData({ ...profileData, videoCount: parseInt(e.target.value) || 0 })}
+                value={profileData.videoCount ?? ''}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setProfileData({ ...profileData, videoCount: val === '' ? undefined : parseInt(val) || undefined });
+                }}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 placeholder:text-gray-400"
                 placeholder="200"
+                min="0"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Descripción (opcional)
+              </label>
+              <textarea
+                value={profileData.description || ''}
+                onChange={(e) => setProfileData({ ...profileData, description: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 placeholder:text-gray-400 resize-none"
+                rows={3}
+                placeholder="Describe tu canal de YouTube..."
               />
             </div>
           </>
@@ -154,10 +276,14 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork }: Pro
               </label>
               <input
                 type="number"
-                value={profileData.followers || ''}
-                onChange={(e) => setProfileData({ ...profileData, followers: parseInt(e.target.value) || 0 })}
+                value={profileData.followers ?? ''}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setProfileData({ ...profileData, followers: val === '' ? undefined : parseInt(val) || undefined });
+                }}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 placeholder:text-gray-400"
                 placeholder="100000"
+                min="0"
               />
             </div>
             <div>
@@ -166,10 +292,26 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork }: Pro
               </label>
               <input
                 type="number"
-                value={profileData.posts || ''}
-                onChange={(e) => setProfileData({ ...profileData, posts: parseInt(e.target.value) || 0 })}
+                value={profileData.posts ?? ''}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setProfileData({ ...profileData, posts: val === '' ? undefined : parseInt(val) || undefined });
+                }}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 placeholder:text-gray-400"
                 placeholder="500"
+                min="0"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Descripción (opcional)
+              </label>
+              <textarea
+                value={profileData.description || ''}
+                onChange={(e) => setProfileData({ ...profileData, description: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 placeholder:text-gray-400 resize-none"
+                rows={3}
+                placeholder="Describe tu perfil de Instagram..."
               />
             </div>
           </>
@@ -196,10 +338,14 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork }: Pro
               </label>
               <input
                 type="number"
-                value={profileData.followers || ''}
-                onChange={(e) => setProfileData({ ...profileData, followers: parseInt(e.target.value) || 0 })}
+                value={profileData.followers ?? ''}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setProfileData({ ...profileData, followers: val === '' ? undefined : parseInt(val) || undefined });
+                }}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 placeholder:text-gray-400"
                 placeholder="50000"
+                min="0"
               />
             </div>
             <div>
@@ -212,6 +358,18 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork }: Pro
                 onChange={(e) => setProfileData({ ...profileData, game: e.target.value })}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 placeholder:text-gray-400"
                 placeholder="Just Chatting"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Descripción (opcional)
+              </label>
+              <textarea
+                value={profileData.description || ''}
+                onChange={(e) => setProfileData({ ...profileData, description: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 placeholder:text-gray-400 resize-none"
+                rows={3}
+                placeholder="Describe tu canal de Twitch..."
               />
             </div>
           </>
@@ -238,10 +396,26 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork }: Pro
               </label>
               <input
                 type="number"
-                value={profileData.likes || ''}
-                onChange={(e) => setProfileData({ ...profileData, likes: parseInt(e.target.value) || 0 })}
+                value={profileData.likes ?? ''}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setProfileData({ ...profileData, likes: val === '' ? undefined : parseInt(val) || undefined });
+                }}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 placeholder:text-gray-400"
                 placeholder="10000"
+                min="0"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Descripción (opcional)
+              </label>
+              <textarea
+                value={profileData.description || ''}
+                onChange={(e) => setProfileData({ ...profileData, description: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 placeholder:text-gray-400 resize-none"
+                rows={3}
+                placeholder="Describe tu página de Facebook..."
               />
             </div>
           </>
@@ -268,10 +442,14 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork }: Pro
               </label>
               <input
                 type="number"
-                value={profileData.followers || ''}
-                onChange={(e) => setProfileData({ ...profileData, followers: parseInt(e.target.value) || 0 })}
+                value={profileData.followers ?? ''}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setProfileData({ ...profileData, followers: val === '' ? undefined : parseInt(val) || undefined });
+                }}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 placeholder:text-gray-400"
                 placeholder="50000"
+                min="0"
               />
             </div>
             <div>
@@ -280,10 +458,26 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork }: Pro
               </label>
               <input
                 type="number"
-                value={profileData.tweets || ''}
-                onChange={(e) => setProfileData({ ...profileData, tweets: parseInt(e.target.value) || 0 })}
+                value={profileData.tweets ?? ''}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setProfileData({ ...profileData, tweets: val === '' ? undefined : parseInt(val) || undefined });
+                }}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 placeholder:text-gray-400"
                 placeholder="1000"
+                min="0"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Descripción (opcional)
+              </label>
+              <textarea
+                value={profileData.description || ''}
+                onChange={(e) => setProfileData({ ...profileData, description: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 placeholder:text-gray-400 resize-none"
+                rows={3}
+                placeholder="Describe tu perfil de X (Twitter)..."
               />
             </div>
           </>
@@ -329,7 +523,7 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork }: Pro
         </label>
         <select
           value={socialNetwork}
-          onChange={(e) => setSocialNetwork(e.target.value as SocialNetwork)}
+          onChange={(e) => handleSocialNetworkChange(e.target.value as SocialNetwork)}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 bg-white"
         >
           <option value="tiktok">TikTok</option>

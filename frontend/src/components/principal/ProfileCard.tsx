@@ -69,29 +69,30 @@ export default function ProfileCard({
   const containerRef = useRef<HTMLDivElement>(null);
 
   const getActionForPosition = (x: number, y: number, width: number, height: number): DragAction => {
-    const threshold = 50; // Distancia mínima para activar acción
+    const threshold = 40; // Reducir threshold para mayor sensibilidad
     
     // Calcular distancia desde el centro
     const distanceFromCenter = Math.sqrt(x * x + y * y);
     const intensity = Math.min(1, distanceFromCenter / threshold);
     
     // Si no ha alcanzado el umbral, no hay acción
-    if (intensity < 0.2) {
+    if (intensity < 0.15) {
       return { type: null, intensity: 0 };
     }
     
     const absX = Math.abs(x);
     const absY = Math.abs(y);
     
-    // Determinar dirección principal
-    if (absX > absY * 1.2) {
-      // Movimiento horizontal dominante (con margen para evitar diagonales)
+    // Determinar dirección principal - priorizar horizontal sobre vertical
+    if (absX > absY * 1.1) {
+      // Movimiento horizontal dominante
       if (x < 0) {
         return { type: 'left', intensity };
-      } else {
+      } else if (x > 0) {
+        // Derecha - siempre abrir enlace si existe
         return { type: 'right', intensity };
       }
-    } else if (absY > absX * 1.2 && y < 0) {
+    } else if (absY > absX * 1.1 && y < 0) {
       // Movimiento vertical hacia arriba dominante
       return { type: 'up', intensity };
     }
@@ -127,20 +128,26 @@ export default function ProfileCard({
       return;
     }
     
-    const threshold = 80;
+    const threshold = 40; // Mismo threshold que getActionForPosition
     const absX = Math.abs(position.x);
     const absY = Math.abs(position.y);
 
-    // Si hay una acción de arrastre detectada con suficiente intensidad
-    if (dragAction.type && dragAction.intensity > 0.3) {
+    // Prioridad: usar dragAction si existe y tiene suficiente intensidad
+    if (dragAction.type && dragAction.intensity > 0.15) {
       if (dragAction.type === 'left' && onSwipeLeft) {
         triggerSwipeAnimation('left', onSwipeLeft);
         return;
       } else if (dragAction.type === 'right') {
-        // Para el gesto a la derecha, primero abrimos el enlace si existe
+        // Para el gesto a la derecha, SIEMPRE abrir el enlace si existe
         if (profile.link) {
-          window.open(profile.link, '_blank');
+          // Abrir enlace en nueva pestaña
+          const linkWindow = window.open(profile.link, '_blank');
+          if (!linkWindow) {
+            // Si no se pudo abrir (bloqueador de popups), intentar redirigir directamente
+            window.location.href = profile.link;
+          }
         }
+        // Luego ejecutar el callback si existe
         if (onSwipeRight) {
           triggerSwipeAnimation('right', onSwipeRight);
         } else {
@@ -158,14 +165,17 @@ export default function ProfileCard({
       }
     }
     
-    // Fallback al sistema basado en posición absoluta
+    // Fallback al sistema basado en posición absoluta (para mayor compatibilidad)
     if (absX > threshold || absY > threshold) {
-      if (absX > absY) {
-        // Movimiento horizontal
-        if (position.x > 0) {
-          // Derecha
+      if (absX > absY * 1.1) {
+        // Movimiento horizontal dominante
+        if (position.x > threshold) {
+          // Derecha - ABRIR ENLACE SIEMPRE PRIMERO
           if (profile.link) {
-            window.open(profile.link, '_blank');
+            const linkWindow = window.open(profile.link, '_blank');
+            if (!linkWindow) {
+              window.location.href = profile.link;
+            }
           }
           if (onSwipeRight) {
             triggerSwipeAnimation('right', onSwipeRight);
@@ -173,13 +183,13 @@ export default function ProfileCard({
             resetPosition();
           }
           return;
-        } else if (position.x < 0 && onSwipeLeft) {
+        } else if (position.x < -threshold && onSwipeLeft) {
           // Izquierda
           triggerSwipeAnimation('left', onSwipeLeft);
           return;
         }
-      } else if (position.y < 0 && absY > threshold) {
-        // Movimiento hacia arriba
+      } else if (absY > absX * 1.1 && position.y < -threshold) {
+        // Movimiento hacia arriba dominante
         if (onShowDetail) {
           onShowDetail(profile);
         } else if (onSwipeUp) {
@@ -246,16 +256,21 @@ export default function ProfileCard({
     const handleMouseMove = (e: MouseEvent) => handleMove(e.clientX, e.clientY);
     const handleMouseUp = () => handleEnd();
     const handleTouchMove = (e: TouchEvent) => {
-      e.preventDefault();
+      e.preventDefault(); // Siempre prevenir scroll durante el arrastre
+      e.stopPropagation();
       if (e.touches[0]) handleMove(e.touches[0].clientX, e.touches[0].clientY);
     };
-    const handleTouchEnd = () => handleEnd();
+    const handleTouchEnd = (e: TouchEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      handleEnd();
+    };
 
     if (isDragging) {
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);
       window.addEventListener('touchmove', handleTouchMove, { passive: false });
-      window.addEventListener('touchend', handleTouchEnd);
+      window.addEventListener('touchend', handleTouchEnd, { passive: false });
     }
 
     return () => {
@@ -461,6 +476,7 @@ export default function ProfileCard({
               : `translate(${position.x}px, ${position.y}px) rotate(${rotation}deg)`,
             transition: isDragging || buttonAction.type ? 'none' : 'transform 0.1s ease-out',
             zIndex: 1000 - index,
+            touchAction: 'none', // Prevenir gestos del navegador
           }}
           onMouseDown={(e) => {
             // Solo iniciar arrastre si no hay animación de botón activa
@@ -471,6 +487,7 @@ export default function ProfileCard({
           onTouchStart={(e) => {
             // Solo iniciar arrastre si no hay animación de botón activa
             if (e.touches[0] && !isAnimating && !buttonAction.type) {
+              e.preventDefault(); // Prevenir scroll
               handleStart(e.touches[0].clientX, e.touches[0].clientY);
             }
           }}
@@ -546,7 +563,7 @@ export default function ProfileCard({
           </div>
 
           {/* Botones de acción */}
-          <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-3 px-4 md:space-x-4 bg-white/95 backdrop-blur-sm py-3 rounded-t-xl border-t border-gray-200 pointer-events-auto">
+          <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-3 px-4 md:space-x-4 bg-white/95 backdrop-blur-sm py-3 rounded-t-xl border-t border-gray-200 pointer-events-auto" style={{ touchAction: 'auto' }}>
             <Tooltip text="Siguiente Perfil">
               <button
                 type="button"
@@ -557,9 +574,13 @@ export default function ProfileCard({
                     triggerButtonAnimation('left', onSwipeLeft);
                   }
                 }}
+                onTouchEnd={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
                 onMouseUp={(e) => e.currentTarget.blur()}
                 disabled={isAnimating}
-                className="bg-red-500 hover:bg-red-600 text-white p-3 rounded-md shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none"
+                className="bg-red-500 hover:bg-red-600 text-white p-3 rounded-md shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none touch-manipulation"
                 aria-label="Siguiente Perfil"
               >
                 <ArrowLeftIcon className="h-6 w-6" />
@@ -580,9 +601,13 @@ export default function ProfileCard({
                     });
                   }
                 }}
+                onTouchEnd={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
                 onMouseUp={(e) => e.currentTarget.blur()}
                 disabled={isAnimating}
-                className="bg-yellow-500 hover:bg-yellow-600 text-white p-3 rounded-md shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none"
+                className="bg-yellow-500 hover:bg-yellow-600 text-white p-3 rounded-md shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none touch-manipulation"
                 aria-label="Ver Detalles"
               >
                 <ArrowUpIcon className="h-6 w-6" />
@@ -599,13 +624,17 @@ export default function ProfileCard({
                     triggerBackAnimation(onGoBack);
                   }
                 }}
+                onTouchEnd={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
                 onMouseUp={(e) => e.currentTarget.blur()}
                 disabled={isAnimating || backUsed || !canGoBack}
                 className={`${
                   backUsed || !canGoBack
                     ? 'bg-gray-400 cursor-not-allowed'
                     : 'bg-green-500 hover:bg-green-600'
-                } text-white p-3 rounded-md shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none`}
+                } text-white p-3 rounded-md shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none touch-manipulation`}
                 aria-label="Retroceder"
               >
                 <ArrowUturnLeftIcon className="h-6 w-6" />
@@ -619,15 +648,23 @@ export default function ProfileCard({
                   e.stopPropagation();
                   e.preventDefault();
                   if (!isAnimating && onSwipeRight) {
+                    // SIEMPRE abrir enlace primero
                     if (profile.link) {
-                      window.open(profile.link, '_blank');
+                      const linkWindow = window.open(profile.link, '_blank');
+                      if (!linkWindow) {
+                        window.location.href = profile.link;
+                      }
                     }
                     triggerButtonAnimation('right', onSwipeRight);
                   }
                 }}
+                onTouchEnd={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
                 onMouseUp={(e) => e.currentTarget.blur()}
                 disabled={isAnimating}
-                className="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-md shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none"
+                className="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-md shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none touch-manipulation"
                 aria-label="Ir al Enlace"
               >
                 <ArrowRightIcon className="h-6 w-6" />

@@ -65,3 +65,25 @@ body {
   overscroll-behavior: contain;
 }
 
+/* Prevenir scroll en la página principal en móvil */
+@media (max-width: 768px) {
+  body.no-scroll {
+    overflow: hidden !important;
+    position: fixed !important;
+    width: 100% !important;
+    height: 100% !important;
+    touch-action: none !important;
+  }
+  
+  /* Permitir gestos solo en elementos específicos */
+  .profile-card-container {
+    touch-action: none;
+    -webkit-overflow-scrolling: auto;
+  }
+  
+  /* Permitir toques en botones */
+  button, [role="button"], a {
+    touch-action: manipulation;
+  }
+}
+

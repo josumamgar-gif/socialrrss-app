@@ -126,11 +126,28 @@ export default function PromocionPage() {
     }
   };
 
-  const handleProfileCreated = (profileId: string) => {
-    setSelectedNetwork(null);
-    setSelectedProfile(profileId);
-    setShowPlanSelector(true);
-    loadProfiles();
+  const handleProfileCreated = async (profileId: string) => {
+    console.log('✅ Perfil creado, ID:', profileId);
+    if (!profileId) {
+      console.error('❌ Error: No se recibió un ID de perfil válido');
+      return;
+    }
+    
+    try {
+      // Recargar perfiles primero para asegurar que el perfil esté disponible
+      await loadProfiles();
+      
+      // Configurar el estado para mostrar el selector de planes
+      setSelectedNetwork(null);
+      setSelectedProfile(profileId);
+      setShowPlanSelector(true);
+    } catch (error) {
+      console.error('Error después de crear perfil:', error);
+      // Si hay error cargando, aún así intentar mostrar el selector
+      setSelectedNetwork(null);
+      setSelectedProfile(profileId);
+      setShowPlanSelector(true);
+    }
   };
 
   const handlePaymentSuccess = () => {
