@@ -65,32 +65,3 @@ body {
   overscroll-behavior: contain;
 }
 
-/* Prevenir scroll en la página principal en móvil - SOLO CSS, no bloquear eventos */
-@media (max-width: 768px) {
-  body.no-scroll-mobile {
-    overflow: hidden !important;
-    position: fixed !important;
-    width: 100% !important;
-    height: 100% !important;
-    /* NO usar touch-action: none para permitir botones */
-  }
-  
-  /* Permitir gestos táctiles en las tarjetas */
-  .profile-card-container {
-    -webkit-overflow-scrolling: auto;
-    /* NO bloquear touch-action aquí */
-  }
-  
-  /* Asegurar que botones y elementos interactivos funcionen */
-  button, [role="button"], a, input, select, textarea {
-    touch-action: manipulation;
-    pointer-events: auto !important;
-  }
-  
-  /* Permitir scroll en tutorial y modales */
-  [class*="tutorial"], [class*="modal"], [role="dialog"] {
-    touch-action: auto !important;
-    overflow-y: auto !important;
-  }
-}
-

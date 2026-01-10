@@ -256,13 +256,20 @@ export default function ProfileCard({
     const handleMouseMove = (e: MouseEvent) => handleMove(e.clientX, e.clientY);
     const handleMouseUp = () => handleEnd();
     const handleTouchMove = (e: TouchEvent) => {
-      e.preventDefault(); // Siempre prevenir scroll durante el arrastre
-      e.stopPropagation();
+      // Solo prevenir scroll si realmente estamos arrastrando (no es un botón)
+      const target = e.target as HTMLElement;
+      if (!target.closest('button')) {
+        e.preventDefault(); // Solo prevenir scroll durante el arrastre real
+        e.stopPropagation();
+      }
       if (e.touches[0]) handleMove(e.touches[0].clientX, e.touches[0].clientY);
     };
     const handleTouchEnd = (e: TouchEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
+      // NO prevenir aquí para permitir clicks en botones
+      const target = e.target as HTMLElement;
+      if (!target.closest('button')) {
+        e.stopPropagation();
+      }
       handleEnd();
     };
 
@@ -476,18 +483,22 @@ export default function ProfileCard({
               : `translate(${position.x}px, ${position.y}px) rotate(${rotation}deg)`,
             transition: isDragging || buttonAction.type ? 'none' : 'transform 0.1s ease-out',
             zIndex: 1000 - index,
-            touchAction: 'none', // Prevenir gestos del navegador
+            touchAction: isDragging ? 'none' : 'auto', // Solo bloquear gestos cuando se está arrastrando
           }}
           onMouseDown={(e) => {
-            // Solo iniciar arrastre si no hay animación de botón activa
+            // Solo iniciar arrastre si no es un botón y no hay animación activa
+            const target = e.target as HTMLElement;
+            if (target.closest('button')) return; // No iniciar arrastre si se hace clic en un botón
             if (e.button === 0 && !isAnimating && !buttonAction.type) {
               handleStart(e.clientX, e.clientY);
             }
           }}
           onTouchStart={(e) => {
-            // Solo iniciar arrastre si no hay animación de botón activa
+            // Solo iniciar arrastre si no es un botón y no hay animación activa
+            const target = e.target as HTMLElement;
+            if (target.closest('button')) return; // No iniciar arrastre si se toca un botón
             if (e.touches[0] && !isAnimating && !buttonAction.type) {
-              e.preventDefault(); // Prevenir scroll
+              // NO prevenir aquí, dejar que los botones funcionen
               handleStart(e.touches[0].clientX, e.touches[0].clientY);
             }
           }}
@@ -563,20 +574,21 @@ export default function ProfileCard({
           </div>
 
           {/* Botones de acción */}
-          <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-3 px-4 md:space-x-4 bg-white/95 backdrop-blur-sm py-3 rounded-t-xl border-t border-gray-200 pointer-events-auto" style={{ touchAction: 'manipulation', zIndex: 50 }}>
+          <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-3 px-4 md:space-x-4 bg-white/95 backdrop-blur-sm py-3 rounded-t-xl border-t border-gray-200 pointer-events-auto" style={{ touchAction: 'auto', zIndex: 9999 }}>
             <Tooltip text="Siguiente Perfil">
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
+                  e.preventDefault();
                   if (!isAnimating && onSwipeLeft) {
                     triggerButtonAnimation('left', onSwipeLeft);
                   }
                 }}
                 onMouseUp={(e) => e.currentTarget.blur()}
                 disabled={isAnimating}
-                className="bg-red-500 hover:bg-red-600 text-white p-3 rounded-md shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none touch-manipulation"
-                style={{ touchAction: 'manipulation' }}
+                className="bg-red-500 hover:bg-red-600 text-white p-3 rounded-md shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none"
+                style={{ touchAction: 'auto', pointerEvents: 'auto' }}
                 aria-label="Siguiente Perfil"
               >
                 <ArrowLeftIcon className="h-6 w-6" />
@@ -588,6 +600,7 @@ export default function ProfileCard({
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
+                  e.preventDefault();
                   if (!isAnimating) {
                     triggerButtonAnimation('up', () => {
                       if (onShowDetail) {
@@ -598,8 +611,8 @@ export default function ProfileCard({
                 }}
                 onMouseUp={(e) => e.currentTarget.blur()}
                 disabled={isAnimating}
-                className="bg-yellow-500 hover:bg-yellow-600 text-white p-3 rounded-md shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none touch-manipulation"
-                style={{ touchAction: 'manipulation' }}
+                className="bg-yellow-500 hover:bg-yellow-600 text-white p-3 rounded-md shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none"
+                style={{ touchAction: 'auto', pointerEvents: 'auto' }}
                 aria-label="Ver Detalles"
               >
                 <ArrowUpIcon className="h-6 w-6" />
@@ -611,6 +624,7 @@ export default function ProfileCard({
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
+                  e.preventDefault();
                   if (!isAnimating && !backUsed && canGoBack && onGoBack) {
                     triggerBackAnimation(onGoBack);
                   }
@@ -621,8 +635,8 @@ export default function ProfileCard({
                   backUsed || !canGoBack
                     ? 'bg-gray-400 cursor-not-allowed'
                     : 'bg-green-500 hover:bg-green-600'
-                } text-white p-3 rounded-md shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none touch-manipulation`}
-                style={{ touchAction: 'manipulation' }}
+                } text-white p-3 rounded-md shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none`}
+                style={{ touchAction: 'auto', pointerEvents: 'auto' }}
                 aria-label="Retroceder"
               >
                 <ArrowUturnLeftIcon className="h-6 w-6" />
@@ -634,6 +648,7 @@ export default function ProfileCard({
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
+                  e.preventDefault();
                   if (!isAnimating && onSwipeRight) {
                     // SIEMPRE abrir enlace primero
                     if (profile.link) {
@@ -647,8 +662,8 @@ export default function ProfileCard({
                 }}
                 onMouseUp={(e) => e.currentTarget.blur()}
                 disabled={isAnimating}
-                className="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-md shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none touch-manipulation"
-                style={{ touchAction: 'manipulation' }}
+                className="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-md shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none"
+                style={{ touchAction: 'auto', pointerEvents: 'auto' }}
                 aria-label="Ir al Enlace"
               >
                 <ArrowRightIcon className="h-6 w-6" />

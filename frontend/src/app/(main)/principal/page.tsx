@@ -41,24 +41,6 @@ export default function PrincipalPage() {
     }
   }, []);
 
-  // Prevenir scroll del body en móvil usando solo CSS
-  // NO bloquear eventos - permitir que botones y tutorial funcionen
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const isMobile = window.innerWidth <= 768;
-      
-      if (isMobile) {
-        // Aplicar clase CSS que previene scroll pero NO bloquea eventos
-        // El tutorial tiene su propio manejo de overflow, no interfiere
-        document.body.classList.add('no-scroll-mobile');
-
-        return () => {
-          document.body.classList.remove('no-scroll-mobile');
-        };
-      }
-    }
-  }, []);
-
   useEffect(() => {
     loadProfiles();
     checkDemoCompletion();
@@ -147,7 +129,7 @@ export default function PrincipalPage() {
   const isDemoProfile = currentProfile?._id.startsWith('demo-');
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4 py-8 overflow-hidden w-full h-full">
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4 py-8">
       {needsDemoInteraction && (
         <div className="mb-6 max-w-md w-full mx-auto bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4 z-50">
           <div className="flex items-start">
