@@ -97,22 +97,22 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-8">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-3 sm:px-4 py-4 sm:py-8">
       <div className="w-full max-w-2xl">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 max-h-[90vh] overflow-y-auto">
-          <div className="text-center mb-6">
-            <h1 className="text-2xl font-semibold text-gray-900 mb-2">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 md:p-8 max-h-[90vh] overflow-y-auto">
+          <div className="text-center mb-4 sm:mb-6">
+            <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2">
               Crear Cuenta
             </h1>
-            <p className="text-sm text-gray-600">Completa tu perfil para comenzar</p>
+            <p className="text-xs sm:text-sm text-gray-600">Completa tu perfil para comenzar</p>
           </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
               {/* Campos requeridos */}
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
-                  <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1.5">
-                    Usuario * <span className="text-xs text-gray-500 font-normal">(mín. 3 caracteres)</span>
+                  <label htmlFor="username" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
+                    Usuario * <span className="text-xs text-gray-500 font-normal">(mín. 3)</span>
                   </label>
                   <input
                     id="username"
@@ -122,13 +122,13 @@ export default function RegisterPage() {
                     onChange={handleInputChange}
                     required
                     minLength={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm"
+                    className="w-full px-3 py-2 sm:py-2.5 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm sm:text-base text-gray-900 placeholder:text-gray-400"
                     placeholder="tu_usuario"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5">
+                  <label htmlFor="email" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
                     Email *
                   </label>
                   <input
@@ -138,16 +138,16 @@ export default function RegisterPage() {
                     value={formData.email}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm"
+                    className="w-full px-3 py-2 sm:py-2.5 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm sm:text-base text-gray-900 placeholder:text-gray-400"
                     placeholder="tu@email.com"
                   />
                 </div>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1.5">
-                    Contraseña * <span className="text-xs text-gray-500 font-normal">(mín. 6 caracteres)</span>
+                  <label htmlFor="password" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
+                    Contraseña * <span className="text-xs text-gray-500 font-normal">(mín. 6)</span>
                   </label>
                   <input
                     id="password"
@@ -157,13 +157,13 @@ export default function RegisterPage() {
                     onChange={handleInputChange}
                     required
                     minLength={6}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm"
+                    className="w-full px-3 py-2 sm:py-2.5 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm sm:text-base text-gray-900 placeholder:text-gray-400"
                     placeholder="••••••••"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1.5">
+                  <label htmlFor="confirmPassword" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
                     Confirmar Contraseña *
                   </label>
                   <input
@@ -173,21 +173,21 @@ export default function RegisterPage() {
                     value={formData.confirmPassword}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm"
+                    className="w-full px-3 py-2 sm:py-2.5 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm sm:text-base text-gray-900 placeholder:text-gray-400"
                     placeholder="••••••••"
                   />
                 </div>
               </div>
 
               {/* Información adicional */}
-              <div className="border-t border-gray-200 pt-4 mt-4">
-                <p className="text-sm font-medium text-gray-700 mb-4">
+              <div className="border-t border-gray-200 pt-3 sm:pt-4 mt-3 sm:mt-4">
+                <p className="text-xs sm:text-sm font-medium text-gray-700 mb-3 sm:mb-4">
                   Información adicional (opcional)
                 </p>
               </div>
 
               <div>
-                <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1.5">
+                <label htmlFor="fullName" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
                   Nombre Completo
                 </label>
                 <input
@@ -196,13 +196,13 @@ export default function RegisterPage() {
                   type="text"
                   value={formData.fullName}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm"
+                  className="w-full px-3 py-2 sm:py-2.5 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm sm:text-base text-gray-900 placeholder:text-gray-400"
                   placeholder="Tu nombre completo"
                 />
               </div>
 
               <div>
-                <label htmlFor="bio" className="block text-sm font-medium text-gray-700 mb-1.5">
+                <label htmlFor="bio" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
                   Biografía
                 </label>
                 <textarea
@@ -212,7 +212,7 @@ export default function RegisterPage() {
                   onChange={handleInputChange}
                   rows={3}
                   maxLength={500}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm resize-none"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm sm:text-base text-gray-900 placeholder:text-gray-400 resize-none"
                   placeholder="Cuéntanos sobre ti..."
                 />
                 <p className="text-xs text-gray-500 mt-1">
@@ -220,9 +220,9 @@ export default function RegisterPage() {
                 </p>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
-                  <label htmlFor="age" className="block text-sm font-medium text-gray-700 mb-1.5">
+                  <label htmlFor="age" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
                     Edad
                   </label>
                   <input
@@ -233,13 +233,13 @@ export default function RegisterPage() {
                     onChange={handleInputChange}
                     min="13"
                     max="120"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm"
+                    className="w-full px-3 py-2 sm:py-2.5 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm sm:text-base text-gray-900 placeholder:text-gray-400"
                     placeholder="Tu edad"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1.5">
+                  <label htmlFor="location" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
                     Ubicación
                   </label>
                   <input
@@ -248,14 +248,14 @@ export default function RegisterPage() {
                     type="text"
                     value={formData.location}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm"
+                    className="w-full px-3 py-2 sm:py-2.5 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm sm:text-base text-gray-900 placeholder:text-gray-400"
                     placeholder="Ciudad, País"
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="favoriteSocialNetwork" className="block text-sm font-medium text-gray-700 mb-1.5">
+                <label htmlFor="favoriteSocialNetwork" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
                   Red Social Favorita
                 </label>
                 <select
@@ -263,7 +263,7 @@ export default function RegisterPage() {
                   name="favoriteSocialNetwork"
                   value={formData.favoriteSocialNetwork}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm bg-white"
+                  className="w-full px-3 py-2 sm:py-2.5 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm sm:text-base bg-white text-gray-900"
                 >
                   <option value="">Selecciona una opción</option>
                   {SOCIAL_NETWORKS.map(network => (
@@ -275,7 +275,7 @@ export default function RegisterPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                   Intereses
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -285,7 +285,7 @@ export default function RegisterPage() {
                       type="button"
                       onClick={() => handleInterestToggle(interest)}
                       className={`
-                        px-3 py-1.5 rounded-md text-xs font-medium transition-colors
+                        px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-md text-xs font-medium transition-colors
                         ${formData.interests.includes(interest)
                           ? 'bg-primary-600 text-white'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -304,7 +304,7 @@ export default function RegisterPage() {
               </div>
 
               {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
+                <div className="bg-red-50 border border-red-200 text-red-700 px-3 sm:px-4 py-2 sm:py-3 rounded-md text-xs sm:text-sm">
                   {error}
                 </div>
               )}
@@ -312,14 +312,14 @@ export default function RegisterPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-primary-600 text-white py-2.5 px-4 rounded-md hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm transition-colors mt-4"
+                className="w-full bg-primary-600 text-white py-2.5 sm:py-3 px-4 rounded-md hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm sm:text-base transition-colors mt-3 sm:mt-4"
               >
                 {loading ? 'Creando cuenta...' : 'Crear Cuenta'}
               </button>
             </form>
 
-            <div className="mt-6 text-center">
-              <p className="text-sm text-gray-600">
+            <div className="mt-4 sm:mt-6 text-center">
+              <p className="text-xs sm:text-sm text-gray-600">
                 ¿Ya tienes cuenta?{' '}
                 <Link href="/login" className="text-primary-600 hover:text-primary-700 font-medium">
                   Inicia sesión

@@ -152,6 +152,17 @@ export default function WelcomeTutorial({ onClose }: WelcomeTutorialProps) {
       highlight: 'ajustes',
     },
     {
+      title: '📱 Añade la App a tu Escritorio',
+      content: [
+        '¡Mejora tu experiencia usando la app como una aplicación nativa!',
+        'Puedes añadir esta web app a la pantalla de inicio de tu móvil para acceder rápidamente.',
+        'Esto te dará una experiencia similar a una app nativa instalada en tu dispositivo.',
+      ],
+      icon: '📱',
+      highlight: null,
+      installInstructions: true,
+    },
+    {
       title: '✅ ¡Ya estás listo!',
       content: [
         'Has completado el tour guiado. Ahora conoces todas las funcionalidades.',
@@ -221,40 +232,103 @@ export default function WelcomeTutorial({ onClose }: WelcomeTutorialProps) {
     return colors[color] || { bg: 'bg-gray-50', border: 'border-gray-300', text: 'text-gray-700', icon: 'text-gray-600' };
   };
 
+  const getInstallInstructions = () => {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isAndroid = /Android/.test(navigator.userAgent);
+    
+    if (isIOS) {
+      return {
+        platform: 'iOS',
+        steps: [
+          'Toca el botón "Compartir" en la parte inferior (cuadrado con flecha hacia arriba)',
+          'Desplázate hacia abajo y busca "Añadir a la pantalla de inicio"',
+          'Toca "Añadir a la pantalla de inicio"',
+          'Personaliza el nombre si quieres y toca "Añadir"',
+          '¡Listo! Ya tienes la app en tu escritorio',
+        ],
+      };
+    } else if (isAndroid) {
+      return {
+        platform: 'Android',
+        steps: [
+          'Toca el menú de opciones (tres puntos) en la esquina superior derecha del navegador',
+          'Selecciona "Añadir a la pantalla de inicio" o "Instalar app"',
+          'Confirma la instalación tocando "Añadir" o "Instalar"',
+          '¡Listo! La app aparecerá en tu escritorio como una aplicación',
+        ],
+      };
+    } else {
+      return {
+        platform: 'Desktop',
+        steps: [
+          'Busca el icono de instalación en la barra de direcciones de tu navegador',
+          'Haz clic en el icono de instalación o en el menú del navegador',
+          'Selecciona "Instalar" o "Añadir a la pantalla de inicio"',
+          '¡Listo! La app se instalará como una aplicación de escritorio',
+        ],
+      };
+    }
+  };
+
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-lg border border-gray-200 animate-fadeIn">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-2 sm:p-4">
+      <div className="bg-white rounded-lg max-w-3xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto shadow-lg border border-gray-200 animate-fadeIn">
         {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-primary-600 to-primary-700 text-white px-6 py-5 flex items-center justify-between z-10 rounded-t-2xl">
-          <div className="flex items-center gap-3">
-            <div className="text-3xl">{currentStepData.icon}</div>
-            <h2 className="text-2xl font-bold">{currentStepData.title}</h2>
+        <div className="sticky top-0 bg-gradient-to-r from-primary-600 to-primary-700 text-white px-4 sm:px-6 py-3 sm:py-5 flex items-center justify-between z-10 rounded-t-lg sm:rounded-t-2xl">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+            <div className="text-2xl sm:text-3xl flex-shrink-0">{currentStepData.icon}</div>
+            <h2 className="text-lg sm:text-xl md:text-2xl font-bold truncate">{currentStepData.title}</h2>
           </div>
           <button
             onClick={handleClose}
-            className="text-white/90 hover:text-white transition-colors"
+            className="text-white/90 hover:text-white transition-colors flex-shrink-0 ml-2"
           >
-            <XMarkIcon className="h-6 w-6" />
+            <XMarkIcon className="h-5 w-5 sm:h-6 sm:w-6" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {/* Información principal */}
-          <div className="space-y-4 mb-6">
+          <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
             {currentStepData.content.map((text, idx) => (
-              <p key={idx} className="text-lg text-gray-700 leading-relaxed">
+              <p key={idx} className="text-sm sm:text-base md:text-lg text-gray-700 leading-relaxed">
                 {text}
               </p>
             ))}
           </div>
 
+          {/* Instrucciones de instalación PWA */}
+          {currentStepData.installInstructions && typeof window !== 'undefined' && (
+            <div className="mb-4 sm:mb-6 p-4 sm:p-5 bg-gradient-to-br from-primary-50 to-blue-50 border-2 border-primary-200 rounded-lg">
+              <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4 flex items-center gap-2">
+                <span className="text-xl sm:text-2xl">📲</span>
+                Instrucciones para {getInstallInstructions().platform}
+              </h3>
+              <ol className="space-y-2 sm:space-y-3 ml-4 sm:ml-6">
+                {getInstallInstructions().steps.map((step, idx) => (
+                  <li key={idx} className="text-sm sm:text-base text-gray-700 leading-relaxed flex items-start gap-2">
+                    <span className="flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-primary-600 text-white flex items-center justify-center font-bold text-xs sm:text-sm mt-0.5">
+                      {idx + 1}
+                    </span>
+                    <span className="flex-1 pt-0.5">{step}</span>
+                  </li>
+                ))}
+              </ol>
+              <div className="mt-4 sm:mt-5 p-3 sm:p-4 bg-white/60 rounded-lg border border-primary-200">
+                <p className="text-xs sm:text-sm text-gray-600">
+                  <span className="font-semibold">💡 Consejo:</span> Una vez instalada, podrás acceder a la app desde tu escritorio como si fuera una aplicación nativa. ¡Mucho más rápido y cómodo!
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Indicador de sección */}
           {currentStepData.highlight && (
-            <div className="mb-6 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
+            <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
               <div className="flex items-center gap-2 text-blue-800">
-                <InformationCircleIcon className="h-5 w-5" />
-                <p className="font-semibold">
+                <InformationCircleIcon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                <p className="font-semibold text-xs sm:text-sm md:text-base">
                   {currentStepData.highlight === 'principal' && '📍 Encontrarás esto en la pestaña "Principal"'}
                   {currentStepData.highlight === 'promocion' && '📍 Encontrarás esto en la pestaña "Promoción"'}
                   {currentStepData.highlight === 'ajustes' && '📍 Encontrarás esto en la pestaña "Ajustes"'}
@@ -265,21 +339,21 @@ export default function WelcomeTutorial({ onClose }: WelcomeTutorialProps) {
 
           {/* Gestos */}
           {currentStepData.gestures && (
-            <div className="space-y-4 mb-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Acciones Disponibles:</h3>
+            <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
+              <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 mb-3 sm:mb-4">Acciones Disponibles:</h3>
               {currentStepData.gestures.map((gesture, idx) => {
                 const Icon = gesture.icon;
                 const colors = getColorClasses(gesture.color);
                 return (
-                  <div key={idx} className={`${colors.bg} rounded-xl p-4 border-2 ${colors.border}`}>
-                    <div className="flex items-start gap-4">
+                  <div key={idx} className={`${colors.bg} rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 ${colors.border}`}>
+                    <div className="flex items-start gap-3 sm:gap-4">
                       <div className={`${colors.icon} flex-shrink-0`}>
-                        <Icon className="h-8 w-8" />
+                        <Icon className="h-6 w-6 sm:h-8 sm:w-8" />
                       </div>
-                      <div className="flex-1">
-                        <h4 className={`${colors.text} font-bold text-lg mb-1`}>{gesture.title}</h4>
-                        <p className="text-gray-700 mb-2">{gesture.text}</p>
-                        <p className="text-gray-600 text-sm mb-2">{gesture.description}</p>
+                      <div className="flex-1 min-w-0">
+                        <h4 className={`${colors.text} font-bold text-base sm:text-lg mb-1`}>{gesture.title}</h4>
+                        <p className="text-sm sm:text-base text-gray-700 mb-2">{gesture.text}</p>
+                        <p className="text-xs sm:text-sm text-gray-600 mb-2">{gesture.description}</p>
                         <div className="mt-2 p-2 bg-white/50 rounded-lg">
                           <p className="text-xs font-semibold text-gray-700">✨ {gesture.action}</p>
                         </div>
@@ -293,14 +367,14 @@ export default function WelcomeTutorial({ onClose }: WelcomeTutorialProps) {
 
           {/* Features */}
           {currentStepData.features && (
-            <div className="grid md:grid-cols-2 gap-4 mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
               {currentStepData.features.map((feature, idx) => (
-                <div key={idx} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                  <div className="flex items-start gap-3">
-                    <span className="text-2xl">{feature.icon}</span>
-                    <div>
-                      <h4 className="font-semibold text-gray-900 mb-1">{feature.title}</h4>
-                      <p className="text-sm text-gray-600">{feature.description}</p>
+                <div key={idx} className="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200">
+                  <div className="flex items-start gap-2 sm:gap-3">
+                    <span className="text-xl sm:text-2xl flex-shrink-0">{feature.icon}</span>
+                    <div className="min-w-0 flex-1">
+                      <h4 className="font-semibold text-sm sm:text-base text-gray-900 mb-1">{feature.title}</h4>
+                      <p className="text-xs sm:text-sm text-gray-600">{feature.description}</p>
                     </div>
                   </div>
                 </div>
@@ -309,10 +383,10 @@ export default function WelcomeTutorial({ onClose }: WelcomeTutorialProps) {
           )}
 
           {/* Progress */}
-          <div className="mb-6">
+          <div className="mb-4 sm:mb-6">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm text-gray-600">Paso {currentStep + 1} de {steps.length}</span>
-              <span className="text-sm font-semibold text-primary-600">
+              <span className="text-xs sm:text-sm text-gray-600">Paso {currentStep + 1} de {steps.length}</span>
+              <span className="text-xs sm:text-sm font-semibold text-primary-600">
                 {Math.round(((currentStep + 1) / steps.length) * 100)}%
               </span>
             </div>
@@ -326,22 +400,22 @@ export default function WelcomeTutorial({ onClose }: WelcomeTutorialProps) {
         </div>
 
         {/* Footer */}
-        <div className="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4 flex items-center justify-between rounded-b-2xl">
+        <div className="sticky bottom-0 bg-white border-t border-gray-200 px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between rounded-b-lg sm:rounded-b-2xl gap-2">
           <button
             onClick={handlePrev}
             disabled={currentStep === 0}
-            className="px-4 py-2 text-gray-600 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="px-3 sm:px-4 py-2 text-gray-600 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
           >
-            <ArrowLeftIcon className="h-4 w-4" />
-            Anterior
+            <ArrowLeftIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">Anterior</span>
           </button>
           
-          <div className="flex gap-2">
+          <div className="flex gap-1 sm:gap-2">
             {steps.map((_, idx) => (
               <div
                 key={idx}
-                className={`h-2 w-2 rounded-full transition-all ${
-                  idx === currentStep ? 'bg-primary-600 w-6' : 'bg-gray-300'
+                className={`h-1.5 sm:h-2 w-1.5 sm:w-2 rounded-full transition-all ${
+                  idx === currentStep ? 'bg-primary-600 w-4 sm:w-6' : 'bg-gray-300'
                 }`}
               />
             ))}
@@ -349,10 +423,10 @@ export default function WelcomeTutorial({ onClose }: WelcomeTutorialProps) {
 
           <button
             onClick={handleNext}
-            className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors flex items-center gap-2"
+            className="px-4 sm:px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium"
           >
             {currentStep === steps.length - 1 ? 'Comenzar' : 'Siguiente'}
-            {currentStep < steps.length - 1 && <ArrowRightIcon className="h-4 w-4" />}
+            {currentStep < steps.length - 1 && <ArrowRightIcon className="h-3 w-3 sm:h-4 sm:w-4" />}
           </button>
         </div>
       </div>

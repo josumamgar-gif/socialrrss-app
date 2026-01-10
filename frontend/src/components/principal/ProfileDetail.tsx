@@ -55,17 +55,17 @@ export default function ProfileDetail({ profile, onClose }: ProfileDetailProps) 
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4" style={{ zIndex: 9999 }}>
-      <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-lg border border-gray-200 animate-fadeIn relative z-[10000]">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4" style={{ zIndex: 9999 }}>
+      <div className="bg-white rounded-lg max-w-4xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto shadow-lg border border-gray-200 animate-fadeIn relative z-[10000]">
         {/* Header */}
-        <div className={`${getNetworkColor(profile.socialNetwork)} text-white p-6 rounded-t-2xl`}>
+        <div className={`${getNetworkColor(profile.socialNetwork)} text-white p-4 sm:p-6 rounded-t-lg sm:rounded-t-2xl sticky top-0 z-10`}>
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="bg-white/20 p-2 rounded-lg">
-                <SocialNetworkLogo network={profile.socialNetwork} className="w-8 h-8" />
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+              <div className="bg-white/20 p-1.5 sm:p-2 rounded-lg flex-shrink-0">
+                <SocialNetworkLogo network={profile.socialNetwork} className="w-6 h-6 sm:w-8 sm:h-8" />
               </div>
-              <div>
-                <h2 className="text-2xl font-bold mb-1">
+              <div className="min-w-0 flex-1">
+                <h2 className="text-lg sm:text-2xl font-bold mb-1 truncate">
                   {profile.profileData.username || 
                    profile.profileData.channelName || 
                    profile.profileData.handle || 
@@ -74,24 +74,24 @@ export default function ProfileDetail({ profile, onClose }: ProfileDetailProps) 
                    profile.profileData.twitterHandle ||
                    'Perfil'}
                 </h2>
-                <p className="text-white/90">{getNetworkName(profile.socialNetwork)}</p>
+                <p className="text-white/90 text-xs sm:text-base truncate">{getNetworkName(profile.socialNetwork)}</p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="text-white hover:text-gray-200 transition-colors"
+              className="text-white hover:text-gray-200 transition-colors flex-shrink-0 ml-2"
             >
-              <XMarkIcon className="h-6 w-6" />
+              <XMarkIcon className="h-5 w-5 sm:h-6 sm:w-6" />
             </button>
           </div>
         </div>
 
         {/* Contenido */}
-        <div className="p-6">
-          <div className="grid md:grid-cols-2 gap-6">
+        <div className="p-3 sm:p-6">
+          <div className="flex flex-col md:grid md:grid-cols-2 gap-4 sm:gap-6">
             {/* Imágenes */}
-            <div className="space-y-4">
-              <div className="relative bg-gray-100 rounded-lg overflow-hidden aspect-[3/4]">
+            <div className="space-y-3 sm:space-y-4 order-1 md:order-1">
+              <div className="relative bg-gray-100 rounded-lg overflow-hidden aspect-[3/4] sm:aspect-[3/4] max-h-[60vh] sm:max-h-none">
                 {images.length > 0 ? (
                   <>
                     <img
@@ -108,17 +108,17 @@ export default function ProfileDetail({ profile, onClose }: ProfileDetailProps) 
                       <>
                         <button
                           onClick={prevImage}
-                          className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
+                          className="absolute left-1 sm:left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-1.5 sm:p-2 rounded-full transition-colors"
                         >
-                          <ChevronLeftIcon className="h-5 w-5" />
+                          <ChevronLeftIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                         </button>
                         <button
                           onClick={nextImage}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
+                          className="absolute right-1 sm:right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-1.5 sm:p-2 rounded-full transition-colors"
                         >
-                          <ChevronRightIcon className="h-5 w-5" />
+                          <ChevronRightIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                         </button>
-                        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
+                        <div className="absolute bottom-1 sm:bottom-2 left-1/2 -translate-x-1/2 bg-black/50 text-white px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm">
                           {currentImageIndex + 1} / {images.length}
                         </div>
                       </>
@@ -126,7 +126,7 @@ export default function ProfileDetail({ profile, onClose }: ProfileDetailProps) 
                   </>
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-gray-400">
-                    <span className="text-6xl">📷</span>
+                    <span className="text-4xl sm:text-6xl">📷</span>
                   </div>
                 )}
               </div>
@@ -138,7 +138,7 @@ export default function ProfileDetail({ profile, onClose }: ProfileDetailProps) 
                     <button
                       key={idx}
                       onClick={() => setCurrentImageIndex(idx)}
-                      className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 ${
+                      className={`flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden border-2 ${
                         idx === currentImageIndex ? 'border-primary-500' : 'border-gray-200'
                       }`}
                     >
@@ -154,9 +154,9 @@ export default function ProfileDetail({ profile, onClose }: ProfileDetailProps) 
             </div>
 
             {/* Información */}
-            <div className="space-y-6">
-              {/* Foto de perfil destacada */}
-              <div className="flex justify-center mb-4">
+            <div className="space-y-4 sm:space-y-6 order-2 md:order-2">
+              {/* Foto de perfil destacada - Solo en desktop */}
+              <div className="hidden md:flex justify-center mb-4">
                 <div className="w-32 h-32 rounded-full border-4 border-white shadow-lg overflow-hidden">
                   {images.length > 0 ? (
                     <img
@@ -175,75 +175,75 @@ export default function ProfileDetail({ profile, onClose }: ProfileDetailProps) 
               {/* Descripción */}
               {profile.profileData.description && (
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Descripción</h3>
-                  <p className="text-gray-700 leading-relaxed">{profile.profileData.description}</p>
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">Descripción</h3>
+                  <p className="text-sm sm:text-base text-gray-700 leading-relaxed">{profile.profileData.description}</p>
                 </div>
               )}
 
               {/* Estadísticas */}
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Estadísticas</h3>
-                <div className="grid grid-cols-2 gap-4">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3">Estadísticas</h3>
+                <div className="grid grid-cols-2 gap-2 sm:gap-4">
                   {profile.profileData.followers && (
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <p className="text-sm text-gray-600 mb-1">Seguidores</p>
-                      <p className="text-2xl font-bold text-gray-900">
+                    <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
+                      <p className="text-xs sm:text-sm text-gray-600 mb-1">Seguidores</p>
+                      <p className="text-xl sm:text-2xl font-bold text-gray-900">
                         {profile.profileData.followers.toLocaleString()}
                       </p>
                     </div>
                   )}
                   {profile.profileData.subscribers && (
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <p className="text-sm text-gray-600 mb-1">Suscriptores</p>
-                      <p className="text-2xl font-bold text-gray-900">
+                    <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
+                      <p className="text-xs sm:text-sm text-gray-600 mb-1">Suscriptores</p>
+                      <p className="text-xl sm:text-2xl font-bold text-gray-900">
                         {profile.profileData.subscribers.toLocaleString()}
                       </p>
                     </div>
                   )}
                   {profile.profileData.videos && (
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <p className="text-sm text-gray-600 mb-1">Videos</p>
-                      <p className="text-2xl font-bold text-gray-900">
+                    <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
+                      <p className="text-xs sm:text-sm text-gray-600 mb-1">Videos</p>
+                      <p className="text-xl sm:text-2xl font-bold text-gray-900">
                         {profile.profileData.videos.toLocaleString()}
                       </p>
                     </div>
                   )}
                   {profile.profileData.videoCount && (
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <p className="text-sm text-gray-600 mb-1">Videos</p>
-                      <p className="text-2xl font-bold text-gray-900">
+                    <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
+                      <p className="text-xs sm:text-sm text-gray-600 mb-1">Videos</p>
+                      <p className="text-xl sm:text-2xl font-bold text-gray-900">
                         {profile.profileData.videoCount.toLocaleString()}
                       </p>
                     </div>
                   )}
                   {profile.profileData.posts && (
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <p className="text-sm text-gray-600 mb-1">Publicaciones</p>
-                      <p className="text-2xl font-bold text-gray-900">
+                    <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
+                      <p className="text-xs sm:text-sm text-gray-600 mb-1">Publicaciones</p>
+                      <p className="text-xl sm:text-2xl font-bold text-gray-900">
                         {profile.profileData.posts.toLocaleString()}
                       </p>
                     </div>
                   )}
                   {profile.profileData.tweets && (
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <p className="text-sm text-gray-600 mb-1">Tweets</p>
-                      <p className="text-2xl font-bold text-gray-900">
+                    <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
+                      <p className="text-xs sm:text-sm text-gray-600 mb-1">Tweets</p>
+                      <p className="text-xl sm:text-2xl font-bold text-gray-900">
                         {profile.profileData.tweets.toLocaleString()}
                       </p>
                     </div>
                   )}
                   {profile.profileData.likes && (
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <p className="text-sm text-gray-600 mb-1">Me gusta</p>
-                      <p className="text-2xl font-bold text-gray-900">
+                    <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
+                      <p className="text-xs sm:text-sm text-gray-600 mb-1">Me gusta</p>
+                      <p className="text-xl sm:text-2xl font-bold text-gray-900">
                         {profile.profileData.likes.toLocaleString()}
                       </p>
                     </div>
                   )}
                   {profile.profileData.game && (
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <p className="text-sm text-gray-600 mb-1">Juego Principal</p>
-                      <p className="text-lg font-bold text-gray-900">{profile.profileData.game}</p>
+                    <div className="bg-gray-50 rounded-lg p-3 sm:p-4 col-span-2">
+                      <p className="text-xs sm:text-sm text-gray-600 mb-1">Juego Principal</p>
+                      <p className="text-base sm:text-lg font-bold text-gray-900">{profile.profileData.game}</p>
                     </div>
                   )}
                 </div>
@@ -256,7 +256,7 @@ export default function ProfileDetail({ profile, onClose }: ProfileDetailProps) 
                     href={profile.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full bg-primary-600 text-white py-3 px-6 rounded-lg hover:bg-primary-700 transition-colors font-semibold text-center block"
+                    className="w-full bg-primary-600 text-white py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg hover:bg-primary-700 transition-colors font-semibold text-center block text-sm sm:text-base"
                   >
                     Visitar Perfil →
                   </a>

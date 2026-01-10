@@ -41,15 +41,26 @@ export default function LoginPage() {
         window.location.href = '/principal';
       }
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Error al iniciar sesión');
+      console.error('Error en login:', err);
+      
+      // Mensajes de error más descriptivos
+      if (err.response) {
+        // El servidor respondió con un error
+        setError(err.response?.data?.error || `Error ${err.response?.status}: No se pudo iniciar sesión`);
+      } else if (err.request) {
+        // No se pudo conectar al servidor
+        setError('No se pudo conectar al servidor. Por favor, verifica tu conexión o contacta al administrador.');
+      } else {
+        setError(err.message || 'Error al iniciar sesión. Por favor, intenta de nuevo.');
+      }
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-8">
-      <div className="max-w-6xl w-full grid md:grid-cols-2 gap-12 items-center">
-        {/* Lado izquierdo - Branding minimalista */}
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-3 sm:px-4 py-4 sm:py-8">
+      <div className="max-w-6xl w-full grid md:grid-cols-2 gap-6 md:gap-12 items-center">
+        {/* Lado izquierdo - Branding minimalista (solo en desktop) */}
         <div className="hidden md:block text-center md:text-left">
           <div className="mb-6">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-900 rounded-lg mb-4">
@@ -73,19 +84,29 @@ export default function LoginPage() {
           </div>
         </div>
 
+        {/* Logo y título en móvil */}
+        <div className="md:hidden text-center mb-4">
+          <div className="inline-flex items-center justify-center w-12 h-12 bg-gray-900 rounded-lg mb-3">
+            <span className="text-white text-xl font-bold">PR</span>
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-1">
+            Promoción RRSS
+          </h1>
+        </div>
+
         {/* Lado derecho - Formulario */}
         <div className="w-full max-w-md mx-auto">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 md:p-8">
+            <div className="text-center mb-6 sm:mb-8">
+              <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2">
                 Iniciar Sesión
               </h2>
-              <p className="text-sm text-gray-600">Accede a tu cuenta</p>
+              <p className="text-xs sm:text-sm text-gray-600">Accede a tu cuenta</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label htmlFor="email" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
                 Email
               </label>
               <input
@@ -94,13 +115,13 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm"
+                className="w-full px-3 py-2 sm:py-2.5 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm sm:text-base text-gray-900 placeholder:text-gray-400"
                 placeholder="tu@email.com"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label htmlFor="password" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
                 Contraseña
               </label>
               <input
@@ -109,7 +130,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm"
+                className="w-full px-3 py-2 sm:py-2.5 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm sm:text-base text-gray-900 placeholder:text-gray-400"
                 placeholder="••••••••"
               />
             </div>
@@ -122,13 +143,13 @@ export default function LoginPage() {
                 onChange={(e) => setRemember(e.target.checked)}
                 className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
               />
-              <label htmlFor="remember" className="ml-2 block text-sm text-gray-700">
+              <label htmlFor="remember" className="ml-2 block text-xs sm:text-sm text-gray-700">
                 Recordar mis datos
               </label>
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
+              <div className="bg-red-50 border border-red-200 text-red-700 px-3 sm:px-4 py-2 sm:py-3 rounded-md text-xs sm:text-sm">
                 {error}
               </div>
             )}
@@ -136,14 +157,14 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-primary-600 text-white py-2.5 px-4 rounded-md hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm transition-colors"
+              className="w-full bg-primary-600 text-white py-2.5 sm:py-3 px-4 rounded-md hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm sm:text-base transition-colors mt-2"
             >
               {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
             </button>
             </form>
 
-            <div className="mt-6 text-center">
-              <p className="text-sm text-gray-600">
+            <div className="mt-4 sm:mt-6 text-center">
+              <p className="text-xs sm:text-sm text-gray-600">
                 ¿No tienes cuenta?{' '}
                 <Link href="/register" className="text-primary-600 hover:text-primary-700 font-medium">
                   Regístrate
