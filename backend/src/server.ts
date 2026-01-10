@@ -18,8 +18,8 @@ const PORT = process.env.PORT || 5000;
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/promocion-rrss';
 
 // Middleware CORS - Configurado para producción y previews de Vercel
-const getAllowedOrigins = () => {
-  const origins: string[] = [];
+const getAllowedOrigins = (): (string | RegExp)[] => {
+  const origins: (string | RegExp)[] = [];
   
   // Desarrollo local
   origins.push('http://localhost:3000');
@@ -60,7 +60,10 @@ const corsOptions = {
       if (allowedOrigin instanceof RegExp) {
         return allowedOrigin.test(origin);
       }
-      return origin === allowedOrigin;
+      if (typeof allowedOrigin === 'string') {
+        return origin === allowedOrigin;
+      }
+      return false;
     });
     
     if (isAllowed) {
