@@ -17,11 +17,63 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/promocion-rrss';
 
-// Middleware CORS - Configurado para producción
+// Middleware CORS - Configurado para producción y previews de Vercel
+const getAllowedOrigins = () => {
+  const origins: string[] = [];
+  
+  // Desarrollo local
+  origins.push('http://localhost:3000');
+  
+  // URL de producción (sin barra al final)
+  const frontendUrl = process.env.FRONTEND_URL;
+  if (frontendUrl) {
+    // Remover barra al final si existe
+    const cleanUrl = frontendUrl.replace(/\/$/, '');
+    origins.push(cleanUrl);
+  }
+  
+  // Permitir cualquier URL de preview de Vercel
+  // Las URLs de preview tienen formato: proyecto-hash-usuario.vercel.app
+  origins.push(/^https:\/\/.*\.vercel\.app$/);
+  
+  // Si tienes un dominio personalizado configurado
+  if (process.env.CUSTOM_DOMAIN) {
+    const cleanDomain = process.env.CUSTOM_DOMAIN.replace(/\/$/, '');
+    origins.push(`https://${cleanDomain}`);
+    origins.push(`https://www.${cleanDomain}`);
+  }
+  
+  return origins;
+};
+
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    const allowedOrigins = getAllowedOrigins();
+    
+    // Permitir requests sin origin (Postman, curl, etc.)
+    if (!origin) {
+      return callback(null, true);
+    }
+    
+    // Verificar si el origen está permitido
+    const isAllowed = allowedOrigins.some((allowedOrigin) => {
+      if (allowedOrigin instanceof RegExp) {
+        return allowedOrigin.test(origin);
+      }
+      return origin === allowedOrigin;
+    });
+    
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      console.warn(`⚠️ Origen no permitido: ${origin}`);
+      callback(new Error('No permitido por CORS'));
+    }
+  },
   credentials: true,
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 };
 
 app.use(cors(corsOptions));
@@ -69,6 +121,7 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
 app.listen(PORT, () => {
   console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
   console.log(`📡 API disponible en http://localhost:${PORT}/api`);
+  console.log(`🌐 CORS configurado para: ${process.env.FRONTEND_URL || 'http://localhost:3000'} y *.vercel.app`);
 });
 
 export default app;
