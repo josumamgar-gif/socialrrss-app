@@ -93,8 +93,7 @@ UserSchema.methods.comparePassword = async function (candidatePassword: string):
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-UserSchema.index({ email: 1 });
-UserSchema.index({ username: 1 });
+// Los índices se crean automáticamente con unique: true en los campos username y email
 
 export default mongoose.model<IUser>('User', UserSchema);
 
