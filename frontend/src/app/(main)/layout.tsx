@@ -12,6 +12,9 @@ import {
   FireIcon as FireIconSolid 
 } from '@heroicons/react/24/solid';
 import WelcomeTutorial from '@/components/shared/WelcomeTutorial';
+import { useAuthStore } from '@/store/authStore';
+import { getAuthToken } from '@/lib/auth';
+import { authAPI } from '@/lib/api';
 
 export default function MainLayout({
   children,
@@ -19,12 +22,47 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   const [pathname, setPathname] = useState('');
+  const [loading, setLoading] = useState(true);
+  const { setUser, isAuthenticated } = useAuthStore();
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setPathname(window.location.pathname);
-    }
-  }, []);
+    // Inicializar sesión desde el token si existe
+    const initializeSession = async () => {
+      if (typeof window !== 'undefined') {
+        setPathname(window.location.pathname);
+        
+        const token = getAuthToken();
+        if (token && !isAuthenticated) {
+          try {
+            // Verificar token y obtener usuario actual
+            const response = await authAPI.getMe();
+            setUser(response.user);
+          } catch (error) {
+            // Si el token es inválido, limpiar y redirigir al login
+            console.error('Error verificando sesión:', error);
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+            return;
+          }
+        } else if (!token) {
+          // Si no hay token, redirigir al login
+          window.location.href = '/login';
+          return;
+        }
+        setLoading(false);
+      }
+    };
+
+    initializeSession();
+  }, [setUser, isAuthenticated]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
+      </div>
+    );
+  }
 
   const tabs = [
     {

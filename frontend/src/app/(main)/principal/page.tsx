@@ -25,30 +25,86 @@ export default function PrincipalPage() {
     }
   }, []);
 
+  // Obtener perfiles vistos por el usuario actual
+  const getViewedProfiles = useCallback((): string[] => {
+    if (!user || typeof window === 'undefined') return [];
+    const key = `viewedProfiles_${user.id}`;
+    const viewed = localStorage.getItem(key);
+    return viewed ? JSON.parse(viewed) : [];
+  }, [user]);
+
+  // Marcar un perfil como visto
+  const markProfileAsViewed = useCallback((profileId: string) => {
+    if (!user || typeof window === 'undefined') return;
+    const key = `viewedProfiles_${user.id}`;
+    const viewed = getViewedProfiles();
+    if (!viewed.includes(profileId)) {
+      viewed.push(profileId);
+      localStorage.setItem(key, JSON.stringify(viewed));
+    }
+  }, [user, getViewedProfiles]);
+
   const loadProfiles = useCallback(async () => {
     try {
       const response = await profilesAPI.getAll();
-      // Primero los demos, luego los perfiles reales
-      const realProfiles = (response.profiles || []).filter((p: Profile) => !p._id.startsWith('demo-'));
-      const allProfiles = [...demoProfiles, ...realProfiles];
-      setProfiles(allProfiles);
+      const viewedProfiles = getViewedProfiles();
+      
+      // Filtrar perfiles reales que no han sido vistos
+      const realProfiles = (response.profiles || [])
+        .filter((p: Profile) => !p._id.startsWith('demo-') && !viewedProfiles.includes(p._id));
+      
+      // Los perfiles demo solo aparecen si el tutorial NO está completado (primera vez)
+      const tutorialCompleted = typeof window !== 'undefined' ? 
+        localStorage.getItem('tutorialCompleted') === 'true' : false;
+      const demoCompleted = typeof window !== 'undefined' ? 
+        localStorage.getItem('demoCompleted') === 'true' : false;
+      
+      // Solo incluir demos si el tutorial NO está completado (primera vez)
+      let profilesToShow: Profile[] = [];
+      if (!tutorialCompleted && !demoCompleted) {
+        // Si el tutorial no está completado, mostrar demos sin filtrar por vistos
+        // Los demos nunca se marcan como vistos permanentemente
+        const demosNotViewed = demoProfiles.filter((p: Profile) => !viewedProfiles.includes(p._id));
+        profilesToShow = [...demosNotViewed, ...realProfiles];
+      } else {
+        // Si el tutorial está completado, NO mostrar demos nunca más
+        profilesToShow = realProfiles;
+      }
+      
+      setProfiles(profilesToShow);
     } catch (error) {
       console.error('Error cargando perfiles:', error);
-      // Si falla, usar solo demos
-      setProfiles(demoProfiles);
+      // Si falla, solo mostrar demos si el tutorial no está completado
+      const tutorialCompleted = typeof window !== 'undefined' ? 
+        localStorage.getItem('tutorialCompleted') === 'true' : false;
+      const demoCompleted = typeof window !== 'undefined' ? 
+        localStorage.getItem('demoCompleted') === 'true' : false;
+      
+      if (!tutorialCompleted && !demoCompleted) {
+        setProfiles(demoProfiles);
+      } else {
+        setProfiles([]);
+      }
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [getViewedProfiles]);
 
   useEffect(() => {
-    loadProfiles();
-    checkDemoCompletion();
-  }, [loadProfiles, checkDemoCompletion]);
+    if (user) {
+      loadProfiles();
+      checkDemoCompletion();
+    }
+  }, [loadProfiles, checkDemoCompletion, user]);
 
   const handleSwipeLeft = () => {
     const currentProfile = profiles[currentIndex];
-    if (currentProfile && currentProfile._id.startsWith('demo-')) {
+    if (!currentProfile) return;
+    
+    // Marcar perfil como visto
+    markProfileAsViewed(currentProfile._id);
+    
+    if (currentProfile._id.startsWith('demo-')) {
       const newInteractions = demoInteractions + 1;
       setDemoInteractions(newInteractions);
       
@@ -61,12 +117,24 @@ export default function PrincipalPage() {
     if (currentIndex < profiles.length - 1) {
       setHistory([...history, currentIndex]);
       setCurrentIndex(currentIndex + 1);
+    } else {
+      // Si no hay más perfiles, recargar para obtener nuevos (sin los vistos)
+      loadProfiles().then(() => {
+        // Resetear índice después de recargar para mostrar nuevos perfiles
+        setCurrentIndex(0);
+        setHistory([]);
+      });
     }
   };
 
   const handleSwipeRight = () => {
     const currentProfile = profiles[currentIndex];
-    if (currentProfile && currentProfile._id.startsWith('demo-')) {
+    if (!currentProfile) return;
+    
+    // Marcar perfil como visto
+    markProfileAsViewed(currentProfile._id);
+    
+    if (currentProfile._id.startsWith('demo-')) {
       const newInteractions = demoInteractions + 1;
       setDemoInteractions(newInteractions);
       
@@ -79,12 +147,24 @@ export default function PrincipalPage() {
     if (currentIndex < profiles.length - 1) {
       setHistory([...history, currentIndex]);
       setCurrentIndex(currentIndex + 1);
+    } else {
+      // Si no hay más perfiles, recargar para obtener nuevos (sin los vistos)
+      loadProfiles().then(() => {
+        // Resetear índice después de recargar para mostrar nuevos perfiles
+        setCurrentIndex(0);
+        setHistory([]);
+      });
     }
   };
 
   const handleSwipeUp = () => {
     const currentProfile = profiles[currentIndex];
-    if (currentProfile && currentProfile._id.startsWith('demo-')) {
+    if (!currentProfile) return;
+    
+    // Marcar perfil como visto cuando se ven los detalles
+    markProfileAsViewed(currentProfile._id);
+    
+    if (currentProfile._id.startsWith('demo-')) {
       const newInteractions = demoInteractions + 1;
       setDemoInteractions(newInteractions);
       
@@ -124,7 +204,10 @@ export default function PrincipalPage() {
   }
 
   // Verificar si el usuario ha completado los demos
-  const needsDemoInteraction = !hasCompletedDemo && currentIndex < demoProfiles.length;
+  // Solo mostrar interacción demo si el tutorial NO está completado
+  const tutorialCompleted = typeof window !== 'undefined' ? 
+    localStorage.getItem('tutorialCompleted') === 'true' : false;
+  const needsDemoInteraction = !tutorialCompleted && !hasCompletedDemo && currentIndex < demoProfiles.length;
   const currentProfile = profiles[currentIndex];
   const isDemoProfile = currentProfile?._id.startsWith('demo-');
 
