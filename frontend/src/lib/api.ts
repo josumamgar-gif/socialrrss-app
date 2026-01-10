@@ -3,12 +3,37 @@ import { User, Profile, ProfileStats, AuthResponse, PricingPlan } from '@/types'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
+// Log para debugging (solo en desarrollo)
+if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+  console.log('🔗 API URL configurada:', API_URL);
+}
+
 const api = axios.create({
   baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
 });
+
+// Interceptor para manejo de errores
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response) {
+      // El servidor respondió con un error
+      console.error('❌ Error de API:', error.response.status, error.response.data);
+    } else if (error.request) {
+      // La petición se hizo pero no hubo respuesta
+      console.error('❌ No se pudo conectar al servidor. Verifica que el backend esté funcionando.');
+      console.error('🔗 URL intentada:', error.config?.url);
+      console.error('🔗 Base URL:', API_URL);
+    } else {
+      // Algo más causó el error
+      console.error('❌ Error:', error.message);
+    }
+    return Promise.reject(error);
+  }
+);
 
 // Interceptor para añadir token a las peticiones
 api.interceptors.request.use((config) => {
