@@ -563,24 +563,20 @@ export default function ProfileCard({
           </div>
 
           {/* Botones de acción */}
-          <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-3 px-4 md:space-x-4 bg-white/95 backdrop-blur-sm py-3 rounded-t-xl border-t border-gray-200 pointer-events-auto" style={{ touchAction: 'auto' }}>
+          <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-3 px-4 md:space-x-4 bg-white/95 backdrop-blur-sm py-3 rounded-t-xl border-t border-gray-200 pointer-events-auto" style={{ touchAction: 'manipulation', zIndex: 50 }}>
             <Tooltip text="Siguiente Perfil">
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  e.preventDefault();
                   if (!isAnimating && onSwipeLeft) {
                     triggerButtonAnimation('left', onSwipeLeft);
                   }
                 }}
-                onTouchEnd={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                }}
                 onMouseUp={(e) => e.currentTarget.blur()}
                 disabled={isAnimating}
                 className="bg-red-500 hover:bg-red-600 text-white p-3 rounded-md shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none touch-manipulation"
+                style={{ touchAction: 'manipulation' }}
                 aria-label="Siguiente Perfil"
               >
                 <ArrowLeftIcon className="h-6 w-6" />
@@ -592,7 +588,6 @@ export default function ProfileCard({
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  e.preventDefault();
                   if (!isAnimating) {
                     triggerButtonAnimation('up', () => {
                       if (onShowDetail) {
@@ -601,13 +596,10 @@ export default function ProfileCard({
                     });
                   }
                 }}
-                onTouchEnd={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                }}
                 onMouseUp={(e) => e.currentTarget.blur()}
                 disabled={isAnimating}
                 className="bg-yellow-500 hover:bg-yellow-600 text-white p-3 rounded-md shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none touch-manipulation"
+                style={{ touchAction: 'manipulation' }}
                 aria-label="Ver Detalles"
               >
                 <ArrowUpIcon className="h-6 w-6" />
@@ -619,14 +611,9 @@ export default function ProfileCard({
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  e.preventDefault();
                   if (!isAnimating && !backUsed && canGoBack && onGoBack) {
                     triggerBackAnimation(onGoBack);
                   }
-                }}
-                onTouchEnd={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
                 }}
                 onMouseUp={(e) => e.currentTarget.blur()}
                 disabled={isAnimating || backUsed || !canGoBack}
@@ -635,6 +622,7 @@ export default function ProfileCard({
                     ? 'bg-gray-400 cursor-not-allowed'
                     : 'bg-green-500 hover:bg-green-600'
                 } text-white p-3 rounded-md shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none touch-manipulation`}
+                style={{ touchAction: 'manipulation' }}
                 aria-label="Retroceder"
               >
                 <ArrowUturnLeftIcon className="h-6 w-6" />
@@ -646,7 +634,6 @@ export default function ProfileCard({
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  e.preventDefault();
                   if (!isAnimating && onSwipeRight) {
                     // SIEMPRE abrir enlace primero
                     if (profile.link) {
@@ -658,13 +645,10 @@ export default function ProfileCard({
                     triggerButtonAnimation('right', onSwipeRight);
                   }
                 }}
-                onTouchEnd={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                }}
                 onMouseUp={(e) => e.currentTarget.blur()}
                 disabled={isAnimating}
                 className="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-md shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none touch-manipulation"
+                style={{ touchAction: 'manipulation' }}
                 aria-label="Ir al Enlace"
               >
                 <ArrowRightIcon className="h-6 w-6" />

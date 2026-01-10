@@ -41,50 +41,19 @@ export default function PrincipalPage() {
     }
   }, []);
 
-  // Prevenir scroll del body en móvil para que las tarjetas sean fijas
+  // Prevenir scroll del body en móvil usando solo CSS
+  // NO bloquear eventos - permitir que botones y tutorial funcionen
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      // Prevenir scroll en móvil - solo permitir gestos programados en las tarjetas
       const isMobile = window.innerWidth <= 768;
       
       if (isMobile) {
-        // Añadir clase al body para prevenir scroll
-        document.body.classList.add('no-scroll');
-        
-        // Prevenir scroll con gestos táctiles
-        const preventScroll = (e: TouchEvent) => {
-          const target = e.target as HTMLElement;
-          // Solo permitir gestos en las tarjetas y botones
-          const isAllowedElement = target.closest('.profile-card-container') ||
-                                   target.closest('button') ||
-                                   target.closest('[role="button"]') ||
-                                   target.closest('a') ||
-                                   target.tagName === 'BUTTON' ||
-                                   target.tagName === 'A';
-          
-          if (!isAllowedElement) {
-            e.preventDefault();
-            e.stopPropagation();
-          }
-        };
-
-        // Prevenir scroll con gestos táctiles y rueda del mouse
-        const preventWheel = (e: WheelEvent) => {
-          const target = e.target as HTMLElement;
-          if (!target.closest('.profile-card-container')) {
-            e.preventDefault();
-          }
-        };
-
-        document.addEventListener('touchmove', preventScroll, { passive: false });
-        document.addEventListener('touchstart', preventScroll, { passive: false });
-        document.addEventListener('wheel', preventWheel, { passive: false });
+        // Aplicar clase CSS que previene scroll pero NO bloquea eventos
+        // El tutorial tiene su propio manejo de overflow, no interfiere
+        document.body.classList.add('no-scroll-mobile');
 
         return () => {
-          document.body.classList.remove('no-scroll');
-          document.removeEventListener('touchmove', preventScroll);
-          document.removeEventListener('touchstart', preventScroll);
-          document.removeEventListener('wheel', preventWheel);
+          document.body.classList.remove('no-scroll-mobile');
         };
       }
     }
@@ -178,7 +147,7 @@ export default function PrincipalPage() {
   const isDemoProfile = currentProfile?._id.startsWith('demo-');
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4 py-8 overflow-hidden w-full h-full" style={{ touchAction: 'none' }}>
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4 py-8 overflow-hidden w-full h-full">
       {needsDemoInteraction && (
         <div className="mb-6 max-w-md w-full mx-auto bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4 z-50">
           <div className="flex items-start">
@@ -200,7 +169,7 @@ export default function PrincipalPage() {
       )}
 
 
-      <div className="relative w-full max-w-md mx-auto profile-card-container" style={{ touchAction: 'none', overflow: 'hidden' }}>
+      <div className="relative w-full max-w-md mx-auto profile-card-container" style={{ overflow: 'hidden' }}>
         {profiles.slice(currentIndex, currentIndex + 3).map((profile, idx) => (
           <div
             key={profile._id}
