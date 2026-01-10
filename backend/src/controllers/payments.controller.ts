@@ -3,14 +3,12 @@ import { AuthRequest } from '../middleware/auth.middleware';
 import { createOrder, captureOrder } from '../utils/paypal';
 import {
   createCardPaymentIntent,
-  createSepaPaymentIntent,
-  createSepaSetupIntent,
   confirmPaymentIntent,
   getPaymentIntentStatus,
 } from '../utils/stripe';
 import Profile from '../models/Profile';
 import Payment from '../models/Payment';
-import { PRICING_PLANS, getPlan, calculateExpirationDate, PlanType } from '../constants/pricing';
+import { getPlan, calculateExpirationDate, PlanType } from '../constants/pricing';
 
 export const createPaymentOrder = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -294,7 +292,7 @@ export const checkPaymentStatus = async (req: AuthRequest, res: Response): Promi
         payment.status = 'completed';
         await payment.save();
         await activateProfile(payment);
-      } else if (result.status === 'canceled' || result.status === 'payment_failed') {
+      } else if (result.status === 'canceled' || result.status === 'requires_payment_method') {
         payment.status = 'failed';
         await payment.save();
       }

@@ -12,10 +12,10 @@ if (!fs.existsSync(uploadDir)) {
 }
 
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
+  destination: (_req, _file, cb) => {
     cb(null, uploadDir);
   },
-  filename: (req, file, cb) => {
+  filename: (_req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
     cb(null, 'images-' + uniqueSuffix + path.extname(file.originalname));
   },
@@ -24,7 +24,7 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
-  fileFilter: (req, file, cb) => {
+  fileFilter: (_req, file, cb) => {
     const allowedTypes = /jpeg|jpg|png|gif|webp/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = allowedTypes.test(file.mimetype);
@@ -37,7 +37,7 @@ const upload = multer({
   },
 });
 
-export const getAllProfiles = async (req: any, res: Response): Promise<void> => {
+export const getAllProfiles = async (_req: any, res: Response): Promise<void> => {
   try {
     const profiles = await Profile.find({ isActive: true })
       .populate('userId', 'username')

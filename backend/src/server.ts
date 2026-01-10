@@ -49,7 +49,7 @@ app.use('/api/payments', paymentsRoutes);
 app.use('/api/pricing', pricingRoutes);
 
 // Ruta de prueba
-app.get('/api/health', (req, res) => {
+app.get('/api/health', (_req, res) => {
   res.json({ 
     status: 'OK', 
     message: 'Servidor funcionando correctamente',
@@ -58,7 +58,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // Manejo de errores
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error('Error:', err);
   res.status(err.status || 500).json({
     error: err.message || 'Error interno del servidor',

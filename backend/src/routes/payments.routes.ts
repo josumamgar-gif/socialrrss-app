@@ -32,7 +32,7 @@ router.get('/paypal-return', (req, res) => {
 });
 
 // Ruta para manejar la cancelación de PayPal
-router.get('/paypal-cancel', (req, res) => {
+router.get('/paypal-cancel', (_req, res) => {
   const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
   res.redirect(`${frontendUrl}/promocion?paypal_cancel=true`);
 });

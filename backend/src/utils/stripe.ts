@@ -2,7 +2,7 @@ import Stripe from 'stripe';
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY || '';
 const stripe = new Stripe(stripeSecretKey, {
-  apiVersion: '2024-11-20.acacia',
+  apiVersion: '2025-12-15.clover',
 });
 
 export interface CreatePaymentIntentParams {
@@ -44,7 +44,6 @@ export async function createSepaSetupIntent(params: {
   try {
     const setupIntent = await stripe.setupIntents.create({
       payment_method_types: ['sepa_debit'],
-      currency: params.currency.toLowerCase(),
       metadata: params.metadata || {},
     });
 
