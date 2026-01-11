@@ -71,9 +71,10 @@ export default function PrincipalPage() {
       
       let profilesToShow: Profile[] = [];
       if (!tutorialCompleted) {
-        // Si el tutorial NO está completado, MOSTRAR TODOS LOS DEMOS siempre
-        // No filtrar demos por vistos - deben aparecer siempre durante el tutorial
-        profilesToShow = [...demoProfiles, ...realProfiles];
+        // Si el tutorial NO está completado, MOSTRAR 3-4 PERFILES DEMO para practicar
+        // Mostrar solo los primeros 3-4 demos para que el usuario practique
+        const demosToShow = demoProfiles.slice(0, 4); // Mostrar máximo 4 demos
+        profilesToShow = [...demosToShow, ...realProfiles];
       } else {
         // Si el tutorial está completado, NO mostrar demos nunca más
         profilesToShow = realProfiles;
@@ -87,7 +88,8 @@ export default function PrincipalPage() {
         localStorage.getItem('tutorialCompleted') === 'true' : false;
       
       if (!tutorialCompleted) {
-        setProfiles(demoProfiles);
+        // Mostrar solo 3-4 demos para practicar
+        setProfiles(demoProfiles.slice(0, 4));
       } else {
         setProfiles([]);
       }

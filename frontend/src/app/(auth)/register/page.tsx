@@ -88,6 +88,11 @@ export default function RegisterPage() {
       setUser(response.user);
       
       if (typeof window !== 'undefined') {
+        // Asegurarse de que el tutorial se muestre para usuarios nuevos
+        // NO establecer tutorialCompleted para que se muestre el tutorial y los demos
+        localStorage.removeItem('tutorialCompleted');
+        localStorage.removeItem('demoCompleted');
+        
         window.location.href = '/principal';
       }
     } catch (err: any) {
