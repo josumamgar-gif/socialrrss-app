@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { authAPI } from '@/lib/api';
 import { setAuthToken, getAuthToken } from '@/lib/auth';
 import { useAuthStore } from '@/store/authStore';
+import AppLogo from '@/components/shared/AppLogo';
 
 const INTERESTS_OPTIONS = [
   'Gaming', 'Música', 'Fitness', 'Moda', 'Cocina', 'Viajes', 
@@ -155,6 +156,7 @@ export default function RegisterPage() {
       <div className="w-full max-w-2xl">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 md:p-8 max-h-[90vh] overflow-y-auto">
           <div className="text-center mb-4 sm:mb-6">
+            <AppLogo size="md" className="mb-4" />
             <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2">
               Crear Cuenta
             </h1>
