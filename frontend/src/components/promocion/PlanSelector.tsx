@@ -123,10 +123,12 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
   // Efecto para centrar cuando cambia el plan seleccionado
   useEffect(() => {
     if (selectedPlan) {
-      // Pequeño delay para asegurar que el DOM esté actualizado
-      setTimeout(() => {
+      // Delay para asegurar que el DOM esté actualizado y la animación funcione siempre
+      const timeoutId = setTimeout(() => {
         scrollToPlan(selectedPlan);
-      }, 100);
+      }, 150);
+      
+      return () => clearTimeout(timeoutId);
     }
   }, [selectedPlan]);
 
@@ -233,7 +235,7 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
       </div>
 
       {/* Carrusel de planes - Sin scroll vertical */}
-      <div className="overflow-x-auto overflow-y-hidden pb-2 pt-6 px-2 flex-shrink-0" id="plans-carousel" style={{ scrollbarWidth: 'thin', maxHeight: '500px' }}>
+      <div className="overflow-x-auto overflow-y-hidden pb-4 pt-8 px-2 flex-shrink-0" id="plans-carousel" style={{ scrollbarWidth: 'thin', maxHeight: '550px' }}>
         <div className="flex gap-4 max-w-full items-center" style={{ scrollSnapType: 'x mandatory' }}>
           {plans.map((plan) => (
             <div
@@ -243,8 +245,8 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
               }}
               onClick={() => setSelectedPlan(plan.type)}
               className={`
-                relative border-2 rounded-xl p-5 pt-9 cursor-pointer transition-all overflow-visible flex-shrink-0
-                min-w-[300px] max-w-[340px] shadow-lg
+                relative border-2 rounded-xl p-6 pt-10 cursor-pointer transition-all overflow-visible flex-shrink-0
+                min-w-[320px] max-w-[360px] shadow-lg
                 ${selectedPlan === plan.type 
                   ? `${getPlanColor(plan.type)} shadow-xl border-primary-500 scale-105` 
                   : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-xl'
@@ -253,44 +255,44 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
               style={{ scrollSnapAlign: 'center' }}
             >
               {plan.price === 10 && plan.durationDays === 365 && (
-                <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 z-10">
-                  <span className="bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg whitespace-nowrap">
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
+                  <span className="bg-green-600 text-white text-sm font-bold px-4 py-1.5 rounded-full shadow-lg whitespace-nowrap">
                     RECOMENDADO
                   </span>
                 </div>
               )}
               {plan.price === 50 && (
-                <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 z-10">
-                  <span className="bg-purple-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg whitespace-nowrap">
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
+                  <span className="bg-purple-600 text-white text-sm font-bold px-4 py-1.5 rounded-full shadow-lg whitespace-nowrap">
                     ÚNICO
                   </span>
                 </div>
               )}
               {selectedPlan === plan.type && (
-                <div className="absolute top-3 right-3">
-                  <CheckIcon className="h-5 w-5 text-primary-600" />
+                <div className="absolute top-4 right-4">
+                  <CheckIcon className="h-6 w-6 text-primary-600" />
                 </div>
               )}
               
-              <div className="text-center mb-3">
-                <div className="text-3xl mb-2">{getPlanIcon(plan.type)}</div>
-                <h3 className="text-lg font-bold text-gray-900">{plan.name}</h3>
-                <div className="mt-2">
-                  <span className="text-2xl font-bold text-gray-900">
+              <div className="text-center mb-4">
+                <div className="text-4xl mb-3">{getPlanIcon(plan.type)}</div>
+                <h3 className="text-xl font-bold text-gray-900">{plan.name}</h3>
+                <div className="mt-3">
+                  <span className="text-3xl font-bold text-gray-900">
                     {plan.price % 1 === 0 ? `${plan.price}` : plan.price.toFixed(2)}€
                   </span>
                   {plan.durationDays && plan.durationDays > 0 && (
-                    <span className="text-gray-600 text-xs ml-1">/{plan.durationDays === 365 ? 'año' : 'mes'}</span>
+                    <span className="text-gray-600 text-sm ml-1">/{plan.durationDays === 365 ? 'año' : 'mes'}</span>
                   )}
                 </div>
-                <p className="text-xs text-gray-600 mt-1">{plan.description}</p>
+                <p className="text-sm text-gray-600 mt-2">{plan.description}</p>
               </div>
 
-              <ul className="space-y-1.5 mb-3">
+              <ul className="space-y-2 mb-4">
                 {plan.features.map((feature, idx) => (
                   <li key={idx} className="flex items-start">
-                    <CheckIcon className="h-4 w-4 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                    <span className="text-xs text-gray-700">{feature}</span>
+                    <CheckIcon className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm text-gray-700">{feature}</span>
                   </li>
                 ))}
               </ul>
@@ -299,26 +301,26 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 shadow-md p-4 sm:p-5 max-w-2xl mx-auto flex-shrink-0 mt-2">
-        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 text-center">Método de Pago</h3>
-        <div className="grid grid-cols-2 gap-3 max-w-lg mx-auto">
+      <div className="bg-white rounded-xl border border-gray-200 shadow-md p-5 max-w-2xl mx-auto flex-shrink-0 mt-3">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">Método de Pago</h3>
+        <div className="grid grid-cols-2 gap-4 max-w-xl mx-auto">
           <button
             onClick={() => setSelectedPaymentMethod('paypal')}
             className={`
-              flex flex-col items-center justify-center p-5 rounded-xl border-2 transition-all
+              flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all w-full
               ${selectedPaymentMethod === 'paypal'
                 ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100 shadow-lg scale-105'
                 : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-md'
               }
             `}
           >
-            <div className="mb-3 flex items-center justify-center bg-white p-3 rounded-lg shadow-sm">
-              <svg viewBox="0 0 24 24" className="w-16 h-16">
+            <div className="mb-2 flex items-center justify-center bg-white p-2 rounded-lg shadow-sm">
+              <svg viewBox="0 0 24 24" className="w-14 h-14">
                 <path fill="#003087" d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.337 7.291-6.2 7.291h-2.287c-.524 0-.968.382-1.05.9l-1.12 7.203zm14.146-14.42a13.022 13.022 0 0 0-.44-2.277C20.172 2.988 18.478 2 15.853 2H8.4c-.524 0-.968.382-1.05.9L5.53 19.243h4.357c.524 0 .968-.382 1.05-.9l1.12-7.203c.082-.519.526-.9 1.05-.9h2.287c1.863 0 5.216-2.24 6.2-7.291.03-.15.054-.295.076-.438z"/>
                 <path fill="#009CDE" d="M21.222 2.663a13.022 13.022 0 0 0-.44-2.277C20.172 2.988 18.478 2 15.853 2H8.4c-.524 0-.968.382-1.05.9L5.53 19.243h4.357c.524 0 .968-.382 1.05-.9l1.12-7.203c.082-.519.526-.9 1.05-.9h2.287c1.863 0 5.216-2.24 6.2-7.291.03-.15.054-.295.076-.438z"/>
               </svg>
             </div>
-            <span className={`text-base font-bold ${selectedPaymentMethod === 'paypal' ? 'text-blue-700' : 'text-blue-600'}`}>
+            <span className={`text-sm font-bold ${selectedPaymentMethod === 'paypal' ? 'text-blue-700' : 'text-blue-600'}`}>
               PayPal
             </span>
           </button>
@@ -326,22 +328,22 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
           <button
             onClick={() => setSelectedPaymentMethod('card')}
             className={`
-              flex flex-col items-center justify-center p-5 rounded-xl border-2 transition-all
+              flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all w-full
               ${selectedPaymentMethod === 'card'
                 ? 'border-blue-500 bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg scale-105'
                 : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-md'
               }
             `}
           >
-            <div className="mb-3">
-              <svg viewBox="0 0 24 24" className={`w-16 h-16 ${selectedPaymentMethod === 'card' ? 'text-white' : 'text-gray-700'}`} fill="none" stroke="currentColor" strokeWidth="2">
+            <div className="mb-2">
+              <svg viewBox="0 0 24 24" className={`w-14 h-14 ${selectedPaymentMethod === 'card' ? 'text-white' : 'text-gray-700'}`} fill="none" stroke="currentColor" strokeWidth="2">
                 <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
                 <line x1="1" y1="10" x2="23" y2="10"/>
                 <circle cx="6" cy="16" r="1.5" fill="currentColor"/>
                 <circle cx="10" cy="16" r="1.5" fill="currentColor"/>
               </svg>
             </div>
-            <span className={`text-base font-bold ${selectedPaymentMethod === 'card' ? 'text-white' : 'text-gray-700'}`}>
+            <span className={`text-sm font-bold ${selectedPaymentMethod === 'card' ? 'text-white' : 'text-gray-700'}`}>
               Tarjeta
             </span>
           </button>
