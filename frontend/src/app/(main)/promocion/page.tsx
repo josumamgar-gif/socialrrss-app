@@ -225,9 +225,9 @@ export default function PromocionPage() {
     const displayNetwork = currentNetwork || selectedNetwork;
     
     return (
-      <div className="min-h-screen bg-white pt-16 sm:pt-20 pb-20 sm:pb-24 px-0 sm:px-4">
-        <div className="max-w-2xl mx-auto w-full">
-          <div className="text-center mb-4 sm:mb-6 px-4 sm:px-0">
+      <div className="h-[calc(100vh-4rem)] bg-white overflow-hidden px-0 sm:px-4">
+        <div className="max-w-2xl mx-auto w-full h-full flex flex-col">
+          <div className="text-center py-4 flex-shrink-0 px-4 sm:px-0">
             <button
               onClick={handleBack}
               className="text-primary-600 hover:text-primary-700 font-medium"
@@ -235,7 +235,7 @@ export default function PromocionPage() {
               ← Volver a redes sociales
             </button>
           </div>
-          <div className="bg-white rounded-none sm:rounded-lg shadow-lg p-4 sm:p-6">
+          <div className="bg-white rounded-none sm:rounded-lg shadow-lg p-4 sm:p-6 flex-1 overflow-y-auto">
             <div className="mb-6">
               {(() => {
                 const network = socialNetworks.find(n => n.id === displayNetwork);

@@ -48,13 +48,16 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
       const recommendedPlan = plans.find(p => p.price === 10 && p.durationDays === 365);
       if (recommendedPlan) {
         setSelectedPlan(recommendedPlan.type);
-        // Centrar el plan recomendado después de un pequeño delay
+        // Centrar el plan recomendado después de un delay para asegurar que el DOM esté listo
         setTimeout(() => {
           scrollToPlan(recommendedPlan.type);
-        }, 300);
+        }, 400);
       } else if (plans.length > 0) {
         // Si no hay plan recomendado, seleccionar el primero
         setSelectedPlan(plans[0].type);
+        setTimeout(() => {
+          scrollToPlan(plans[0].type);
+        }, 400);
       }
     }
   }, [plans]);
@@ -104,11 +107,15 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
   // Función para centrar el plan seleccionado
   const scrollToPlan = (planType: PlanType) => {
     const planElement = planRefs.current[planType];
-    if (planElement) {
-      planElement.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
-        inline: 'center'
+    const carousel = document.getElementById('plans-carousel');
+    if (planElement && carousel) {
+      const carouselRect = carousel.getBoundingClientRect();
+      const elementRect = planElement.getBoundingClientRect();
+      const scrollLeft = carousel.scrollLeft + (elementRect.left - carouselRect.left) - (carouselRect.width / 2) + (elementRect.width / 2);
+      
+      carousel.scrollTo({
+        left: scrollLeft,
+        behavior: 'smooth'
       });
     }
   };
@@ -226,7 +233,7 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
       </div>
 
       {/* Carrusel de planes */}
-      <div className="overflow-x-auto pb-4 pt-4 px-2 flex-1" id="plans-carousel" style={{ scrollbarWidth: 'thin' }}>
+      <div className="overflow-x-auto pb-4 pt-8 px-2 flex-1" id="plans-carousel" style={{ scrollbarWidth: 'thin' }}>
         <div className="flex gap-4 max-w-full" style={{ scrollSnapType: 'x mandatory' }}>
           {plans.map((plan) => (
             <div
@@ -236,24 +243,24 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
               }}
               onClick={() => setSelectedPlan(plan.type)}
               className={`
-                relative border-2 rounded-xl p-6 pt-8 cursor-pointer transition-all overflow-visible flex-shrink-0
+                relative border-2 rounded-xl p-6 pt-10 cursor-pointer transition-all overflow-visible flex-shrink-0
                 min-w-[320px] max-w-[360px] shadow-lg
                 ${selectedPlan === plan.type 
                   ? `${getPlanColor(plan.type)} shadow-xl border-primary-500 scale-105` 
                   : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-xl'
                 }
               `}
-              style={{ scrollSnapAlign: 'start' }}
+              style={{ scrollSnapAlign: 'center' }}
             >
               {plan.price === 10 && plan.durationDays === 365 && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
                   <span className="bg-green-600 text-white text-sm font-bold px-4 py-1.5 rounded-full shadow-lg whitespace-nowrap">
                     RECOMENDADO
                   </span>
                 </div>
               )}
               {plan.price === 50 && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
                   <span className="bg-purple-600 text-white text-sm font-bold px-4 py-1.5 rounded-full shadow-lg whitespace-nowrap">
                     ÚNICO
                   </span>
@@ -292,26 +299,26 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 shadow-md p-4 max-w-2xl mx-auto flex-shrink-0">
-        <h3 className="text-lg font-semibold text-gray-900 mb-3 text-center">Método de Pago</h3>
-        <div className="grid grid-cols-2 gap-3 max-w-md mx-auto">
+      <div className="bg-white rounded-xl border border-gray-200 shadow-md p-6 max-w-2xl mx-auto flex-shrink-0">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">Método de Pago</h3>
+        <div className="grid grid-cols-2 gap-4 max-w-lg mx-auto">
           <button
             onClick={() => setSelectedPaymentMethod('paypal')}
             className={`
-              flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all
+              flex flex-col items-center justify-center p-5 rounded-xl border-2 transition-all
               ${selectedPaymentMethod === 'paypal'
                 ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100 shadow-lg scale-105'
                 : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-md'
               }
             `}
           >
-            <div className="mb-2 flex items-center justify-center bg-white p-2 rounded-lg shadow-sm">
-              <svg viewBox="0 0 24 24" className="w-12 h-12">
+            <div className="mb-3 flex items-center justify-center bg-white p-3 rounded-lg shadow-sm">
+              <svg viewBox="0 0 24 24" className="w-16 h-16">
                 <path fill="#003087" d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.337 7.291-6.2 7.291h-2.287c-.524 0-.968.382-1.05.9l-1.12 7.203zm14.146-14.42a13.022 13.022 0 0 0-.44-2.277C20.172 2.988 18.478 2 15.853 2H8.4c-.524 0-.968.382-1.05.9L5.53 19.243h4.357c.524 0 .968-.382 1.05-.9l1.12-7.203c.082-.519.526-.9 1.05-.9h2.287c1.863 0 5.216-2.24 6.2-7.291.03-.15.054-.295.076-.438z"/>
                 <path fill="#009CDE" d="M21.222 2.663a13.022 13.022 0 0 0-.44-2.277C20.172 2.988 18.478 2 15.853 2H8.4c-.524 0-.968.382-1.05.9L5.53 19.243h4.357c.524 0 .968-.382 1.05-.9l1.12-7.203c.082-.519.526-.9 1.05-.9h2.287c1.863 0 5.216-2.24 6.2-7.291.03-.15.054-.295.076-.438z"/>
               </svg>
             </div>
-            <span className={`text-sm font-bold ${selectedPaymentMethod === 'paypal' ? 'text-blue-700' : 'text-blue-600'}`}>
+            <span className={`text-base font-bold ${selectedPaymentMethod === 'paypal' ? 'text-blue-700' : 'text-blue-600'}`}>
               PayPal
             </span>
           </button>
@@ -319,22 +326,22 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
           <button
             onClick={() => setSelectedPaymentMethod('card')}
             className={`
-              flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all
+              flex flex-col items-center justify-center p-5 rounded-xl border-2 transition-all
               ${selectedPaymentMethod === 'card'
                 ? 'border-blue-500 bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg scale-105'
                 : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-md'
               }
             `}
           >
-            <div className="mb-2">
-              <svg viewBox="0 0 24 24" className={`w-12 h-12 ${selectedPaymentMethod === 'card' ? 'text-white' : 'text-gray-700'}`} fill="none" stroke="currentColor" strokeWidth="2">
+            <div className="mb-3">
+              <svg viewBox="0 0 24 24" className={`w-16 h-16 ${selectedPaymentMethod === 'card' ? 'text-white' : 'text-gray-700'}`} fill="none" stroke="currentColor" strokeWidth="2">
                 <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
                 <line x1="1" y1="10" x2="23" y2="10"/>
                 <circle cx="6" cy="16" r="1.5" fill="currentColor"/>
                 <circle cx="10" cy="16" r="1.5" fill="currentColor"/>
               </svg>
             </div>
-            <span className={`text-sm font-bold ${selectedPaymentMethod === 'card' ? 'text-white' : 'text-gray-700'}`}>
+            <span className={`text-base font-bold ${selectedPaymentMethod === 'card' ? 'text-white' : 'text-gray-700'}`}>
               Tarjeta
             </span>
           </button>
@@ -360,7 +367,7 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
       )}
 
       {!paymentCreated && (
-        <div className="max-w-md mx-auto flex-shrink-0 pb-4">
+        <div className="max-w-md mx-auto flex-shrink-0 py-4">
           <button
             onClick={handlePayment}
             disabled={loading || !selectedPlan}
