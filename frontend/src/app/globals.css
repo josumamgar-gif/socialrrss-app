@@ -16,9 +16,33 @@
   }
 }
 
+html {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
 body {
   color: rgb(var(--foreground-rgb));
   background: #ffffff;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevenir zoom con doble toque */
+* {
+  touch-action: manipulation;
+}
+
+/* Permitir selección de texto donde sea necesario */
+input,
+textarea,
+[contenteditable],
+p,
+span,
+div[role="textbox"] {
+  -webkit-user-select: text;
+  user-select: text;
+  touch-action: auto;
 }
 
 @keyframes fadeIn {
