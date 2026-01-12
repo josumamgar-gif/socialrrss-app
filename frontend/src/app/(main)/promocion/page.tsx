@@ -185,9 +185,9 @@ export default function PromocionPage() {
   // Vista de selección de planes
   if (showPlanSelector && selectedProfile) {
     return (
-      <div className="min-h-screen bg-white pt-16 sm:pt-20 pb-20 sm:pb-24 px-0 sm:px-4">
-        <div className="max-w-4xl mx-auto w-full">
-          <div className="text-center mb-6">
+      <div className="h-[calc(100vh-4rem)] bg-white overflow-hidden px-0 sm:px-4">
+        <div className="max-w-4xl mx-auto w-full h-full flex flex-col">
+          <div className="text-center py-4 flex-shrink-0">
             <button
               onClick={handleBack}
               className="text-primary-600 hover:text-primary-700 font-medium"
@@ -195,23 +195,25 @@ export default function PromocionPage() {
               ← Volver a mis perfiles
             </button>
           </div>
-          <PlanSelector 
-            profileId={selectedProfile} 
-            profile={(() => {
-              const foundProfile = profiles.find(p => p._id === selectedProfile);
-              if (foundProfile) {
-                console.log('✅ Perfil encontrado para preview:', {
-                  id: foundProfile._id,
-                  images: foundProfile.images,
-                  imagesCount: foundProfile.images?.length || 0
-                });
-              } else {
-                console.warn('⚠️ Perfil no encontrado en lista para preview:', selectedProfile);
-              }
-              return foundProfile;
-            })()}
-            onPaymentSuccess={handlePaymentSuccess} 
-          />
+          <div className="flex-1 overflow-hidden">
+            <PlanSelector 
+              profileId={selectedProfile} 
+              profile={(() => {
+                const foundProfile = profiles.find(p => p._id === selectedProfile);
+                if (foundProfile) {
+                  console.log('✅ Perfil encontrado para preview:', {
+                    id: foundProfile._id,
+                    images: foundProfile.images,
+                    imagesCount: foundProfile.images?.length || 0
+                  });
+                } else {
+                  console.warn('⚠️ Perfil no encontrado en lista para preview:', selectedProfile);
+                }
+                return foundProfile;
+              })()}
+              onPaymentSuccess={handlePaymentSuccess} 
+            />
+          </div>
         </div>
       </div>
     );
@@ -288,13 +290,13 @@ export default function PromocionPage() {
                 key={network.id}
                 onClick={() => handleSelectNetwork(network.id)}
                 className={`
-                  bg-white rounded-xl shadow-md p-6 text-left hover:shadow-lg transition-all
+                  bg-white rounded-xl shadow-md p-8 text-left hover:shadow-lg transition-all
                   hover:scale-105 transform border-2 border-transparent hover:border-primary-200
                 `}
               >
                 <div className="flex items-start justify-between mb-4">
-                  <div className={`w-12 h-12 ${network.color} rounded-lg flex items-center justify-center`}>
-                    <SocialNetworkLogo network={network.id} className="w-7 h-7 text-white" />
+                  <div className={`w-16 h-16 ${network.color} rounded-lg flex items-center justify-center`}>
+                    <SocialNetworkLogo network={network.id} className="w-9 h-9 text-white" />
                   </div>
                   {profileCount > 0 && (
                     <span className="bg-primary-100 text-primary-600 text-xs font-semibold px-2 py-1 rounded-full">
@@ -302,8 +304,8 @@ export default function PromocionPage() {
                     </span>
                   )}
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-1">{network.name}</h3>
-                <p className="text-sm text-gray-600 mb-3">{network.description}</p>
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">{network.name}</h3>
+                <p className="text-base text-gray-600 mb-4">{network.description}</p>
                 <div className="flex flex-wrap gap-2">
                   {network.stats.map((stat, idx) => (
                     <span key={idx} className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
