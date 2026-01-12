@@ -109,12 +109,18 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
     const planElement = planRefs.current[planType];
     const carousel = document.getElementById('plans-carousel');
     if (planElement && carousel) {
+      // Obtener posiciones relativas al contenedor del carrusel
       const carouselRect = carousel.getBoundingClientRect();
       const elementRect = planElement.getBoundingClientRect();
-      const scrollLeft = carousel.scrollLeft + (elementRect.left - carouselRect.left) - (carouselRect.width / 2) + (elementRect.width / 2);
       
+      // Calcular la posición para centrar el elemento
+      const elementCenter = elementRect.left - carouselRect.left + (elementRect.width / 2);
+      const carouselCenter = carouselRect.width / 2;
+      const scrollLeft = carousel.scrollLeft + elementCenter - carouselCenter;
+      
+      // Scroll suave hacia el centro
       carousel.scrollTo({
-        left: scrollLeft,
+        left: Math.max(0, scrollLeft),
         behavior: 'smooth'
       });
     }
@@ -123,12 +129,13 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
   // Efecto para centrar cuando cambia el plan seleccionado
   useEffect(() => {
     if (selectedPlan) {
-      // Delay para asegurar que el DOM esté actualizado y la animación funcione siempre
-      const timeoutId = setTimeout(() => {
-        scrollToPlan(selectedPlan);
-      }, 150);
-      
-      return () => clearTimeout(timeoutId);
+      // Usar requestAnimationFrame para asegurar que el DOM esté actualizado
+      requestAnimationFrame(() => {
+        // Pequeño delay adicional para asegurar que los estilos se hayan aplicado
+        setTimeout(() => {
+          scrollToPlan(selectedPlan);
+        }, 100);
+      });
     }
   }, [selectedPlan]);
 
@@ -235,8 +242,8 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
       </div>
 
       {/* Carrusel de planes - Sin scroll vertical */}
-      <div className="overflow-x-auto overflow-y-hidden pb-3 pt-6 px-2 flex-shrink-0" id="plans-carousel" style={{ scrollbarWidth: 'thin', maxHeight: '480px' }}>
-        <div className="flex gap-4 max-w-full items-center" style={{ scrollSnapType: 'x mandatory' }}>
+      <div className="overflow-x-auto overflow-y-hidden pb-3 pt-6 px-8 flex-shrink-0 w-full" id="plans-carousel" style={{ scrollbarWidth: 'thin', maxHeight: '480px' }}>
+        <div className="flex gap-4 items-center justify-center" style={{ scrollSnapType: 'x mandatory', minWidth: 'max-content' }}>
           {plans.map((plan) => (
             <div
               key={plan.type}
