@@ -192,7 +192,10 @@ export default function PrincipalPage() {
 
   if (loading) {
     return (
-      <div className="h-full flex justify-center items-center">
+      <div className="w-full bg-white flex items-center justify-center" style={{ 
+        height: 'calc(100vh - 4rem)', 
+        minHeight: 'calc(100vh - 4rem)'
+      }}>
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
       </div>
     );
@@ -201,7 +204,10 @@ export default function PrincipalPage() {
   // Mostrar mensaje si no hay perfiles después de cargar
   if (!loading && profiles.length === 0) {
     return (
-      <div className="h-full flex justify-center items-center">
+      <div className="w-full bg-white flex items-center justify-center" style={{ 
+        height: 'calc(100vh - 4rem)', 
+        minHeight: 'calc(100vh - 4rem)'
+      }}>
         <div className="text-center">
           <p className="text-gray-600 text-lg mb-2">No hay perfiles disponibles por el momento</p>
           <p className="text-gray-500 text-sm">Intenta recargar la página o contacta al administrador</p>
@@ -219,7 +225,13 @@ export default function PrincipalPage() {
   const isDemoProfile = currentProfile?._id.startsWith('demo-');
 
   return (
-    <div className="h-full bg-white flex items-center justify-center px-4 overflow-hidden">
+    <div className="w-full bg-white flex items-center justify-center px-4 overflow-hidden" style={{ 
+      height: '100%',
+      minHeight: '100%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    }}>
       <div className="flex flex-col items-center justify-center w-full max-w-md mx-auto">
         {needsDemoInteraction && (
           <div className="mb-4 max-w-md w-full mx-auto bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4 z-50">
