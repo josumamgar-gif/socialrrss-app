@@ -24,7 +24,7 @@ router.post('/', authenticate, (req: express.Request, res: express.Response, nex
           return;
         }
         if (err.code === 'LIMIT_FILE_COUNT') {
-          res.status(400).json({ error: 'Demasiados archivos. Máximo 10 imágenes.' });
+          res.status(400).json({ error: 'Demasiados archivos. Máximo 3 imágenes.' });
           return;
         }
         if (err.code === 'LIMIT_UNEXPECTED_FILE') {

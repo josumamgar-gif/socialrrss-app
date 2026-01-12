@@ -194,6 +194,6 @@ export const createProfile = async (req: AuthRequest, res: Response): Promise<vo
   }
 };
 
-export const uploadMiddleware = upload.array('images', 10);
+export const uploadMiddleware = upload.array('images', 3);
 
 

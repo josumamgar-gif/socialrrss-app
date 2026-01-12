@@ -35,17 +35,21 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork, onNet
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      const files = Array.from(e.target.files);
+      const newFiles = Array.from(e.target.files);
       
-      // Validar número de imágenes
-      if (files.length > 10) {
-        setError('Máximo 10 imágenes permitidas');
+      // Validar número total de imágenes (existentes + nuevas)
+      const totalImages = images.length + newFiles.length;
+      if (totalImages > 3) {
+        setError(`Máximo 3 imágenes permitidas. Ya tienes ${images.length} imagen(es).`);
         e.target.value = ''; // Limpiar input
         return;
       }
       
-      // Crear previews de los archivos originales primero
-      const previewPromises = files.map((file) => {
+      // Limitar a 3 imágenes máximo
+      const filesToAdd = newFiles.slice(0, 3 - images.length);
+      
+      // Crear previews de los archivos nuevos
+      const previewPromises = filesToAdd.map((file) => {
         return new Promise<string>((resolve) => {
           const reader = new FileReader();
           reader.onload = (e) => {
@@ -58,17 +62,16 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork, onNet
         });
       });
       
-      const previews = await Promise.all(previewPromises);
-      setImagePreviews(previews.filter(p => p !== ''));
+      const newPreviews = await Promise.all(previewPromises);
       
-      // Comprimir imágenes
+      // Comprimir imágenes nuevas
       setCompressing(true);
-      setCompressionProgress({ current: 0, total: files.length });
+      setCompressionProgress({ current: 0, total: filesToAdd.length });
       setError(''); // Limpiar errores anteriores
       
       try {
         const compressedFiles = await compressImages(
-          files,
+          filesToAdd,
           {
             maxWidth: 1920,
             maxHeight: 1920,
@@ -96,19 +99,30 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork, onNet
           })
         );
         
-        setImages(compressedFiles);
-        setImagePreviews(compressedPreviews.filter(p => p !== ''));
+        // Añadir nuevas imágenes a las existentes (no reemplazar)
+        setImages([...images, ...compressedFiles]);
+        setImagePreviews([...imagePreviews, ...compressedPreviews.filter(p => p !== '')]);
         setCompressing(false);
         setCompressionProgress({ current: 0, total: 0 });
       } catch (error) {
         console.error('Error comprimiendo imágenes:', error);
         // Si falla la compresión, usar archivos originales
-        setImages(files);
+        setImages([...images, ...filesToAdd]);
         setCompressing(false);
         setCompressionProgress({ current: 0, total: 0 });
         setError('Error al comprimir algunas imágenes. Se usarán los archivos originales.');
       }
+      
+      // Limpiar input para permitir seleccionar el mismo archivo de nuevo
+      e.target.value = '';
     }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    const newImages = images.filter((_, i) => i !== index);
+    const newPreviews = imagePreviews.filter((_, i) => i !== index);
+    setImages(newImages);
+    setImagePreviews(newPreviews);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -638,14 +652,14 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork, onNet
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Imágenes (máximo 10)
+          Imágenes (máximo 3)
         </label>
         <input
           type="file"
           multiple
           accept="image/*"
           onChange={handleImageChange}
-          disabled={compressing || loading}
+          disabled={compressing || loading || images.length >= 3}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
         />
         
@@ -669,16 +683,26 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork, onNet
         {images.length > 0 && !compressing && (
           <div className="mt-3 space-y-2">
             <p className="text-sm text-gray-600 font-medium">
-              {images.length} imagen(es) seleccionada(s)
+              {images.length} / 3 imagen(es) seleccionada(s)
             </p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 gap-2">
               {imagePreviews.map((preview, index) => (
                 <div key={index} className="relative group">
                   <img
                     src={preview}
                     alt={`Preview ${index + 1}`}
-                    className="w-full h-24 object-cover rounded-lg border border-gray-200"
+                    className="w-full h-32 object-cover rounded-lg border border-gray-200"
                   />
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveImage(index)}
+                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1.5 hover:bg-red-600 transition-colors shadow-lg"
+                    aria-label="Eliminar imagen"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
                   <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs px-1 py-0.5 rounded-b-lg">
                     {formatFileSize(images[index]?.size || 0)}
                   </div>

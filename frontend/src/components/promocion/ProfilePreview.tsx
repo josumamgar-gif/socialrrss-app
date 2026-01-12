@@ -23,12 +23,16 @@ export default function ProfilePreview({ profile }: ProfilePreviewProps) {
 
   // Obtener URL base del API
   const getImageUrl = (imagePath: string) => {
+    if (!imagePath) return '';
     if (imagePath.startsWith('http')) {
       return imagePath;
     }
+    // Las imágenes vienen como /uploads/filename desde el backend
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
     const baseUrl = apiUrl.replace('/api', '');
-    return `${baseUrl}${imagePath}`;
+    // Asegurar que la ruta empiece con /
+    const cleanPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
+    return `${baseUrl}${cleanPath}`;
   };
 
   // Icono de planeta para "otros"
