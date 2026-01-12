@@ -229,27 +229,28 @@ export default function ProfileCard({
 
     const translateX = direction === 'left' ? '-100vw' : '100vw';
     
-    // Forzar el estilo inline para la animación
+    // Optimizar para animaciones fluidas
+    card.style.willChange = 'transform, opacity';
     card.style.transform = `translate(${translateX}, ${position.y}px) rotate(${direction === 'left' ? '-30deg' : '30deg'})`;
     card.style.opacity = '0';
-    card.style.transition = 'transform 0.3s ease-out, opacity 0.3s ease-out';
+    card.style.transition = 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1)';
 
-    // Esperar a que termine la animación antes de ejecutar el callback y resetear
+    // Ejecutar callback más rápido para mejor fluidez (antes de que termine la animación visual)
     setTimeout(() => {
-      // Resetear todos los estilos antes de ejecutar el callback
+      callback();
+    }, 100);
+
+    // Resetear estilos después de la animación
+    setTimeout(() => {
       if (card) {
         card.style.transform = '';
         card.style.opacity = '';
         card.style.transition = '';
+        card.style.willChange = '';
       }
       setPosition({ x: 0, y: 0 });
       setIsAnimating(false);
-      
-      // Ejecutar callback después de resetear todo
-      setTimeout(() => {
-        callback();
-      }, 50);
-    }, 350);
+    }, 250);
   };
 
   useEffect(() => {
@@ -350,7 +351,7 @@ export default function ProfileCard({
     // Mostrar overlay verde inmediatamente
     setButtonAction({ type: 'back', intensity: 1 });
     
-    // Forzar un pequeño delay para asegurar que el overlay se muestre
+    // Usar requestAnimationFrame para mejor rendimiento
     requestAnimationFrame(() => {
       const card = cardRef.current;
       if (!card) {
@@ -359,6 +360,9 @@ export default function ProfileCard({
         return;
       }
 
+      // Optimizar para animaciones fluidas
+      card.style.willChange = 'transform, opacity';
+      
       // Animación hacia atrás (desde abajo/derecha hacia el centro)
       // Primero la tarjeta aparece desde atrás
       card.style.transform = 'translate(100px, 100px) rotate(15deg)';
@@ -368,25 +372,27 @@ export default function ProfileCard({
       // Forzar reflow
       card.offsetHeight;
       
-      // Animar hacia la posición original (centro)
+      // Animar hacia la posición original (centro) con animación más rápida
       card.style.transform = 'translate(0, 0) rotate(0deg)';
       card.style.opacity = '1';
-      card.style.transition = 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+      card.style.transition = 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1)';
       
-      // Después de la animación completa (500ms), ejecutar callback y resetear
+      // Ejecutar callback más rápido para mejor fluidez
       setTimeout(() => {
-        // Resetear estilos
-        card.style.transform = '';
-        card.style.opacity = '';
-        card.style.transition = '';
-        
-        // Resetear estados
+        callback();
+      }, 120);
+      
+      // Resetear después de la animación
+      setTimeout(() => {
+        if (card) {
+          card.style.transform = '';
+          card.style.opacity = '';
+          card.style.transition = '';
+          card.style.willChange = '';
+        }
         setButtonAction({ type: null, intensity: 0 });
         setIsAnimating(false);
-        
-        // Ejecutar callback
-        callback();
-      }, 500);
+      }, 300);
     });
   };
 
@@ -398,9 +404,8 @@ export default function ProfileCard({
     // Mostrar overlay inmediatamente al hacer clic
     setButtonAction({ type: actionType, intensity: 1 });
     
-    // Forzar un pequeño delay para asegurar que el overlay se muestre
+    // Usar requestAnimationFrame para mejor rendimiento
     requestAnimationFrame(() => {
-      // Animar la tarjeta completamente hacia la esquina
       const card = cardRef.current;
       if (!card) {
         setIsAnimating(false);
@@ -412,25 +417,28 @@ export default function ProfileCard({
       const translateY = actionType === 'up' ? '-100vh' : '0';
       const rotation = actionType === 'left' ? '-30deg' : actionType === 'right' ? '30deg' : '0';
       
-      // Aplicar transformación completa con animación de 0.5 segundos
+      // Optimizar para animaciones fluidas
+      card.style.willChange = 'transform, opacity';
       card.style.transform = `translate(${translateX}, ${translateY}) rotate(${rotation})`;
       card.style.opacity = '0';
-      card.style.transition = 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+      card.style.transition = 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1)';
       
-      // Después de la animación completa (500ms), ejecutar callback y resetear
+      // Ejecutar callback más rápido para mejor fluidez
       setTimeout(() => {
-        // Resetear estilos
-        card.style.transform = '';
-        card.style.opacity = '';
-        card.style.transition = '';
-        
-        // Resetear estados
+        callback();
+      }, 120);
+      
+      // Resetear después de la animación
+      setTimeout(() => {
+        if (card) {
+          card.style.transform = '';
+          card.style.opacity = '';
+          card.style.transition = '';
+          card.style.willChange = '';
+        }
         setButtonAction({ type: null, intensity: 0 });
         setIsAnimating(false);
-        
-        // Ejecutar callback
-        callback();
-      }, 500);
+      }, 300);
     });
   };
 
@@ -481,9 +489,10 @@ export default function ProfileCard({
             transform: buttonAction.type 
               ? undefined // La transformación de botones se maneja con style inline
               : `translate(${position.x}px, ${position.y}px) rotate(${rotation}deg)`,
-            transition: isDragging || buttonAction.type ? 'none' : 'transform 0.1s ease-out',
+            transition: isDragging || buttonAction.type ? 'none' : 'transform 0.08s cubic-bezier(0.4, 0, 0.2, 1)',
             zIndex: 1000 - index,
             touchAction: isDragging ? 'none' : 'auto', // Solo bloquear gestos cuando se está arrastrando
+            willChange: isDragging ? 'transform' : 'auto',
           }}
           onMouseDown={(e) => {
             // Solo iniciar arrastre si no es un botón y no hay animación activa

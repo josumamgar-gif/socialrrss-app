@@ -219,8 +219,8 @@ export default function PrincipalPage() {
   const isDemoProfile = currentProfile?._id.startsWith('demo-');
 
   return (
-    <div className="h-full bg-white flex flex-col items-center justify-center px-4 overflow-hidden">
-      <div className="flex flex-col items-center justify-center w-full max-w-md mx-auto flex-1">
+    <div className="h-full bg-white flex items-center justify-center px-4 overflow-hidden">
+      <div className="flex flex-col items-center justify-center w-full max-w-md mx-auto">
         {needsDemoInteraction && (
           <div className="mb-4 max-w-md w-full mx-auto bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4 z-50">
             <div className="flex items-start">
@@ -247,7 +247,11 @@ export default function PrincipalPage() {
               <div
                 key={profile._id}
                 className={idx === 0 ? 'relative z-10' : 'absolute top-0 left-0 right-0 opacity-50 scale-95'}
-                style={{ zIndex: 10 - idx }}
+                style={{ 
+                  zIndex: 10 - idx,
+                  transition: 'opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                  willChange: idx === 0 ? 'auto' : 'opacity, transform'
+                }}
               >
                 <ProfileCard
                   profile={profile}
