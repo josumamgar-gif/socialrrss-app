@@ -5,7 +5,6 @@ import { PricingPlan, PlanType, PaymentMethod } from '@/types';
 import { pricingAPI, paymentsAPI } from '@/lib/api';
 import { CheckIcon } from '@heroicons/react/24/solid';
 import StripePayment from './StripePayment';
-import ProfilePreview from './ProfilePreview';
 import { Profile } from '@/types';
 import { profilesAPI } from '@/lib/api';
 
@@ -181,38 +180,15 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
   }
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto">
+    <div className="space-y-8 max-w-5xl mx-auto px-4 sm:px-6">
       <div className="text-center">
         <h2 className="text-3xl font-bold text-gray-900 mb-2">Elige tu Plan de Promoción</h2>
         <p className="text-gray-600">Selecciona el plan que mejor se adapte a tus necesidades</p>
       </div>
 
-      {/* Preview del perfil */}
-      {profileData ? (
-        <div className="bg-white border border-gray-300 rounded-none sm:rounded-md p-4 sm:p-6 max-w-2xl mx-auto shadow-md">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">
-            👁️ Vista Previa de tu Perfil Promocionado
-          </h3>
-          {profileData.images && profileData.images.length > 0 ? (
-            <ProfilePreview profile={profileData} />
-          ) : (
-            <div className="text-center py-8">
-              <p className="text-gray-600 mb-4">⚠️ No se detectaron imágenes en el perfil</p>
-              <p className="text-sm text-gray-500">ID del perfil: {profileData._id}</p>
-              <p className="text-sm text-gray-500">Imágenes: {profileData.images ? JSON.stringify(profileData.images) : 'null'}</p>
-              <ProfilePreview profile={profileData} />
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="bg-white border border-gray-300 rounded-none sm:rounded-md p-4 sm:p-6 max-w-2xl mx-auto">
-          <p className="text-center text-gray-600">Cargando perfil...</p>
-        </div>
-      )}
-
       {/* Carrusel de planes */}
-      <div className="overflow-x-auto pb-4 pt-4">
-        <div className="flex gap-4 max-w-full px-2" style={{ scrollSnapType: 'x mandatory' }}>
+      <div className="overflow-x-auto pb-4 pt-4 px-2">
+        <div className="flex gap-4 max-w-full" style={{ scrollSnapType: 'x mandatory' }}>
           {plans.map((plan) => (
             <div
               key={plan.type}
@@ -302,20 +278,20 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
             className={`
               flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all
               ${selectedPaymentMethod === 'card'
-                ? 'border-blue-500 bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg scale-105'
-                : 'border-gray-200 bg-gradient-to-br from-gray-100 to-gray-200 hover:border-blue-300 hover:shadow-md'
+                ? 'border-blue-500 bg-white shadow-lg scale-105'
+                : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-md'
               }
             `}
           >
             <div className="mb-2">
-              <svg viewBox="0 0 24 24" className={`w-12 h-12 ${selectedPaymentMethod === 'card' ? 'text-white' : 'text-gray-600'}`} fill="none" stroke="currentColor" strokeWidth="2">
+              <svg viewBox="0 0 24 24" className="w-12 h-12 text-gray-700" fill="none" stroke="currentColor" strokeWidth="2">
                 <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
                 <line x1="1" y1="10" x2="23" y2="10"/>
                 <circle cx="6" cy="16" r="1.5"/>
                 <circle cx="10" cy="16" r="1.5"/>
               </svg>
             </div>
-            <span className={`text-sm font-bold ${selectedPaymentMethod === 'card' ? 'text-white' : 'text-gray-700'}`}>
+            <span className="text-sm font-bold text-gray-700">
               Tarjeta
             </span>
           </button>
