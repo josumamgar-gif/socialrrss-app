@@ -31,7 +31,7 @@ export default function AjustesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-16 sm:pt-20 pb-20 sm:pb-24 px-0 sm:px-4">
+    <div className="min-h-screen bg-white pt-16 sm:pt-20 pb-20 sm:pb-24 px-0 sm:px-4">
       {/* Tutorial - se muestra cuando showTutorial es true */}
       {showTutorial && (
         <WelcomeTutorial 
@@ -58,21 +58,21 @@ export default function AjustesPage() {
 
         {/* Tabs de navegación */}
         <div className="bg-white rounded-none sm:rounded-lg shadow mb-4 sm:mb-6 overflow-x-auto">
-          <div className="flex border-b border-gray-200">
+          <div className="flex border-b border-gray-200 w-full">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`
-                  flex items-center space-x-2 px-4 md:px-6 py-4 text-sm font-medium transition-colors whitespace-nowrap
+                  flex flex-col items-center justify-center flex-1 py-4 text-sm font-medium transition-colors whitespace-nowrap min-w-0 w-full
                   ${activeTab === tab.id
                     ? 'text-primary-600 border-b-2 border-primary-600 bg-primary-50'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                   }
                 `}
               >
-                <span className="text-lg">{tab.icon}</span>
-                <span className="hidden sm:inline">{tab.name}</span>
+                <span className="text-3xl sm:text-4xl mb-1">{tab.icon}</span>
+                <span className="text-xs sm:text-sm">{tab.name}</span>
               </button>
             ))}
           </div>

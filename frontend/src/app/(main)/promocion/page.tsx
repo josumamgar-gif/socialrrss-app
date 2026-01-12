@@ -171,7 +171,7 @@ export default function PromocionPage() {
   // Vista de selección de planes
   if (showPlanSelector && selectedProfile) {
     return (
-      <div className="min-h-screen bg-gray-50 pt-16 sm:pt-20 pb-20 sm:pb-24 px-0 sm:px-4">
+      <div className="min-h-screen bg-white pt-16 sm:pt-20 pb-20 sm:pb-24 px-0 sm:px-4">
         <div className="max-w-4xl mx-auto w-full">
           <div className="text-center mb-6">
             <button
@@ -197,7 +197,7 @@ export default function PromocionPage() {
     const displayNetwork = currentNetwork || selectedNetwork;
     
     return (
-      <div className="min-h-screen bg-gray-50 pt-16 sm:pt-20 pb-20 sm:pb-24 px-0 sm:px-4">
+      <div className="min-h-screen bg-white pt-16 sm:pt-20 pb-20 sm:pb-24 px-0 sm:px-4">
         <div className="max-w-2xl mx-auto w-full">
           <div className="text-center mb-4 sm:mb-6 px-4 sm:px-0">
             <button
@@ -246,7 +246,7 @@ export default function PromocionPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-16 sm:pt-20 pb-20 sm:pb-24 px-0 sm:px-4">
+    <div className="min-h-screen bg-white pt-16 sm:pt-20 pb-20 sm:pb-24 px-0 sm:px-4">
       <div className="max-w-7xl mx-auto w-full">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Promociona tu Perfil</h1>

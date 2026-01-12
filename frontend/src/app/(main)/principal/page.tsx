@@ -219,7 +219,7 @@ export default function PrincipalPage() {
   const isDemoProfile = currentProfile?._id.startsWith('demo-');
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4 py-4 md:py-8 pt-4 md:pt-8">
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4 py-4 md:py-8 pt-4 md:pt-8">
       {needsDemoInteraction && (
         <div className="mb-6 max-w-md w-full mx-auto bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4 z-50">
           <div className="flex items-start">

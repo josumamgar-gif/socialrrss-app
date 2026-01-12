@@ -39,24 +39,18 @@ const RadarIconSolid = ({ className }: { className?: string }) => (
   </svg>
 );
 
-// Icono de martillo y llave cruzados
-const WrenchScrewdriverIcon = ({ className }: { className?: string }) => (
+// Icono de tuerca típica de ajustes
+const CogIcon = ({ className }: { className?: string }) => (
   <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    {/* Llave inglesa */}
-    <path strokeLinecap="round" strokeLinejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655-5.653a2.548 2.548 0 010-3.586l4.94-4.94a2.548 2.548 0 013.586 0l5.653 4.655M11.42 15.17l-3.03 2.496a2.548 2.548 0 01-3.586 0l-4.94-4.94a2.548 2.548 0 010-3.586l4.94-4.94a2.548 2.548 0 013.586 0l4.94 4.94a2.548 2.548 0 010 3.586l-2.496 3.03" />
-    {/* Martillo */}
-    <path strokeLinecap="round" strokeLinejoin="round" d="M14.5 2.5l3 3M14.5 5.5l-3-3M17.5 5.5l-3 3" />
-    <rect x="16" y="1" width="4" height="6" rx="1" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
   </svg>
 );
 
-const WrenchScrewdriverIconSolid = ({ className }: { className?: string }) => (
+const CogIconSolid = ({ className }: { className?: string }) => (
   <svg className={className} fill="currentColor" viewBox="0 0 24 24">
-    {/* Llave inglesa */}
-    <path d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655-5.653a2.548 2.548 0 010-3.586l4.94-4.94a2.548 2.548 0 013.586 0l5.653 4.655M11.42 15.17l-3.03 2.496a2.548 2.548 0 01-3.586 0l-4.94-4.94a2.548 2.548 0 010-3.586l4.94-4.94a2.548 2.548 0 013.586 0l4.94 4.94a2.548 2.548 0 010 3.586l-2.496 3.03" />
-    {/* Martillo */}
-    <rect x="16" y="1" width="4" height="6" rx="1" />
-    <path d="M14.5 2.5l3 3M14.5 5.5l-3-3M17.5 5.5l-3 3" />
+    <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+    <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
   </svg>
 );
 
@@ -111,7 +105,7 @@ export default function MainLayout({
   const isActive = (href: string) => pathname === href;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col">
       <WelcomeTutorial />
       
       {/* Pestañas de navegación - Parte superior FIJAS (solo desktop) */}
@@ -215,9 +209,9 @@ export default function MainLayout({
             `}
           >
             {isActive('/ajustes') ? (
-              <WrenchScrewdriverIconSolid className="h-6 w-6 text-primary-600" />
+              <CogIconSolid className="h-6 w-6 text-primary-600" />
             ) : (
-              <WrenchScrewdriverIcon className="h-6 w-6 text-gray-600" />
+              <CogIcon className="h-6 w-6 text-gray-600" />
             )}
             <span className="text-xs mt-1">Ajustes</span>
           </Link>
