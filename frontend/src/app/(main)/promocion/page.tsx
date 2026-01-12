@@ -72,6 +72,7 @@ export default function PromocionPage() {
   const user = useAuthStore((state) => state.user);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [selectedNetwork, setSelectedNetwork] = useState<SocialNetwork | null>(null);
+  const [currentNetwork, setCurrentNetwork] = useState<SocialNetwork | null>(null);
   const [selectedProfile, setSelectedProfile] = useState<string | null>(null);
   const [showPlanSelector, setShowPlanSelector] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -158,6 +159,7 @@ export default function PromocionPage() {
 
   const handleSelectNetwork = (network: SocialNetwork) => {
     setSelectedNetwork(network);
+    setCurrentNetwork(network);
   };
 
   const handleBack = () => {
@@ -191,6 +193,9 @@ export default function PromocionPage() {
 
   // Vista de formulario de RRSS
   if (selectedNetwork) {
+    // Usar currentNetwork si está definido, sino usar selectedNetwork
+    const displayNetwork = currentNetwork || selectedNetwork;
+    
     return (
       <div className="min-h-screen bg-gray-50 pt-16 sm:pt-20 pb-20 sm:pb-24 px-0 sm:px-4">
         <div className="max-w-2xl mx-auto w-full">
@@ -205,7 +210,7 @@ export default function PromocionPage() {
           <div className="bg-white rounded-none sm:rounded-lg shadow-lg p-4 sm:p-6">
             <div className="mb-6">
               {(() => {
-                const network = socialNetworks.find(n => n.id === selectedNetwork);
+                const network = socialNetworks.find(n => n.id === displayNetwork);
                 return network ? (
                   <div className="flex items-center space-x-3 mb-2">
                     <div className={`w-12 h-12 ${network.color} rounded-lg flex items-center justify-center`}>
@@ -222,7 +227,8 @@ export default function PromocionPage() {
             <ProfileForm 
               defaultNetwork={selectedNetwork}
               onSuccess={handleProfileCreated} 
-              onCancel={handleBack} 
+              onCancel={handleBack}
+              onNetworkChange={setCurrentNetwork}
             />
           </div>
         </div>

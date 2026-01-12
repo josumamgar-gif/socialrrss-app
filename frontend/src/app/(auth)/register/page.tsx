@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { authAPI } from '@/lib/api';
-import { setAuthToken } from '@/lib/auth';
+import { setAuthToken, getAuthToken } from '@/lib/auth';
 import { useAuthStore } from '@/store/authStore';
 
 const INTERESTS_OPTIONS = [
@@ -37,7 +37,54 @@ export default function RegisterPage() {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
   const setUser = useAuthStore((state) => state.setUser);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const user = useAuthStore((state) => state.user);
+
+  // Verificar si el usuario ya está autenticado y redirigir
+  useEffect(() => {
+    const checkAuth = async () => {
+      if (typeof window !== 'undefined') {
+        const token = getAuthToken();
+        
+        // Si hay token o usuario autenticado, redirigir a principal
+        if (token || isAuthenticated || user) {
+          // Intentar cargar el usuario si hay token pero no está en el store
+          if (token && !user) {
+            try {
+              const response = await authAPI.getMe();
+              setUser(response.user);
+            } catch (error) {
+              // Si el token es inválido, limpiar y permitir registro
+              localStorage.removeItem('token');
+            }
+          }
+          
+          // Si hay usuario autenticado, redirigir y reemplazar el historial
+          if (user || (token && isAuthenticated)) {
+            // Reemplazar la entrada del historial para evitar volver con el botón atrás
+            window.history.replaceState(null, '', '/principal');
+            window.location.href = '/principal';
+            return;
+          }
+        }
+        
+        setCheckingAuth(false);
+      }
+    };
+
+    checkAuth();
+  }, [isAuthenticated, user, setUser]);
+
+  // Mostrar loading mientras se verifica la autenticación
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
+      </div>
+    );
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -93,6 +140,8 @@ export default function RegisterPage() {
         localStorage.removeItem('tutorialCompleted');
         localStorage.removeItem('demoCompleted');
         
+        // Reemplazar la entrada del historial para evitar volver al registro con el botón atrás
+        window.history.replaceState(null, '', '/principal');
         window.location.href = '/principal';
       }
     } catch (err: any) {

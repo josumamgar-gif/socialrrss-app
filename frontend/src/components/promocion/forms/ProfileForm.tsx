@@ -3,30 +3,111 @@
 import { useState } from 'react';
 import { SocialNetwork, ProfileData } from '@/types';
 import { profilesAPI } from '@/lib/api';
+import { compressImages, formatFileSize } from '@/lib/imageUtils';
 
 interface ProfileFormProps {
   onSuccess: (profileId: string) => void;
   onCancel: () => void;
   defaultNetwork?: SocialNetwork;
+  onNetworkChange?: (network: SocialNetwork) => void;
 }
 
-export default function ProfileForm({ onSuccess, onCancel, defaultNetwork }: ProfileFormProps) {
+export default function ProfileForm({ onSuccess, onCancel, defaultNetwork, onNetworkChange }: ProfileFormProps) {
   const [socialNetwork, setSocialNetwork] = useState<SocialNetwork>(defaultNetwork || 'tiktok');
   const [link, setLink] = useState('');
   const [images, setImages] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [profileData, setProfileData] = useState<Partial<ProfileData>>({});
   const [loading, setLoading] = useState(false);
+  const [compressing, setCompressing] = useState(false);
+  const [compressionProgress, setCompressionProgress] = useState({ current: 0, total: 0 });
   const [error, setError] = useState('');
 
   // Resetear profileData cuando cambia la red social
   const handleSocialNetworkChange = (network: SocialNetwork) => {
     setSocialNetwork(network);
     setProfileData({}); // Resetear datos al cambiar de red social
+    // Notificar al componente padre del cambio
+    if (onNetworkChange) {
+      onNetworkChange(network);
+    }
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setImages(Array.from(e.target.files));
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const files = Array.from(e.target.files);
+      
+      // Validar número de imágenes
+      if (files.length > 10) {
+        setError('Máximo 10 imágenes permitidas');
+        e.target.value = ''; // Limpiar input
+        return;
+      }
+      
+      // Crear previews de los archivos originales primero
+      const previewPromises = files.map((file) => {
+        return new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            resolve(e.target?.result as string);
+          };
+          reader.onerror = () => {
+            resolve(''); // Preview vacío si hay error
+          };
+          reader.readAsDataURL(file);
+        });
+      });
+      
+      const previews = await Promise.all(previewPromises);
+      setImagePreviews(previews.filter(p => p !== ''));
+      
+      // Comprimir imágenes
+      setCompressing(true);
+      setCompressionProgress({ current: 0, total: files.length });
+      setError(''); // Limpiar errores anteriores
+      
+      try {
+        const compressedFiles = await compressImages(
+          files,
+          {
+            maxWidth: 1920,
+            maxHeight: 1920,
+            quality: 0.85,
+            maxSizeMB: 2,
+          },
+          (current, total) => {
+            setCompressionProgress({ current, total });
+          }
+        );
+        
+        // Actualizar previews con las imágenes comprimidas
+        const compressedPreviews = await Promise.all(
+          compressedFiles.map((file) => {
+            return new Promise<string>((resolve) => {
+              const reader = new FileReader();
+              reader.onload = (e) => {
+                resolve(e.target?.result as string);
+              };
+              reader.onerror = () => {
+                resolve('');
+              };
+              reader.readAsDataURL(file);
+            });
+          })
+        );
+        
+        setImages(compressedFiles);
+        setImagePreviews(compressedPreviews.filter(p => p !== ''));
+        setCompressing(false);
+        setCompressionProgress({ current: 0, total: 0 });
+      } catch (error) {
+        console.error('Error comprimiendo imágenes:', error);
+        // Si falla la compresión, usar archivos originales
+        setImages(files);
+        setCompressing(false);
+        setCompressionProgress({ current: 0, total: 0 });
+        setError('Error al comprimir algunas imágenes. Se usarán los archivos originales.');
+      }
     }
   };
 
@@ -97,9 +178,12 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork }: Pro
       // Resetear formulario antes de llamar onSuccess
       setLink('');
       setImages([]);
+      setImagePreviews([]);
       setProfileData({});
       setError('');
       setLoading(false);
+      setCompressing(false);
+      setCompressionProgress({ current: 0, total: 0 });
       
       // Llamar onSuccess con el ID del perfil
       if (response && response.profile && response.profile._id) {
@@ -561,12 +645,50 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork }: Pro
           multiple
           accept="image/*"
           onChange={handleImageChange}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+          disabled={compressing || loading}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
         />
-        {images.length > 0 && (
-          <p className="mt-2 text-sm text-gray-600">
-            {images.length} imagen(es) seleccionada(s)
-          </p>
+        
+        {compressing && (
+          <div className="mt-3 space-y-2">
+            <div className="flex items-center justify-between text-sm text-gray-600">
+              <span>Comprimiendo imágenes...</span>
+              <span>{compressionProgress.current} / {compressionProgress.total}</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div
+                className="bg-primary-600 h-2 rounded-full transition-all duration-300"
+                style={{
+                  width: `${(compressionProgress.current / compressionProgress.total) * 100}%`,
+                }}
+              />
+            </div>
+          </div>
+        )}
+        
+        {images.length > 0 && !compressing && (
+          <div className="mt-3 space-y-2">
+            <p className="text-sm text-gray-600 font-medium">
+              {images.length} imagen(es) seleccionada(s)
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {imagePreviews.map((preview, index) => (
+                <div key={index} className="relative group">
+                  <img
+                    src={preview}
+                    alt={`Preview ${index + 1}`}
+                    className="w-full h-24 object-cover rounded-lg border border-gray-200"
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs px-1 py-0.5 rounded-b-lg">
+                    {formatFileSize(images[index]?.size || 0)}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-gray-500">
+              Total: {formatFileSize(images.reduce((acc, img) => acc + img.size, 0))}
+            </p>
+          </div>
         )}
       </div>
 
@@ -586,10 +708,10 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork }: Pro
         </button>
         <button
           type="submit"
-          disabled={loading || !link}
+          disabled={loading || !link || compressing}
           className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading ? 'Creando...' : 'Crear Perfil'}
+          {compressing ? 'Comprimiendo...' : loading ? 'Subiendo...' : 'Crear Perfil'}
         </button>
       </div>
     </form>

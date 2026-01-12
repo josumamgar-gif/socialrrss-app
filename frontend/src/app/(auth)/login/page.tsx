@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { authAPI } from '@/lib/api';
-import { setAuthToken } from '@/lib/auth';
+import { setAuthToken, getAuthToken } from '@/lib/auth';
 import { useAuthStore } from '@/store/authStore';
 import { saveLoginCredentials, getSavedEmail } from '@/lib/cookies';
 
@@ -13,16 +13,60 @@ export default function LoginPage() {
   const [remember, setRemember] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
   const setUser = useAuthStore((state) => state.setUser);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const user = useAuthStore((state) => state.user);
 
   useEffect(() => {
-    // Cargar email guardado si existe
-    const savedEmail = getSavedEmail();
-    if (savedEmail) {
-      setEmail(savedEmail);
-      setRemember(true);
-    }
-  }, []);
+    const checkAuth = async () => {
+      if (typeof window !== 'undefined') {
+        const token = getAuthToken();
+        
+        // Si hay token o usuario autenticado, redirigir a principal
+        if (token || isAuthenticated || user) {
+          // Intentar cargar el usuario si hay token pero no está en el store
+          if (token && !user) {
+            try {
+              const response = await authAPI.getMe();
+              setUser(response.user);
+            } catch (error) {
+              // Si el token es inválido, limpiar y permitir login
+              localStorage.removeItem('token');
+            }
+          }
+          
+          // Si hay usuario autenticado, redirigir y reemplazar el historial
+          if (user || (token && isAuthenticated)) {
+            // Reemplazar la entrada del historial para evitar volver con el botón atrás
+            window.history.replaceState(null, '', '/principal');
+            window.location.href = '/principal';
+            return;
+          }
+        }
+        
+        // Cargar email guardado si existe
+        const savedEmail = getSavedEmail();
+        if (savedEmail) {
+          setEmail(savedEmail);
+          setRemember(true);
+        }
+        
+        setCheckingAuth(false);
+      }
+    };
+
+    checkAuth();
+  }, [isAuthenticated, user, setUser]);
+
+  // Mostrar loading mientras se verifica la autenticación
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
+      </div>
+    );
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,6 +82,8 @@ export default function LoginPage() {
       saveLoginCredentials(email, remember);
       
       if (typeof window !== 'undefined') {
+        // Reemplazar la entrada del historial para evitar volver al login con el botón atrás
+        window.history.replaceState(null, '', '/principal');
         window.location.href = '/principal';
       }
     } catch (err: any) {
