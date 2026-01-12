@@ -104,38 +104,24 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
     }
   };
 
-  // Función para centrar el plan seleccionado
+  // Función para hacer scroll suave al plan seleccionado (solo en móvil si es necesario)
   const scrollToPlan = (planType: PlanType) => {
     const planElement = planRefs.current[planType];
-    const carousel = document.getElementById('plans-carousel');
-    if (planElement && carousel) {
-      // Obtener posiciones relativas al contenedor del carrusel
-      const carouselRect = carousel.getBoundingClientRect();
-      const elementRect = planElement.getBoundingClientRect();
-      
-      // Calcular la posición para centrar el elemento
-      const elementCenter = elementRect.left - carouselRect.left + (elementRect.width / 2);
-      const carouselCenter = carouselRect.width / 2;
-      const scrollLeft = carousel.scrollLeft + elementCenter - carouselCenter;
-      
-      // Scroll suave hacia el centro
-      carousel.scrollTo({
-        left: Math.max(0, scrollLeft),
-        behavior: 'smooth'
+    if (planElement) {
+      planElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'center'
       });
     }
   };
 
-  // Efecto para centrar cuando cambia el plan seleccionado
+  // Efecto para hacer scroll al plan seleccionado (solo en móvil)
   useEffect(() => {
-    if (selectedPlan) {
-      // Usar requestAnimationFrame para asegurar que el DOM esté actualizado
-      requestAnimationFrame(() => {
-        // Pequeño delay adicional para asegurar que los estilos se hayan aplicado
-        setTimeout(() => {
-          scrollToPlan(selectedPlan);
-        }, 100);
-      });
+    if (selectedPlan && typeof window !== 'undefined' && window.innerWidth < 768) {
+      setTimeout(() => {
+        scrollToPlan(selectedPlan);
+      }, 100);
     }
   }, [selectedPlan]);
 
@@ -235,94 +221,91 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
   }
 
   return (
-    <div className="w-full flex flex-col max-w-5xl mx-auto px-4 sm:px-6 pb-6">
-      <div className="text-center flex-shrink-0 py-2">
-        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">Elige tu Plan de Promoción</h2>
+    <div className="w-full flex flex-col max-w-6xl mx-auto px-4 sm:px-6 pb-6">
+      <div className="text-center flex-shrink-0 py-3">
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Elige tu Plan de Promoción</h2>
         <p className="text-sm sm:text-base text-gray-600">Selecciona el plan que mejor se adapte a tus necesidades</p>
       </div>
 
-      {/* Carrusel de planes - Sin scroll vertical */}
-      <div className="overflow-x-auto overflow-y-hidden pb-3 pt-6 px-8 flex-shrink-0 w-full" id="plans-carousel" style={{ scrollbarWidth: 'thin', maxHeight: '480px' }}>
-        <div className="flex gap-4 items-center justify-center" style={{ scrollSnapType: 'x mandatory', minWidth: 'max-content' }}>
-          {plans.map((plan) => (
-            <div
-              key={plan.type}
-              ref={(el) => {
-                planRefs.current[plan.type] = el;
-              }}
-              onClick={() => setSelectedPlan(plan.type)}
-              className={`
-                relative border-2 rounded-xl p-6 pt-10 cursor-pointer transition-all overflow-visible flex-shrink-0
-                min-w-[320px] max-w-[360px] shadow-lg
-                ${selectedPlan === plan.type 
-                  ? `${getPlanColor(plan.type)} shadow-xl border-primary-500 scale-105` 
-                  : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-xl'
-                }
-              `}
-              style={{ scrollSnapAlign: 'center' }}
-            >
-              {plan.price === 10 && plan.durationDays === 365 && (
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
-                  <span className="bg-green-600 text-white text-sm font-bold px-4 py-1.5 rounded-full shadow-lg whitespace-nowrap">
-                    RECOMENDADO
-                  </span>
-                </div>
-              )}
-              {plan.price === 50 && (
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
-                  <span className="bg-purple-600 text-white text-sm font-bold px-4 py-1.5 rounded-full shadow-lg whitespace-nowrap">
-                    ÚNICO
-                  </span>
-                </div>
-              )}
-              {selectedPlan === plan.type && (
-                <div className="absolute top-4 right-4">
-                  <CheckIcon className="h-6 w-6 text-primary-600" />
-                </div>
-              )}
-              
-              <div className="text-center mb-4">
-                <div className="text-4xl mb-3">{getPlanIcon(plan.type)}</div>
-                <h3 className="text-xl font-bold text-gray-900">{plan.name}</h3>
-                <div className="mt-3">
-                  <span className="text-3xl font-bold text-gray-900">
-                    {plan.price % 1 === 0 ? `${plan.price}` : plan.price.toFixed(2)}€
-                  </span>
-                  {plan.durationDays && plan.durationDays > 0 && (
-                    <span className="text-gray-600 text-sm ml-1">/{plan.durationDays === 365 ? 'año' : 'mes'}</span>
-                  )}
-                </div>
-                <p className="text-sm text-gray-600 mt-2">{plan.description}</p>
+      {/* Grid de planes - Simple y responsive */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6" id="plans-carousel">
+        {plans.map((plan) => (
+          <div
+            key={plan.type}
+            ref={(el) => {
+              planRefs.current[plan.type] = el;
+            }}
+            onClick={() => setSelectedPlan(plan.type)}
+            className={`
+              relative border-2 rounded-xl p-5 pt-8 cursor-pointer transition-all overflow-visible
+              shadow-lg
+              ${selectedPlan === plan.type 
+                ? `${getPlanColor(plan.type)} shadow-xl border-primary-500 ring-2 ring-primary-300` 
+                : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-xl'
+              }
+            `}
+          >
+            {plan.price === 10 && plan.durationDays === 365 && (
+              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
+                <span className="bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg whitespace-nowrap">
+                  RECOMENDADO
+                </span>
               </div>
-
-              <ul className="space-y-2 mb-4">
-                {plan.features.map((feature, idx) => (
-                  <li key={idx} className="flex items-start">
-                    <CheckIcon className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-gray-700">{feature}</span>
-                  </li>
-                ))}
-              </ul>
+            )}
+            {plan.price === 50 && (
+              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
+                <span className="bg-purple-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg whitespace-nowrap">
+                  ÚNICO
+                </span>
+              </div>
+            )}
+            {selectedPlan === plan.type && (
+              <div className="absolute top-3 right-3">
+                <CheckIcon className="h-5 w-5 text-primary-600" />
+              </div>
+            )}
+            
+            <div className="text-center mb-3">
+              <div className="text-3xl mb-2">{getPlanIcon(plan.type)}</div>
+              <h3 className="text-lg font-bold text-gray-900">{plan.name}</h3>
+              <div className="mt-2">
+                <span className="text-2xl font-bold text-gray-900">
+                  {plan.price % 1 === 0 ? `${plan.price}` : plan.price.toFixed(2)}€
+                </span>
+                {plan.durationDays && plan.durationDays > 0 && (
+                  <span className="text-gray-600 text-xs ml-1">/{plan.durationDays === 365 ? 'año' : 'mes'}</span>
+                )}
+              </div>
+              <p className="text-xs text-gray-600 mt-1">{plan.description}</p>
             </div>
-          ))}
-        </div>
+
+            <ul className="space-y-1.5">
+              {plan.features.map((feature, idx) => (
+                <li key={idx} className="flex items-start">
+                  <CheckIcon className="h-4 w-4 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <span className="text-xs text-gray-700">{feature}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 shadow-md p-4 max-w-2xl mx-auto flex-shrink-0 mt-2">
-        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 text-center">Método de Pago</h3>
-        <div className="grid grid-cols-2 gap-3 max-w-xl mx-auto">
+      <div className="bg-white rounded-xl border border-gray-200 shadow-md p-5 max-w-2xl mx-auto flex-shrink-0">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">Método de Pago</h3>
+        <div className="grid grid-cols-2 gap-4 max-w-lg mx-auto">
           <button
             onClick={() => setSelectedPaymentMethod('paypal')}
             className={`
               flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all w-full
               ${selectedPaymentMethod === 'paypal'
-                ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100 shadow-lg scale-105'
+                ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100 shadow-lg'
                 : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-md'
               }
             `}
           >
             <div className="mb-2 flex items-center justify-center bg-white p-2 rounded-lg shadow-sm">
-              <svg viewBox="0 0 24 24" className="w-14 h-14">
+              <svg viewBox="0 0 24 24" className="w-12 h-12">
                 <path fill="#003087" d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.337 7.291-6.2 7.291h-2.287c-.524 0-.968.382-1.05.9l-1.12 7.203zm14.146-14.42a13.022 13.022 0 0 0-.44-2.277C20.172 2.988 18.478 2 15.853 2H8.4c-.524 0-.968.382-1.05.9L5.53 19.243h4.357c.524 0 .968-.382 1.05-.9l1.12-7.203c.082-.519.526-.9 1.05-.9h2.287c1.863 0 5.216-2.24 6.2-7.291.03-.15.054-.295.076-.438z"/>
                 <path fill="#009CDE" d="M21.222 2.663a13.022 13.022 0 0 0-.44-2.277C20.172 2.988 18.478 2 15.853 2H8.4c-.524 0-.968.382-1.05.9L5.53 19.243h4.357c.524 0 .968-.382 1.05-.9l1.12-7.203c.082-.519.526-.9 1.05-.9h2.287c1.863 0 5.216-2.24 6.2-7.291.03-.15.054-.295.076-.438z"/>
               </svg>
@@ -337,13 +320,13 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
             className={`
               flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all w-full
               ${selectedPaymentMethod === 'card'
-                ? 'border-blue-500 bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg scale-105'
+                ? 'border-blue-500 bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg'
                 : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-md'
               }
             `}
           >
             <div className="mb-2">
-              <svg viewBox="0 0 24 24" className={`w-14 h-14 ${selectedPaymentMethod === 'card' ? 'text-white' : 'text-gray-700'}`} fill="none" stroke="currentColor" strokeWidth="2">
+              <svg viewBox="0 0 24 24" className={`w-12 h-12 ${selectedPaymentMethod === 'card' ? 'text-white' : 'text-gray-700'}`} fill="none" stroke="currentColor" strokeWidth="2">
                 <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
                 <line x1="1" y1="10" x2="23" y2="10"/>
                 <circle cx="6" cy="16" r="1.5" fill="currentColor"/>
@@ -376,11 +359,11 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
       )}
 
       {!paymentCreated && (
-        <div className="max-w-md mx-auto flex-shrink-0 py-3 pb-6">
+        <div className="max-w-md mx-auto flex-shrink-0 py-4">
           <button
             onClick={handlePayment}
             disabled={loading || !selectedPlan}
-            className="w-full bg-gradient-to-r from-primary-600 to-primary-700 text-white py-4 px-8 rounded-xl hover:from-primary-700 hover:to-primary-800 disabled:opacity-50 disabled:cursor-not-allowed text-lg font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center gap-2"
+            className="w-full bg-gradient-to-r from-primary-600 to-primary-700 text-white py-4 px-8 rounded-xl hover:from-primary-700 hover:to-primary-800 disabled:opacity-50 disabled:cursor-not-allowed text-lg font-bold shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2"
           >
             {loading ? (
               <>
