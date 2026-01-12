@@ -1,12 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { SocialNetwork, ProfileData } from '@/types';
+import { SocialNetwork, ProfileData, Profile } from '@/types';
 import { profilesAPI } from '@/lib/api';
 import { compressImages, formatFileSize } from '@/lib/imageUtils';
 
 interface ProfileFormProps {
-  onSuccess: (profileId: string) => void;
+  onSuccess: (profileId: string, profile?: Profile) => void;
   onCancel: () => void;
   defaultNetwork?: SocialNetwork;
   onNetworkChange?: (network: SocialNetwork) => void;
@@ -199,9 +199,11 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork, onNet
       setCompressing(false);
       setCompressionProgress({ current: 0, total: 0 });
       
-      // Llamar onSuccess con el ID del perfil
+      // Llamar onSuccess con el ID del perfil y el perfil completo
       if (response && response.profile && response.profile._id) {
-        onSuccess(response.profile._id);
+        console.log('✅ Perfil completo recibido:', response.profile);
+        console.log('🖼️ Imágenes del perfil:', response.profile.images);
+        onSuccess(response.profile._id, response.profile);
       } else {
         throw new Error('El servidor no devolvió un perfil válido');
       }

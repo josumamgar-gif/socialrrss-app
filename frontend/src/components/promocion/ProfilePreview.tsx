@@ -24,12 +24,16 @@ export default function ProfilePreview({ profile }: ProfilePreviewProps) {
   // Obtener URL base del API
   const getImageUrl = (imagePath: string) => {
     if (!imagePath) return '';
-    if (imagePath.startsWith('http')) {
+    
+    // Si ya es una URL completa, usarla directamente
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
       return imagePath;
     }
-    // Las imágenes vienen como /uploads/filename desde el backend
+    
+    // Construir URL completa desde el backend
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
     const baseUrl = apiUrl.replace('/api', '');
+    
     // Asegurar que la ruta empiece con /
     const cleanPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
     return `${baseUrl}${cleanPath}`;
@@ -66,18 +70,25 @@ export default function ProfilePreview({ profile }: ProfilePreviewProps) {
 
         {/* Imagen */}
         <div className="relative h-64 bg-gray-200">
-          {profile.images && profile.images.length > 0 ? (
+          {profile.images && profile.images.length > 0 && profile.images[0] ? (
             <img
+              key={profile.images[0]} // Forzar re-render cuando cambie la imagen
               src={getImageUrl(profile.images[0])}
               alt="Preview"
               className="w-full h-full object-cover"
               onError={(e) => {
-                (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x600?text=Imagen';
+                console.error('❌ Error cargando imagen. URL intentada:', getImageUrl(profile.images[0]));
+                console.error('❌ Perfil completo:', profile);
+                (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x600?text=Imagen+No+Disponible';
               }}
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-400">
-              <span className="text-4xl">📷</span>
+            <div className="w-full h-full flex flex-col items-center justify-center text-gray-400">
+              <span className="text-4xl mb-2">📷</span>
+              <p className="text-xs text-gray-500">No hay imágenes disponibles</p>
+              {profile.images && profile.images.length === 0 && (
+                <p className="text-xs text-gray-400 mt-1">Añade imágenes al crear el perfil</p>
+              )}
             </div>
           )}
         </div>

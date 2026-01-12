@@ -127,16 +127,30 @@ export default function PromocionPage() {
     }
   };
 
-  const handleProfileCreated = async (profileId: string) => {
+  const handleProfileCreated = async (profileId: string, createdProfile?: Profile) => {
     console.log('✅ Perfil creado, ID:', profileId);
+    console.log('📦 Perfil recibido:', createdProfile);
     if (!profileId) {
       console.error('❌ Error: No se recibió un ID de perfil válido');
       return;
     }
     
     try {
-      // Recargar perfiles primero para asegurar que el perfil esté disponible
-      await loadProfiles();
+      // Si tenemos el perfil creado, añadirlo directamente a la lista
+      if (createdProfile) {
+        console.log('🖼️ Imágenes del perfil creado:', createdProfile.images);
+        setProfiles(prev => {
+          // Evitar duplicados
+          const exists = prev.find(p => p._id === createdProfile._id);
+          if (exists) {
+            return prev.map(p => p._id === createdProfile._id ? createdProfile : p);
+          }
+          return [createdProfile, ...prev];
+        });
+      } else {
+        // Si no, recargar perfiles
+        await loadProfiles();
+      }
       
       // Configurar el estado para mostrar el selector de planes
       setSelectedNetwork(null);
@@ -183,7 +197,19 @@ export default function PromocionPage() {
           </div>
           <PlanSelector 
             profileId={selectedProfile} 
-            profile={profiles.find(p => p._id === selectedProfile) || undefined}
+            profile={(() => {
+              const foundProfile = profiles.find(p => p._id === selectedProfile);
+              if (foundProfile) {
+                console.log('✅ Perfil encontrado para preview:', {
+                  id: foundProfile._id,
+                  images: foundProfile.images,
+                  imagesCount: foundProfile.images?.length || 0
+                });
+              } else {
+                console.warn('⚠️ Perfil no encontrado en lista para preview:', selectedProfile);
+              }
+              return foundProfile;
+            })()}
             onPaymentSuccess={handlePaymentSuccess} 
           />
         </div>
@@ -226,7 +252,7 @@ export default function PromocionPage() {
             </div>
             <ProfileForm 
               defaultNetwork={selectedNetwork}
-              onSuccess={handleProfileCreated} 
+              onSuccess={(profileId, profile) => handleProfileCreated(profileId, profile)} 
               onCancel={handleBack}
               onNetworkChange={setCurrentNetwork}
             />

@@ -30,10 +30,16 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
 
   useEffect(() => {
     loadPlans();
-    if (profileId && !profile) {
+    // Si tenemos profile como prop, usarlo directamente
+    if (profile) {
+      console.log('📸 Perfil recibido como prop:', profile);
+      console.log('🖼️ Imágenes del perfil recibido:', profile.images);
+      setProfileData(profile);
+    } else if (profileId) {
+      // Si no, cargar desde el servidor
       loadProfile();
     }
-  }, [profileId]);
+  }, [profileId, profile]);
 
   // Resetear estados cuando cambia el método de pago
   useEffect(() => {
@@ -47,13 +53,19 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
 
   const loadProfile = async () => {
     try {
+      console.log('🔍 Cargando perfil con ID:', profileId);
       const response = await profilesAPI.getMyProfiles();
+      console.log('📋 Perfiles recibidos:', response.profiles);
       const foundProfile = response.profiles.find((p: Profile) => p._id === profileId);
       if (foundProfile) {
+        console.log('✅ Perfil encontrado:', foundProfile);
+        console.log('🖼️ Imágenes del perfil:', foundProfile.images);
         setProfileData(foundProfile);
+      } else {
+        console.error('❌ Perfil no encontrado con ID:', profileId);
       }
     } catch (error) {
-      console.error('Error cargando perfil:', error);
+      console.error('❌ Error cargando perfil:', error);
     }
   };
 
@@ -176,12 +188,25 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
       </div>
 
       {/* Preview del perfil */}
-      {profileData && (
-        <div className="bg-gray-50 border border-gray-300 rounded-none sm:rounded-md p-4 sm:p-6 max-w-2xl mx-auto">
+      {profileData ? (
+        <div className="bg-white border border-gray-300 rounded-none sm:rounded-md p-4 sm:p-6 max-w-2xl mx-auto shadow-md">
           <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">
             👁️ Vista Previa de tu Perfil Promocionado
           </h3>
-          <ProfilePreview profile={profileData} />
+          {profileData.images && profileData.images.length > 0 ? (
+            <ProfilePreview profile={profileData} />
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-gray-600 mb-4">⚠️ No se detectaron imágenes en el perfil</p>
+              <p className="text-sm text-gray-500">ID del perfil: {profileData._id}</p>
+              <p className="text-sm text-gray-500">Imágenes: {profileData.images ? JSON.stringify(profileData.images) : 'null'}</p>
+              <ProfilePreview profile={profileData} />
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="bg-white border border-gray-300 rounded-none sm:rounded-md p-4 sm:p-6 max-w-2xl mx-auto">
+          <p className="text-center text-gray-600">Cargando perfil...</p>
         </div>
       )}
 
