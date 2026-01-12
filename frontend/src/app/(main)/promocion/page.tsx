@@ -185,9 +185,9 @@ export default function PromocionPage() {
   // Vista de selección de planes
   if (showPlanSelector && selectedProfile) {
     return (
-      <div className="h-[calc(100vh-4rem)] bg-white overflow-hidden px-0 sm:px-4">
-        <div className="max-w-4xl mx-auto w-full h-full flex flex-col">
-          <div className="text-center py-4 flex-shrink-0">
+      <div className="min-h-[calc(100vh-4rem)] bg-white px-0 sm:px-4">
+        <div className="max-w-4xl mx-auto w-full min-h-full flex flex-col">
+          <div className="text-center py-3 flex-shrink-0">
             <button
               onClick={handleBack}
               className="text-primary-600 hover:text-primary-700 font-medium"
@@ -195,7 +195,7 @@ export default function PromocionPage() {
               ← Volver a mis perfiles
             </button>
           </div>
-          <div className="flex-1 overflow-hidden">
+          <div className="flex-1">
             <PlanSelector 
               profileId={selectedProfile} 
               profile={(() => {

@@ -228,14 +228,14 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
   }
 
   return (
-    <div className="h-full flex flex-col max-w-5xl mx-auto px-4 sm:px-6 overflow-hidden">
-      <div className="text-center flex-shrink-0 py-3">
+    <div className="w-full flex flex-col max-w-5xl mx-auto px-4 sm:px-6 pb-6">
+      <div className="text-center flex-shrink-0 py-2">
         <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">Elige tu Plan de Promoción</h2>
         <p className="text-sm sm:text-base text-gray-600">Selecciona el plan que mejor se adapte a tus necesidades</p>
       </div>
 
       {/* Carrusel de planes - Sin scroll vertical */}
-      <div className="overflow-x-auto overflow-y-hidden pb-4 pt-8 px-2 flex-shrink-0" id="plans-carousel" style={{ scrollbarWidth: 'thin', maxHeight: '550px' }}>
+      <div className="overflow-x-auto overflow-y-hidden pb-3 pt-6 px-2 flex-shrink-0" id="plans-carousel" style={{ scrollbarWidth: 'thin', maxHeight: '480px' }}>
         <div className="flex gap-4 max-w-full items-center" style={{ scrollSnapType: 'x mandatory' }}>
           {plans.map((plan) => (
             <div
@@ -301,9 +301,9 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 shadow-md p-5 max-w-2xl mx-auto flex-shrink-0 mt-3">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">Método de Pago</h3>
-        <div className="grid grid-cols-2 gap-4 max-w-xl mx-auto">
+      <div className="bg-white rounded-xl border border-gray-200 shadow-md p-4 max-w-2xl mx-auto flex-shrink-0 mt-2">
+        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 text-center">Método de Pago</h3>
+        <div className="grid grid-cols-2 gap-3 max-w-xl mx-auto">
           <button
             onClick={() => setSelectedPaymentMethod('paypal')}
             className={`
@@ -369,7 +369,7 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
       )}
 
       {!paymentCreated && (
-        <div className="max-w-md mx-auto flex-shrink-0 py-4">
+        <div className="max-w-md mx-auto flex-shrink-0 py-3 pb-6">
           <button
             onClick={handlePayment}
             disabled={loading || !selectedPlan}
