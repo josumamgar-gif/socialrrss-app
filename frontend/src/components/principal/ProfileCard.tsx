@@ -185,6 +185,11 @@ export default function ProfileCard({
     setIsAnimating(true);
     setIsDragging(false);
     setDragAction({ type: null, intensity: 0 });
+    // Resetear efectos de esquina inmediatamente
+    setCornerEffects({ left: 0, right: 0, top: 0, bottom: 0 });
+    if (onCornerEffectsChange) {
+      onCornerEffectsChange({ left: 0, right: 0, top: 0, bottom: 0 });
+    }
     
     const card = cardRef.current;
     if (!card) {
@@ -217,8 +222,13 @@ export default function ProfileCard({
       }
       setPosition({ x: 0, y: 0 });
       setIsAnimating(false);
+      // Asegurar que los efectos se reseteen
+      setCornerEffects({ left: 0, right: 0, top: 0, bottom: 0 });
+      if (onCornerEffectsChange) {
+        onCornerEffectsChange({ left: 0, right: 0, top: 0, bottom: 0 });
+      }
     }, 250);
-  }, []); // Sin dependencias - usa ref para posición
+  }, [onCornerEffectsChange]); // Añadir dependencia
 
   const handleMove = useCallback((clientX: number, clientY: number) => {
     // Usar refs para obtener valores actuales sin dependencias
@@ -281,17 +291,25 @@ export default function ProfileCard({
     // Prioridad: usar dragAction si existe y tiene suficiente intensidad
     if (currentDragAction.type && currentDragAction.intensity > 0.15) {
       if (currentDragAction.type === 'left' && currentOnSwipeLeft) {
+        // Resetear efectos antes de ejecutar acción
+        setCornerEffects({ left: 0, right: 0, top: 0, bottom: 0 });
+        if (onCornerEffectsChange) {
+          onCornerEffectsChange({ left: 0, right: 0, top: 0, bottom: 0 });
+        }
         triggerSwipeAnimation('left', currentOnSwipeLeft);
         return;
       } else if (currentDragAction.type === 'right') {
+        // Resetear efectos antes de ejecutar acción
+        setCornerEffects({ left: 0, right: 0, top: 0, bottom: 0 });
+        if (onCornerEffectsChange) {
+          onCornerEffectsChange({ left: 0, right: 0, top: 0, bottom: 0 });
+        }
         // Para el gesto a la derecha, SIEMPRE abrir el enlace si existe
         if (currentProfileLink) {
-          // Abrir enlace en nueva pestaña
-          const linkWindow = window.open(currentProfileLink, '_blank');
-          if (!linkWindow) {
-            // Si no se pudo abrir (bloqueador de popups), intentar redirigir directamente
-            window.location.href = currentProfileLink;
-          }
+          // Abrir enlace en nueva pestaña (sin cambiar la página actual)
+          setTimeout(() => {
+            window.open(currentProfileLink, '_blank', 'noopener,noreferrer');
+          }, 50);
         }
         // Luego ejecutar el callback si existe
         if (currentOnSwipeRight) {
@@ -301,6 +319,11 @@ export default function ProfileCard({
         }
         return;
       } else if (currentDragAction.type === 'up') {
+        // Resetear efectos antes de ejecutar acción
+        setCornerEffects({ left: 0, right: 0, top: 0, bottom: 0 });
+        if (onCornerEffectsChange) {
+          onCornerEffectsChange({ left: 0, right: 0, top: 0, bottom: 0 });
+        }
         if (currentOnShowDetail) {
           currentOnShowDetail(currentProfile);
         } else if (currentOnSwipeUp) {
@@ -309,9 +332,14 @@ export default function ProfileCard({
         resetPosition();
         return;
       } else if (currentDragAction.type === 'down') {
-        // Gesto hacia abajo - retroceder
+        // Gesto hacia abajo - retroceder (igual que el botón)
         const currentOnGoBack = onGoBackRef.current;
         if (currentOnGoBack && canGoBack && !backUsed) {
+          // Resetear efectos antes de ejecutar acción
+          setCornerEffects({ left: 0, right: 0, top: 0, bottom: 0 });
+          if (onCornerEffectsChange) {
+            onCornerEffectsChange({ left: 0, right: 0, top: 0, bottom: 0 });
+          }
           triggerBackAnimation(currentOnGoBack);
         } else {
           resetPosition();
@@ -325,12 +353,15 @@ export default function ProfileCard({
       if (absX > absY * 1.1) {
         // Movimiento horizontal dominante
         if (currentPosition.x > threshold) {
-          // Derecha - ABRIR ENLACE SIEMPRE PRIMERO
+          // Derecha - Resetear efectos y abrir enlace
+          setCornerEffects({ left: 0, right: 0, top: 0, bottom: 0 });
+          if (onCornerEffectsChange) {
+            onCornerEffectsChange({ left: 0, right: 0, top: 0, bottom: 0 });
+          }
           if (currentProfileLink) {
-            const linkWindow = window.open(currentProfileLink, '_blank');
-            if (!linkWindow) {
-              window.location.href = currentProfileLink;
-            }
+            setTimeout(() => {
+              window.open(currentProfileLink, '_blank', 'noopener,noreferrer');
+            }, 50);
           }
           if (currentOnSwipeRight) {
             triggerSwipeAnimation('right', currentOnSwipeRight);
@@ -339,14 +370,22 @@ export default function ProfileCard({
           }
           return;
         } else if (currentPosition.x < -threshold && currentOnSwipeLeft) {
-          // Izquierda
+          // Izquierda - Resetear efectos
+          setCornerEffects({ left: 0, right: 0, top: 0, bottom: 0 });
+          if (onCornerEffectsChange) {
+            onCornerEffectsChange({ left: 0, right: 0, top: 0, bottom: 0 });
+          }
           triggerSwipeAnimation('left', currentOnSwipeLeft);
           return;
         }
       } else if (absY > absX * 1.1) {
         // Movimiento vertical dominante
         if (currentPosition.y < -threshold) {
-          // Hacia arriba
+          // Hacia arriba - Resetear efectos
+          setCornerEffects({ left: 0, right: 0, top: 0, bottom: 0 });
+          if (onCornerEffectsChange) {
+            onCornerEffectsChange({ left: 0, right: 0, top: 0, bottom: 0 });
+          }
           if (currentOnShowDetail) {
             currentOnShowDetail(currentProfile);
           } else if (currentOnSwipeUp) {
@@ -355,7 +394,11 @@ export default function ProfileCard({
           resetPosition();
           return;
         } else if (currentPosition.y > threshold) {
-          // Hacia abajo - retroceder
+          // Hacia abajo - retroceder (igual que el botón)
+          setCornerEffects({ left: 0, right: 0, top: 0, bottom: 0 });
+          if (onCornerEffectsChange) {
+            onCornerEffectsChange({ left: 0, right: 0, top: 0, bottom: 0 });
+          }
           const currentOnGoBack = onGoBackRef.current;
           if (currentOnGoBack && canGoBack && !backUsed) {
             triggerBackAnimation(currentOnGoBack);
@@ -480,7 +523,14 @@ export default function ProfileCard({
     if (isAnimating || backUsed || !canGoBack || !callback) return;
     
     setIsAnimating(true);
+    setIsDragging(false);
     setBackUsed(true);
+    setDragAction({ type: null, intensity: 0 });
+    // Resetear efectos de esquina inmediatamente
+    setCornerEffects({ left: 0, right: 0, top: 0, bottom: 0 });
+    if (onCornerEffectsChange) {
+      onCornerEffectsChange({ left: 0, right: 0, top: 0, bottom: 0 });
+    }
     // Mostrar overlay verde inmediatamente
     setButtonAction({ type: 'back', intensity: 1 });
     
@@ -525,6 +575,11 @@ export default function ProfileCard({
         }
         setButtonAction({ type: null, intensity: 0 });
         setIsAnimating(false);
+        // Asegurar que los efectos se reseteen
+        setCornerEffects({ left: 0, right: 0, top: 0, bottom: 0 });
+        if (onCornerEffectsChange) {
+          onCornerEffectsChange({ left: 0, right: 0, top: 0, bottom: 0 });
+        }
       }, 300);
     });
   };
@@ -534,6 +589,13 @@ export default function ProfileCard({
     if (isAnimating) return;
     
     setIsAnimating(true);
+    setIsDragging(false);
+    setDragAction({ type: null, intensity: 0 });
+    // Resetear efectos de esquina inmediatamente
+    setCornerEffects({ left: 0, right: 0, top: 0, bottom: 0 });
+    if (onCornerEffectsChange) {
+      onCornerEffectsChange({ left: 0, right: 0, top: 0, bottom: 0 });
+    }
     // Mostrar overlay inmediatamente al hacer clic
     setButtonAction({ type: actionType, intensity: 1 });
     
@@ -571,6 +633,11 @@ export default function ProfileCard({
         }
         setButtonAction({ type: null, intensity: 0 });
         setIsAnimating(false);
+        // Asegurar que los efectos se reseteen
+        setCornerEffects({ left: 0, right: 0, top: 0, bottom: 0 });
+        if (onCornerEffectsChange) {
+          onCornerEffectsChange({ left: 0, right: 0, top: 0, bottom: 0 });
+        }
       }, 300);
     });
   };
@@ -819,10 +886,9 @@ export default function ProfileCard({
                   if (!isAnimating && onSwipeRight) {
                     // SIEMPRE abrir enlace primero
                     if (profile.link) {
-                      const linkWindow = window.open(profile.link, '_blank');
-                      if (!linkWindow) {
-                        window.location.href = profile.link;
-                      }
+                      setTimeout(() => {
+                        window.open(profile.link, '_blank', 'noopener,noreferrer');
+                      }, 50);
                     }
                     triggerButtonAnimation('right', onSwipeRight);
                   }

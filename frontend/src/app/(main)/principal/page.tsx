@@ -431,11 +431,12 @@ export default function PrincipalPage() {
 
       <div className="flex flex-col items-center justify-center w-full" style={{ 
         position: 'absolute',
-        top: '55%',
+        top: '50%',
         left: '50%',
         transform: 'translate(-50%, -50%)',
         width: '100%',
-        maxWidth: '28rem'
+        maxWidth: '28rem',
+        marginTop: '1.5rem'
       }}>
         {needsDemoInteraction && (
           <div className="mb-4 max-w-md w-full mx-auto bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4 z-40">
