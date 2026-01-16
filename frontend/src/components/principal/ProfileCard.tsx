@@ -18,13 +18,14 @@ interface ProfileCardProps {
   onSwipeUp?: () => void;
   onGoBack?: () => void;
   onShowDetail?: (profile: Profile) => void;
+  onCornerEffectsChange?: (effects: { left: number; right: number; top: number; bottom: number }) => void;
   index: number;
   canGoBack?: boolean;
   currentProfileIndex?: number; // Índice global del perfil actual
 }
 
 interface DragAction {
-  type: 'left' | 'right' | 'up' | 'back' | null;
+  type: 'left' | 'right' | 'up' | 'down' | 'back' | null;
   intensity: number; // 0-1
 }
 
@@ -55,6 +56,7 @@ export default function ProfileCard({
   onSwipeUp,
   onGoBack,
   onShowDetail,
+  onCornerEffectsChange,
   index,
   canGoBack = false,
   currentProfileIndex,
@@ -66,6 +68,7 @@ export default function ProfileCard({
   const [dragAction, setDragAction] = useState<DragAction>({ type: null, intensity: 0 });
   const [buttonAction, setButtonAction] = useState<DragAction>({ type: null, intensity: 0 });
   const [backUsed, setBackUsed] = useState(false);
+  const [cornerEffects, setCornerEffects] = useState({ left: 0, right: 0, top: 0, bottom: 0 });
   const cardRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   
@@ -82,6 +85,7 @@ export default function ProfileCard({
   const onSwipeLeftRef = useRef(onSwipeLeft);
   const onSwipeRightRef = useRef(onSwipeRight);
   const onSwipeUpRef = useRef(onSwipeUp);
+  const onGoBackRef = useRef(onGoBack);
   const onShowDetailRef = useRef(onShowDetail);
   
   // Actualizar refs en useEffect para evitar problemas con React
@@ -108,6 +112,7 @@ export default function ProfileCard({
     onSwipeLeftRef.current = onSwipeLeft;
     onSwipeRightRef.current = onSwipeRight;
     onSwipeUpRef.current = onSwipeUp;
+    onGoBackRef.current = onGoBack;
     onShowDetailRef.current = onShowDetail;
   }, [onSwipeLeft, onSwipeRight, onSwipeUp, onShowDetail]);
 
@@ -135,9 +140,15 @@ export default function ProfileCard({
         // Derecha - siempre abrir enlace si existe
         return { type: 'right', intensity };
       }
-    } else if (absY > absX * 1.1 && y < 0) {
-      // Movimiento vertical hacia arriba dominante
-      return { type: 'up', intensity };
+    } else if (absY > absX * 1.1) {
+      // Movimiento vertical dominante
+      if (y < 0) {
+        // Hacia arriba
+        return { type: 'up', intensity };
+      } else if (y > 0) {
+        // Hacia abajo - retroceder
+        return { type: 'down', intensity };
+      }
     }
     
     return { type: null, intensity: 0 };
@@ -148,6 +159,10 @@ export default function ProfileCard({
     setIsDragging(true);
     setStartPos({ x: clientX, y: clientY });
     setDragAction({ type: null, intensity: 0 });
+    setCornerEffects({ left: 0, right: 0, top: 0, bottom: 0 });
+    if (onCornerEffectsChange) {
+      onCornerEffectsChange({ left: 0, right: 0, top: 0, bottom: 0 });
+    }
   };
 
   const resetPosition = useCallback(() => {
@@ -155,12 +170,16 @@ export default function ProfileCard({
     setIsAnimating(false);
     setIsDragging(false);
     setDragAction({ type: null, intensity: 0 });
+    setCornerEffects({ left: 0, right: 0, top: 0, bottom: 0 });
+    if (onCornerEffectsChange) {
+      onCornerEffectsChange({ left: 0, right: 0, top: 0, bottom: 0 });
+    }
     if (cardRef.current) {
       cardRef.current.style.transform = '';
       cardRef.current.style.opacity = '';
       cardRef.current.style.transition = '';
     }
-  }, []);
+  }, [onCornerEffectsChange]);
 
   const triggerSwipeAnimation = useCallback((direction: 'left' | 'right', callback: () => void) => {
     setIsAnimating(true);
@@ -210,11 +229,31 @@ export default function ProfileCard({
     const deltaY = clientY - currentStartPos.y;
     setPosition({ x: deltaX, y: deltaY });
     
-    // Obtener dimensiones del contenedor
+    // Obtener dimensiones del contenedor y viewport
     if (cardRef.current && containerRef.current) {
       const cardRect = cardRef.current.getBoundingClientRect();
       const action = getActionForPosition(deltaX, deltaY, cardRect.width, cardRect.height);
       setDragAction(action);
+      
+      // Calcular distancia a las esquinas para efecto de gradiente
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const distanceToLeft = cardRect.left;
+      const distanceToRight = viewportWidth - cardRect.right;
+      const distanceToTop = cardRect.top;
+      const distanceToBottom = viewportHeight - cardRect.bottom;
+      
+      // Actualizar estado para efectos de esquina (se usará en el render)
+      const cornerEffect = {
+        left: Math.max(0, 1 - distanceToLeft / 150),
+        right: Math.max(0, 1 - distanceToRight / 150),
+        top: Math.max(0, 1 - distanceToTop / 150),
+        bottom: Math.max(0, 1 - distanceToBottom / 150),
+      };
+      setCornerEffects(cornerEffect);
+      if (onCornerEffectsChange) {
+        onCornerEffectsChange(cornerEffect);
+      }
     }
   }, []); // Sin dependencias - usa refs
 
@@ -269,6 +308,15 @@ export default function ProfileCard({
         }
         resetPosition();
         return;
+      } else if (currentDragAction.type === 'down') {
+        // Gesto hacia abajo - retroceder
+        const currentOnGoBack = onGoBackRef.current;
+        if (currentOnGoBack && canGoBack && !backUsed) {
+          triggerBackAnimation(currentOnGoBack);
+        } else {
+          resetPosition();
+        }
+        return;
       }
     }
     
@@ -295,15 +343,27 @@ export default function ProfileCard({
           triggerSwipeAnimation('left', currentOnSwipeLeft);
           return;
         }
-      } else if (absY > absX * 1.1 && currentPosition.y < -threshold) {
-        // Movimiento hacia arriba dominante
-        if (currentOnShowDetail) {
-          currentOnShowDetail(currentProfile);
-        } else if (currentOnSwipeUp) {
-          currentOnSwipeUp();
+      } else if (absY > absX * 1.1) {
+        // Movimiento vertical dominante
+        if (currentPosition.y < -threshold) {
+          // Hacia arriba
+          if (currentOnShowDetail) {
+            currentOnShowDetail(currentProfile);
+          } else if (currentOnSwipeUp) {
+            currentOnSwipeUp();
+          }
+          resetPosition();
+          return;
+        } else if (currentPosition.y > threshold) {
+          // Hacia abajo - retroceder
+          const currentOnGoBack = onGoBackRef.current;
+          if (currentOnGoBack && canGoBack && !backUsed) {
+            triggerBackAnimation(currentOnGoBack);
+          } else {
+            resetPosition();
+          }
+          return;
         }
-        resetPosition();
-        return;
       }
     }
     
@@ -399,6 +459,11 @@ export default function ProfileCard({
         text: 'Ver Detalles',
         gradient: 'bg-yellow-500',
         icon: '↑',
+      },
+      down: {
+        text: 'Retroceder',
+        gradient: 'bg-green-500',
+        icon: '↓',
       },
       back: {
         text: 'Retroceder',

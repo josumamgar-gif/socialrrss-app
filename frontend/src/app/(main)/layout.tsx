@@ -124,13 +124,15 @@ export default function MainLayout({
                 <Link
                   key={tab.name}
                   href={tab.href}
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.preventDefault();
                     if (typeof window !== 'undefined') {
                       setPathname(tab.href);
+                      window.location.href = tab.href;
                     }
                   }}
                   className={`
-                    flex items-center justify-center px-6 py-4 text-sm font-medium transition-colors
+                    flex items-center justify-center px-6 py-4 text-sm font-medium transition-colors cursor-pointer
                     ${isActive(tab.href)
                       ? 'text-primary-600 border-b-2 border-primary-600'
                       : 'text-gray-600 hover:text-gray-900'
@@ -157,13 +159,15 @@ export default function MainLayout({
           {/* Promoción - Izquierda */}
           <Link
             href="/promocion"
-            onClick={() => {
+            onClick={(e) => {
+              e.preventDefault();
               if (typeof window !== 'undefined') {
                 setPathname('/promocion');
+                window.location.href = '/promocion';
               }
             }}
             className={`
-              flex flex-col items-center justify-center flex-1 h-full transition-colors py-2
+              flex flex-col items-center justify-center flex-1 h-full transition-colors py-2 cursor-pointer
               ${isActive('/promocion')
                 ? 'text-primary-600'
                 : 'text-gray-600'
@@ -177,13 +181,15 @@ export default function MainLayout({
           {/* Principal - Centro con radar */}
           <Link
             href="/principal"
-            onClick={() => {
+            onClick={(e) => {
+              e.preventDefault();
               if (typeof window !== 'undefined') {
                 setPathname('/principal');
+                window.location.href = '/principal';
               }
             }}
             className={`
-              flex flex-col items-center justify-center flex-1 h-full transition-colors py-2
+              flex flex-col items-center justify-center flex-1 h-full transition-colors py-2 cursor-pointer
               ${isActive('/principal')
                 ? 'text-primary-600'
                 : 'text-gray-600'
@@ -201,13 +207,15 @@ export default function MainLayout({
           {/* Ajustes - Derecha con martillo y llave */}
           <Link
             href="/ajustes"
-            onClick={() => {
+            onClick={(e) => {
+              e.preventDefault();
               if (typeof window !== 'undefined') {
                 setPathname('/ajustes');
+                window.location.href = '/ajustes';
               }
             }}
             className={`
-              flex flex-col items-center justify-center flex-1 h-full transition-colors py-2
+              flex flex-col items-center justify-center flex-1 h-full transition-colors py-2 cursor-pointer
               ${isActive('/ajustes')
                 ? 'text-primary-600'
                 : 'text-gray-600'
@@ -229,13 +237,15 @@ export default function MainLayout({
         <div className="max-w-7xl mx-auto px-4 w-full">
           <Link
             href="/ajustes"
-            onClick={() => {
+            onClick={(e) => {
+              e.preventDefault();
               if (typeof window !== 'undefined') {
                 setPathname('/ajustes');
+                window.location.href = '/ajustes';
               }
             }}
             className={`
-              flex items-center justify-center px-6 py-4 text-sm font-medium transition-colors
+              flex items-center justify-center px-6 py-4 text-sm font-medium transition-colors cursor-pointer
               ${isActive('/ajustes')
                 ? 'text-primary-600'
                 : 'text-gray-600 hover:text-gray-900'

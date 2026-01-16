@@ -87,6 +87,26 @@ export default function PromocionPage() {
   const [loading, setLoading] = useState(true);
   const [profileData, setProfileData] = useState<Profile | null>(null);
 
+  // Ocultar controles del navegador (fullscreen)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Forzar fullscreen en móvil
+      const hideNavBar = () => {
+        setTimeout(() => {
+          window.scrollTo(0, 1);
+        }, 100);
+      };
+      hideNavBar();
+      window.addEventListener('resize', hideNavBar);
+      window.addEventListener('orientationchange', hideNavBar);
+      
+      return () => {
+        window.removeEventListener('resize', hideNavBar);
+        window.removeEventListener('orientationchange', hideNavBar);
+      };
+    }
+  }, []);
+
   useEffect(() => {
     if (user) {
       loadProfiles();
@@ -289,7 +309,7 @@ export default function PromocionPage() {
     const displayNetwork = currentNetwork || selectedNetwork;
     
     return (
-      <div className="fixed inset-0 bg-white overflow-hidden px-0 sm:px-4" style={{ height: '100vh', width: '100vw', touchAction: 'none' }}>
+      <div className="fixed inset-0 bg-white overflow-hidden px-0 sm:px-4" style={{ height: '100vh', width: '100vw', touchAction: 'none', position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}>
         <div className="max-w-2xl mx-auto w-full h-full flex flex-col">
           <div className="text-center py-4 flex-shrink-0 px-4 sm:px-0">
             <button

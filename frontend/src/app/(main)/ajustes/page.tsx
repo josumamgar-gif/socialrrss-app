@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import Link from 'next/link';
 import ProfileSection from '@/components/ajustes/ProfileSection';
@@ -18,6 +18,26 @@ export default function AjustesPage() {
   const [activeTab, setActiveTab] = useState<TabType>('profile');
   const [showTutorial, setShowTutorial] = useState(false);
 
+  // Ocultar controles del navegador (fullscreen)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Forzar fullscreen en móvil
+      const hideNavBar = () => {
+        setTimeout(() => {
+          window.scrollTo(0, 1);
+        }, 100);
+      };
+      hideNavBar();
+      window.addEventListener('resize', hideNavBar);
+      window.addEventListener('orientationchange', hideNavBar);
+      
+      return () => {
+        window.removeEventListener('resize', hideNavBar);
+        window.removeEventListener('orientationchange', hideNavBar);
+      };
+    }
+  }, []);
+
   const tabs = [
     { id: 'profile' as TabType, name: 'Mi Perfil', icon: '👤' },
     { id: 'payments' as TabType, name: 'Pagos', icon: '💳' },
@@ -31,7 +51,7 @@ export default function AjustesPage() {
   };
 
   return (
-    <div className="fixed inset-0 bg-white px-0 sm:px-4" style={{ height: '100vh', width: '100vw', touchAction: 'none', overflow: 'hidden' }}>
+    <div className="fixed inset-0 bg-white px-0 sm:px-4" style={{ height: '100vh', width: '100vw', touchAction: 'none', overflow: 'hidden', position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}>
       {/* Tutorial - se muestra cuando showTutorial es true */}
       {showTutorial && (
         <WelcomeTutorial 

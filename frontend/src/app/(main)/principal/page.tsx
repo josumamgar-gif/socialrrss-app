@@ -18,6 +18,7 @@ export default function PrincipalPage() {
   const [hasCompletedDemo, setHasCompletedDemo] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
   const [selectedNetworkFilter, setSelectedNetworkFilter] = useState<'all' | SocialNetwork>('all');
+  const [cornerEffects, setCornerEffects] = useState({ left: 0, right: 0, top: 0, bottom: 0 });
 
   // Opciones del filtro
   const networkOptions: { value: 'all' | SocialNetwork; label: string }[] = [
@@ -367,6 +368,19 @@ export default function PrincipalPage() {
         }
       }}
     >
+      {/* Efectos de gradiente en las esquinas - colores según gesto */}
+      <div 
+        className="fixed inset-0 pointer-events-none z-30"
+        style={{
+          background: `
+            radial-gradient(circle at 0% 50%, rgba(239, 68, 68, ${cornerEffects.left * 0.4}) 0%, transparent 40%),
+            radial-gradient(circle at 100% 50%, rgba(59, 130, 246, ${cornerEffects.right * 0.4}) 0%, transparent 40%),
+            radial-gradient(circle at 50% 0%, rgba(234, 179, 8, ${cornerEffects.top * 0.4}) 0%, transparent 40%),
+            radial-gradient(circle at 50% 100%, rgba(34, 197, 94, ${cornerEffects.bottom * 0.4}) 0%, transparent 40%)
+          `,
+          transition: 'opacity 0.15s ease',
+        }}
+      />
       {/* Filtro de redes sociales - Parte superior central con efecto liquid glass */}
       <div className="absolute top-4 sm:top-6 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-xs px-4">
         <select
@@ -403,7 +417,7 @@ export default function PrincipalPage() {
         </select>
       </div>
 
-      <div className="flex flex-col items-center justify-center w-full max-w-md mx-auto pt-28 sm:pt-32">
+      <div className="flex flex-col items-center justify-center w-full max-w-md mx-auto pt-40 sm:pt-48">
         {needsDemoInteraction && (
           <div className="mb-4 max-w-md w-full mx-auto bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4 z-40">
             <div className="flex items-start">
@@ -443,6 +457,7 @@ export default function PrincipalPage() {
                   onSwipeUp={handleSwipeUp}
                   onGoBack={handleGoBack}
                   onShowDetail={(profile) => setSelectedProfile(profile)}
+                  onCornerEffectsChange={setCornerEffects}
                   index={idx}
                   canGoBack={history.length > 0 && idx === 0}
                   currentProfileIndex={currentIndex + idx}
