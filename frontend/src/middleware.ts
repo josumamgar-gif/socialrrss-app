@@ -6,20 +6,19 @@ export function middleware(request: NextRequest) {
 
   // Configurar Content Security Policy
   // Permitir unsafe-eval solo si es necesario para librerías de terceros (Stripe, PayPal, etc.)
-  const cspHeader = `
-    default-src 'self';
-    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://www.paypal.com https://www.paypalobjects.com;
-    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-    img-src 'self' data: https: blob:;
-    font-src 'self' https://fonts.gstatic.com data:;
-    connect-src 'self' https://api.stripe.com https://api.socialrrss.com https://api.socialrrss.com/api https://*.vercel.app;
-    frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://www.paypal.com;
-    object-src 'none';
-    base-uri 'self';
-    form-action 'self';
-    frame-ancestors 'none';
-    upgrade-insecure-requests;
-  `.replace(/\s{2,}/g, ' ').trim();
+  const cspHeader = [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://www.paypal.com https://www.paypalobjects.com",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "img-src 'self' data: https: blob:",
+    "font-src 'self' https://fonts.gstatic.com data:",
+    "connect-src 'self' https://api.stripe.com https://api.socialrrss.com https://*.vercel.app",
+    "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://www.paypal.com",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "frame-ancestors 'none'",
+  ].join('; ');
 
   response.headers.set('Content-Security-Policy', cspHeader);
 

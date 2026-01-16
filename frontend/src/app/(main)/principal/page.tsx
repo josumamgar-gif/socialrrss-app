@@ -46,11 +46,11 @@ export default function PrincipalPage() {
       return; // Los demos nunca se marcan como vistos
     }
     
-    // Si hay usuario, usar su ID, sino usar 'anonymous'
-    const userId = user?.id || 'anonymous';
+    // Usar el ref para obtener el userId actual
+    const userId = userIdRef.current || 'anonymous';
     const key = `viewedProfiles_${userId}`;
     
-    // Obtener perfiles vistos directamente aquí para evitar dependencias
+    // Obtener perfiles vistos directamente aquí
     const viewed = (() => {
       const viewedData = localStorage.getItem(key);
       return viewedData ? JSON.parse(viewedData) : [];
@@ -60,17 +60,23 @@ export default function PrincipalPage() {
       viewed.push(profileId);
       localStorage.setItem(key, JSON.stringify(viewed));
     }
-  }, [user?.id]); // Solo depender del ID del usuario
+  }, []); // Sin dependencias - usa ref para acceder al userId actual
+
+  // Ref para el userId actual
+  const userIdRef = useRef(user?.id);
+  useEffect(() => {
+    userIdRef.current = user?.id;
+  }, [user?.id]);
 
   const loadProfiles = useCallback(async () => {
     try {
       setLoading(true);
       const response = await profilesAPI.getAll();
       
-      // Obtener perfiles vistos directamente aquí para evitar dependencias
+      // Obtener perfiles vistos directamente aquí usando el ref
       const viewedProfiles = (() => {
         if (typeof window === 'undefined') return [];
-        const userId = user?.id || 'anonymous';
+        const userId = userIdRef.current || 'anonymous';
         const key = `viewedProfiles_${userId}`;
         const viewed = localStorage.getItem(key);
         return viewed ? JSON.parse(viewed) : [];
@@ -111,7 +117,7 @@ export default function PrincipalPage() {
     } finally {
       setLoading(false);
     }
-  }, [user?.id]); // Solo depender del ID del usuario, no de la función completa
+  }, []); // Sin dependencias - usa refs para acceder a valores actuales
 
   const networkOptions: { value: 'all' | SocialNetwork; label: string }[] = [
     { value: 'all', label: 'Todas' },
@@ -133,15 +139,15 @@ export default function PrincipalPage() {
 
   // Ref para acceder al array más reciente sin incluirlo en dependencias
   const displayedProfilesRef = useRef(displayedProfiles);
-  useEffect(() => {
-    displayedProfilesRef.current = displayedProfiles;
-  }, [displayedProfiles]);
+  // Actualizar el ref en cada render (no causa re-renders)
+  displayedProfilesRef.current = displayedProfiles;
 
+  // Cargar perfiles al montar y cuando cambie el usuario
   useEffect(() => {
     loadProfiles();
     checkDemoCompletion();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Solo ejecutar una vez al montar
+  }, [user?.id]); // Recargar cuando cambie el usuario
 
   const handleSwipeLeft = useCallback(() => {
     const profiles = displayedProfilesRef.current;
@@ -286,7 +292,8 @@ export default function PrincipalPage() {
   }, [selectedNetworkFilter]);
 
   useEffect(() => {
-    if (displayedProfiles.length > 0 && currentIndex >= displayedProfiles.length) {
+    const length = displayedProfiles.length;
+    if (length > 0 && currentIndex >= length) {
       setCurrentIndex(0);
       setHistory([]);
     }
