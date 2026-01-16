@@ -7,6 +7,7 @@ import { CheckIcon } from '@heroicons/react/24/solid';
 import StripePayment from './StripePayment';
 import { Profile } from '@/types';
 import { profilesAPI } from '@/lib/api';
+import ProfilePreview from './ProfilePreview';
 
 interface PlanSelectorProps {
   profileId: string;
@@ -255,6 +256,13 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
         <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Elige tu Plan de Promoción</h2>
         <p className="text-sm sm:text-base text-gray-600">Selecciona el plan que mejor se adapte a tus necesidades</p>
       </div>
+
+      {/* Preview del perfil */}
+      {profileData && (
+        <div className="mb-6 flex justify-center">
+          <ProfilePreview profile={profileData} />
+        </div>
+      )}
 
       {/* Grid de planes - Simple y responsive */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6" id="plans-carousel">

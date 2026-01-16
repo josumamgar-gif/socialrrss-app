@@ -2,14 +2,13 @@
 
 import { Profile } from '@/types';
 import SocialNetworkLogo from '@/components/shared/SocialNetworkLogo';
+import { getImageUrl, placeholderImage } from '@/lib/imageUtils';
 
 interface ProfilePreviewProps {
   profile: Profile;
 }
 
 export default function ProfilePreview({ profile }: ProfilePreviewProps) {
-  const placeholderImage =
-    "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='600' viewBox='0 0 400 600'%3E%3Crect width='400' height='600' fill='%23f3f4f6'/%3E%3Ctext x='200' y='300' text-anchor='middle' fill='%239ca3af' font-family='Arial' font-size='20'%3EImagen no disponible%3C/text%3E%3C/svg%3E";
   const getNetworkColor = (network: string) => {
     const colors: Record<string, string> = {
       tiktok: 'bg-pink-500',
@@ -22,24 +21,6 @@ export default function ProfilePreview({ profile }: ProfilePreviewProps) {
       otros: 'bg-gray-500',
     };
     return colors[network] || 'bg-gray-500';
-  };
-
-  // Obtener URL base del API
-  const getImageUrl = (imagePath: string) => {
-    if (!imagePath) return '';
-    
-    // Si ya es una URL completa, usarla directamente
-    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-      return imagePath;
-    }
-    
-    // Construir URL completa desde el backend
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-    const baseUrl = apiUrl.replace('/api', '');
-    
-    // Asegurar que la ruta empiece con /
-    const cleanPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
-    return `${baseUrl}${cleanPath}`;
   };
 
   // Icono de planeta para "otros"
@@ -79,9 +60,14 @@ export default function ProfilePreview({ profile }: ProfilePreviewProps) {
               src={getImageUrl(profile.images[0])}
               alt="Preview"
               className="w-full h-full object-cover"
+              onLoad={() => {
+                console.log('✅ Imagen cargada exitosamente:', getImageUrl(profile.images[0]));
+              }}
               onError={(e) => {
                 console.error('❌ Error cargando imagen. URL intentada:', getImageUrl(profile.images[0]));
+                console.error('❌ Ruta original:', profile.images[0]);
                 console.error('❌ Perfil completo:', profile);
+                console.error('❌ API URL:', process.env.NEXT_PUBLIC_API_URL);
                 (e.target as HTMLImageElement).src = placeholderImage;
               }}
             />
@@ -91,6 +77,9 @@ export default function ProfilePreview({ profile }: ProfilePreviewProps) {
               <p className="text-xs text-gray-500">No hay imágenes disponibles</p>
               {profile.images && profile.images.length === 0 && (
                 <p className="text-xs text-gray-400 mt-1">Añade imágenes al crear el perfil</p>
+              )}
+              {!profile.images && (
+                <p className="text-xs text-gray-400 mt-1">No se encontraron imágenes en el perfil</p>
               )}
             </div>
           )}

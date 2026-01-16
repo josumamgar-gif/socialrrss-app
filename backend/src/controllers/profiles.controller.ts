@@ -277,6 +277,8 @@ export const createProfile = async (req: AuthRequest, res: Response): Promise<vo
     await profile.save();
 
     console.log('✅ Perfil creado exitosamente:', profile._id);
+    console.log('🖼️ Imágenes guardadas en perfil:', profile.images);
+    console.log('📦 Perfil completo a devolver:', JSON.stringify(profile.toObject(), null, 2));
 
     res.status(201).json({
       message: 'Perfil creado exitosamente',
