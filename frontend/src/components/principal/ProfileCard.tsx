@@ -309,23 +309,22 @@ export default function ProfileCard({
         if (onCornerEffectsChange) {
           onCornerEffectsChange({ left: 0, right: 0, top: 0, bottom: 0 });
         }
-        // Para el gesto a la derecha, SIEMPRE ejecutar onSwipeRight (acción del botón azul)
-        if (currentOnSwipeRight) {
-          // Abrir enlace en nueva pestaña si existe (después de un pequeño delay)
-          if (currentProfileLink) {
+        // Para el gesto a la derecha: SIEMPRE abrir enlace y ejecutar onSwipeRight (acción del botón azul)
+        // PRIMERO: Abrir el enlace inmediatamente (igual que el botón azul)
+        if (currentProfileLink) {
+          // Abrir enlace inmediatamente - el navegador lo manejará
+          const linkWindow = window.open(currentProfileLink, '_blank', 'noopener,noreferrer');
+          // Si el popup fue bloqueado, intentar nuevamente después de un pequeño delay
+          if (!linkWindow || linkWindow.closed || typeof linkWindow.closed === 'undefined') {
             setTimeout(() => {
               window.open(currentProfileLink, '_blank', 'noopener,noreferrer');
             }, 100);
           }
-          // Ejecutar el callback del gesto (igual que el botón azul)
+        }
+        // SEGUNDO: Ejecutar el callback para avanzar al siguiente perfil (igual que el botón azul)
+        if (currentOnSwipeRight) {
           triggerSwipeAnimation('right', currentOnSwipeRight);
         } else {
-          // Si no hay callback, solo abrir enlace y resetear
-          if (currentProfileLink) {
-            setTimeout(() => {
-              window.open(currentProfileLink, '_blank', 'noopener,noreferrer');
-            }, 50);
-          }
           resetPosition();
         }
         return;
@@ -366,16 +365,22 @@ export default function ProfileCard({
       if (absX > absY * 1.1) {
         // Movimiento horizontal dominante
         if (currentPosition.x > threshold) {
-          // Derecha - Resetear efectos y abrir enlace
+          // Derecha - Resetear efectos, abrir enlace y ejecutar callback
           setCornerEffects({ left: 0, right: 0, top: 0, bottom: 0 });
           if (onCornerEffectsChange) {
             onCornerEffectsChange({ left: 0, right: 0, top: 0, bottom: 0 });
           }
+          // PRIMERO: Abrir el enlace inmediatamente
           if (currentProfileLink) {
-            setTimeout(() => {
-              window.open(currentProfileLink, '_blank', 'noopener,noreferrer');
-            }, 50);
+            const linkWindow = window.open(currentProfileLink, '_blank', 'noopener,noreferrer');
+            // Si el popup fue bloqueado, intentar nuevamente después de un pequeño delay
+            if (!linkWindow || linkWindow.closed || typeof linkWindow.closed === 'undefined') {
+              setTimeout(() => {
+                window.open(currentProfileLink, '_blank', 'noopener,noreferrer');
+              }, 100);
+            }
           }
+          // SEGUNDO: Ejecutar el callback para avanzar al siguiente perfil
           if (currentOnSwipeRight) {
             triggerSwipeAnimation('right', currentOnSwipeRight);
           } else {
