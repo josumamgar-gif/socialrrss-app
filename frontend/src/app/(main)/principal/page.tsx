@@ -64,7 +64,8 @@ export default function PrincipalPage() {
         
         let profilesToShow: Profile[] = [];
         if (!tutorialCompleted) {
-          profilesToShow = [...demoProfiles.slice(0, 4), ...realProfiles];
+          // Mostrar todos los perfiles demo (50) para probar el filtro
+          profilesToShow = [...demoProfiles, ...realProfiles];
         } else {
           profilesToShow = realProfiles;
         }
@@ -82,7 +83,7 @@ export default function PrincipalPage() {
             localStorage.getItem('tutorialCompleted') === 'true' : false;
           
           if (!tutorialCompleted) {
-            setProfiles(demoProfiles.slice(0, 4));
+            setProfiles(demoProfiles);
           } else {
             setProfiles([]);
           }
@@ -223,11 +224,50 @@ export default function PrincipalPage() {
 
   if (!loading && filteredProfiles.length === 0 && profiles.length > 0) {
     return (
-      <div className="w-full bg-white flex items-center justify-center" style={{ 
-        height: 'calc(100vh - 4rem)', 
-        minHeight: 'calc(100vh - 4rem)'
+      <div className="w-full bg-white flex items-center justify-center px-4 overflow-hidden relative" style={{ 
+        height: '100%',
+        minHeight: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
       }}>
-        <div className="text-center px-4">
+        {/* Filtro siempre visible incluso sin perfiles */}
+        <div className="absolute top-8 sm:top-12 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-xs px-4">
+          <select
+            value={selectedNetworkFilter}
+            onChange={(e) => setSelectedNetworkFilter(e.target.value as 'all' | SocialNetwork)}
+            className="w-full px-5 py-3 text-sm sm:text-base text-gray-900 font-semibold appearance-none cursor-pointer"
+            style={{
+              background: 'rgba(255, 255, 255, 0.7)',
+              backdropFilter: 'blur(20px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+              borderRadius: '9999px',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15), inset 0 1px 0 0 rgba(255, 255, 255, 0.4)',
+              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 12 12'%3E%3Cpath fill='%23374151' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'right 1.25rem center',
+              paddingRight: '2.75rem',
+              transition: 'all 0.3s ease',
+            }}
+            onFocus={(e) => {
+              e.target.style.background = 'rgba(255, 255, 255, 0.85)';
+              e.target.style.boxShadow = '0 8px 32px 0 rgba(31, 38, 135, 0.25), inset 0 1px 0 0 rgba(255, 255, 255, 0.5)';
+            }}
+            onBlur={(e) => {
+              e.target.style.background = 'rgba(255, 255, 255, 0.7)';
+              e.target.style.boxShadow = '0 8px 32px 0 rgba(31, 38, 135, 0.15), inset 0 1px 0 0 rgba(255, 255, 255, 0.4)';
+            }}
+          >
+            {networkOptions.map((option) => (
+              <option key={option.value} value={option.value} style={{ background: 'white' }}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="text-center px-4 pt-24">
           <p className="text-gray-600 text-lg mb-2">No hay perfiles disponibles para esta red social</p>
           <p className="text-gray-500 text-sm">Intenta seleccionar otra red social o recargar la página</p>
         </div>
@@ -237,11 +277,50 @@ export default function PrincipalPage() {
 
   if (!loading && profiles.length === 0) {
     return (
-      <div className="w-full bg-white flex items-center justify-center" style={{ 
-        height: 'calc(100vh - 4rem)', 
-        minHeight: 'calc(100vh - 4rem)'
+      <div className="w-full bg-white flex items-center justify-center px-4 overflow-hidden relative" style={{ 
+        height: '100%',
+        minHeight: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
       }}>
-        <div className="text-center px-4">
+        {/* Filtro siempre visible incluso sin perfiles */}
+        <div className="absolute top-8 sm:top-12 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-xs px-4">
+          <select
+            value={selectedNetworkFilter}
+            onChange={(e) => setSelectedNetworkFilter(e.target.value as 'all' | SocialNetwork)}
+            className="w-full px-5 py-3 text-sm sm:text-base text-gray-900 font-semibold appearance-none cursor-pointer"
+            style={{
+              background: 'rgba(255, 255, 255, 0.7)',
+              backdropFilter: 'blur(20px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+              borderRadius: '9999px',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15), inset 0 1px 0 0 rgba(255, 255, 255, 0.4)',
+              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 12 12'%3E%3Cpath fill='%23374151' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'right 1.25rem center',
+              paddingRight: '2.75rem',
+              transition: 'all 0.3s ease',
+            }}
+            onFocus={(e) => {
+              e.target.style.background = 'rgba(255, 255, 255, 0.85)';
+              e.target.style.boxShadow = '0 8px 32px 0 rgba(31, 38, 135, 0.25), inset 0 1px 0 0 rgba(255, 255, 255, 0.5)';
+            }}
+            onBlur={(e) => {
+              e.target.style.background = 'rgba(255, 255, 255, 0.7)';
+              e.target.style.boxShadow = '0 8px 32px 0 rgba(31, 38, 135, 0.15), inset 0 1px 0 0 rgba(255, 255, 255, 0.4)';
+            }}
+          >
+            {networkOptions.map((option) => (
+              <option key={option.value} value={option.value} style={{ background: 'white' }}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="text-center px-4 pt-24">
           <p className="text-gray-600 text-lg mb-2">No hay perfiles disponibles por el momento</p>
           <p className="text-gray-500 text-sm">Intenta recargar la página o contacta al administrador</p>
         </div>
@@ -262,21 +341,36 @@ export default function PrincipalPage() {
       alignItems: 'center',
       justifyContent: 'center'
     }}>
-      {/* Filtro de redes sociales - Parte superior central con margen para móvil */}
-      <div className="absolute top-4 sm:top-6 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-xs px-4">
+      {/* Filtro de redes sociales - Parte superior central con efecto liquid glass */}
+      <div className="absolute top-8 sm:top-12 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-xs px-4">
         <select
           value={selectedNetworkFilter}
           onChange={(e) => setSelectedNetworkFilter(e.target.value as 'all' | SocialNetwork)}
-          className="w-full px-4 py-2.5 text-sm sm:text-base border-2 border-gray-300 rounded-lg bg-white text-gray-900 shadow-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 font-medium appearance-none cursor-pointer"
+          className="w-full px-5 py-3 text-sm sm:text-base text-gray-900 font-semibold appearance-none cursor-pointer"
           style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23374151' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
+            background: 'rgba(255, 255, 255, 0.7)',
+            backdropFilter: 'blur(20px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+            borderRadius: '9999px',
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15), inset 0 1px 0 0 rgba(255, 255, 255, 0.4)',
+            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 12 12'%3E%3Cpath fill='%23374151' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
             backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'right 1rem center',
-            paddingRight: '2.5rem'
+            backgroundPosition: 'right 1.25rem center',
+            paddingRight: '2.75rem',
+            transition: 'all 0.3s ease',
+          }}
+          onFocus={(e) => {
+            e.target.style.background = 'rgba(255, 255, 255, 0.85)';
+            e.target.style.boxShadow = '0 8px 32px 0 rgba(31, 38, 135, 0.25), inset 0 1px 0 0 rgba(255, 255, 255, 0.5)';
+          }}
+          onBlur={(e) => {
+            e.target.style.background = 'rgba(255, 255, 255, 0.7)';
+            e.target.style.boxShadow = '0 8px 32px 0 rgba(31, 38, 135, 0.15), inset 0 1px 0 0 rgba(255, 255, 255, 0.4)';
           }}
         >
           {networkOptions.map((option) => (
-            <option key={option.value} value={option.value}>
+            <option key={option.value} value={option.value} style={{ background: 'white' }}>
               {option.label}
             </option>
           ))}
