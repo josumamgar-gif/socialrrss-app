@@ -19,6 +19,7 @@ export default function PrincipalPage() {
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
   const [selectedNetworkFilter, setSelectedNetworkFilter] = useState<'all' | SocialNetwork>('all');
   const [cornerEffects, setCornerEffects] = useState({ left: 0, right: 0, top: 0, bottom: 0 });
+  const [lastSwipeDirection, setLastSwipeDirection] = useState<'left' | 'right' | 'up' | 'down' | 'back' | null>(null);
 
   // Opciones del filtro
   const networkOptions: { value: 'all' | SocialNetwork; label: string }[] = [
@@ -152,6 +153,7 @@ export default function PrincipalPage() {
     if (!currentProfile) return;
     
     markProfileAsViewed(currentProfile._id);
+    setLastSwipeDirection('left');
     
     if (currentProfile._id.startsWith('demo-')) {
       const newInteractions = demoInteractions + 1;
@@ -178,6 +180,7 @@ export default function PrincipalPage() {
     if (!currentProfile) return;
     
     markProfileAsViewed(currentProfile._id);
+    setLastSwipeDirection('right');
     
     if (currentProfile._id.startsWith('demo-')) {
       const newInteractions = demoInteractions + 1;
@@ -219,6 +222,7 @@ export default function PrincipalPage() {
 
   const handleGoBack = () => {
     if (history.length > 0) {
+      setLastSwipeDirection('back');
       const previousIndex = history[history.length - 1];
       setCurrentIndex(previousIndex);
       setHistory(history.slice(0, -1));
@@ -461,13 +465,27 @@ export default function PrincipalPage() {
           <div className="relative w-full max-w-md mx-auto profile-card-container" style={{ overflow: 'visible', touchAction: 'none', width: '100%' }}>
             {filteredProfiles.slice(currentIndex, currentIndex + 3).map((profile, idx) => (
               <div
-                key={profile._id}
-                className={idx === 0 ? 'relative z-10' : 'absolute top-0 left-0 right-0 opacity-50 scale-95'}
+                key={`${profile._id}-${currentIndex}`}
+                className={idx === 0 ? 'relative z-10' : 'absolute top-0 left-0 right-0 z-[5]'}
                 style={{ 
-                  zIndex: 10 - idx,
-                  transition: 'opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                  willChange: idx === 0 ? 'auto' : 'opacity, transform'
-                }}
+                  zIndex: idx === 0 ? 10 : 5 - idx,
+                  opacity: idx === 0 ? 1 : Math.max(0.2, 0.6 - idx * 0.2),
+                  transform: idx === 0 
+                    ? (lastSwipeDirection ? undefined : 'translate(0, 0) scale(1)')
+                    : `translate(0, ${idx * 8}px) scale(${1 - idx * 0.05})`,
+                  transition: idx === 0 
+                    ? 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)' 
+                    : 'opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                  willChange: idx === 0 ? 'auto' : 'opacity, transform',
+                  ...(idx === 0 && lastSwipeDirection ? {
+                    animation: `${
+                      lastSwipeDirection === 'left' ? 'slideInFromRight' :
+                      lastSwipeDirection === 'right' ? 'slideInFromLeft' :
+                      lastSwipeDirection === 'up' ? 'slideInFromBottom' :
+                      'slideInFromTop'
+                    } 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards`
+                  } : {})
+                } as React.CSSProperties}
               >
                 <ProfileCard
                   profile={profile}

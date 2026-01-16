@@ -309,17 +309,23 @@ export default function ProfileCard({
         if (onCornerEffectsChange) {
           onCornerEffectsChange({ left: 0, right: 0, top: 0, bottom: 0 });
         }
-        // Para el gesto a la derecha, SIEMPRE abrir el enlace si existe
-        if (currentProfileLink) {
-          // Abrir enlace en nueva pestaña (sin cambiar la página actual)
-          setTimeout(() => {
-            window.open(currentProfileLink, '_blank', 'noopener,noreferrer');
-          }, 50);
-        }
-        // Luego ejecutar el callback si existe
+        // Para el gesto a la derecha, SIEMPRE ejecutar onSwipeRight (acción del botón azul)
         if (currentOnSwipeRight) {
+          // Abrir enlace en nueva pestaña si existe (después de un pequeño delay)
+          if (currentProfileLink) {
+            setTimeout(() => {
+              window.open(currentProfileLink, '_blank', 'noopener,noreferrer');
+            }, 100);
+          }
+          // Ejecutar el callback del gesto (igual que el botón azul)
           triggerSwipeAnimation('right', currentOnSwipeRight);
         } else {
+          // Si no hay callback, solo abrir enlace y resetear
+          if (currentProfileLink) {
+            setTimeout(() => {
+              window.open(currentProfileLink, '_blank', 'noopener,noreferrer');
+            }, 50);
+          }
           resetPosition();
         }
         return;
@@ -547,6 +553,16 @@ export default function ProfileCard({
     // Mostrar overlay verde inmediatamente
     setButtonAction({ type: 'back', intensity: 1 });
     
+    // PRIMERO: Resetear la posición actual para evitar bugs
+    setPosition({ x: 0, y: 0 });
+    const card = cardRef.current;
+    if (card) {
+      // Resetear cualquier transformación previa
+      card.style.transform = '';
+      card.style.opacity = '';
+      card.style.transition = '';
+    }
+    
     // Usar requestAnimationFrame para mejor rendimiento
     requestAnimationFrame(() => {
       const card = cardRef.current;
@@ -559,9 +575,9 @@ export default function ProfileCard({
       // Optimizar para animaciones fluidas
       card.style.willChange = 'transform, opacity';
       
-      // Animación hacia atrás (desde abajo/derecha hacia el centro)
+      // Animación hacia atrás (desde abajo hacia el centro - verde)
       // Primero la tarjeta aparece desde atrás
-      card.style.transform = 'translate(100px, 100px) rotate(15deg)';
+      card.style.transform = 'translate(0, 100px) rotate(0deg)';
       card.style.opacity = '0';
       card.style.transition = 'none';
       
@@ -573,10 +589,8 @@ export default function ProfileCard({
       card.style.opacity = '1';
       card.style.transition = 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1)';
       
-      // Ejecutar callback más rápido para mejor fluidez
-      setTimeout(() => {
-        callback();
-      }, 120);
+      // Ejecutar callback ANTES para que el cambio de índice ocurra inmediatamente
+      callback();
       
       // Resetear después de la animación
       setTimeout(() => {
@@ -588,6 +602,7 @@ export default function ProfileCard({
         }
         setButtonAction({ type: null, intensity: 0 });
         setIsAnimating(false);
+        setPosition({ x: 0, y: 0 });
         // Asegurar que los efectos se reseteen
         setCornerEffects({ left: 0, right: 0, top: 0, bottom: 0 });
         if (onCornerEffectsChange) {
