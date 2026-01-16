@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Profile } from '@/types';
 import {
   ArrowLeftIcon,
@@ -120,7 +120,7 @@ export default function ProfileCard({
     setDragAction({ type: null, intensity: 0 });
   };
 
-  const handleMove = (clientX: number, clientY: number) => {
+  const handleMove = useCallback((clientX: number, clientY: number) => {
     if (!isDragging || isAnimating) return;
     
     const deltaX = clientX - startPos.x;
@@ -133,9 +133,9 @@ export default function ProfileCard({
       const action = getActionForPosition(deltaX, deltaY, cardRect.width, cardRect.height);
       setDragAction(action);
     }
-  };
+  }, [isDragging, isAnimating, startPos]);
 
-  const handleEnd = () => {
+  const handleEnd = useCallback(() => {
     if (!isDragging || isAnimating) {
       setIsDragging(false);
       return;
@@ -215,9 +215,9 @@ export default function ProfileCard({
     
     // Si no se ejecutó ninguna acción, resetear
     resetPosition();
-  };
+  }, [isDragging, isAnimating, position, dragAction, profile.link, onSwipeLeft, onSwipeRight, onSwipeUp, onShowDetail, profile, triggerSwipeAnimation, resetPosition]);
 
-  const resetPosition = () => {
+  const resetPosition = useCallback(() => {
     setPosition({ x: 0, y: 0 });
     setIsAnimating(false);
     setIsDragging(false);
@@ -227,9 +227,9 @@ export default function ProfileCard({
       cardRef.current.style.opacity = '';
       cardRef.current.style.transition = '';
     }
-  };
+  }, []);
 
-  const triggerSwipeAnimation = (direction: 'left' | 'right', callback: () => void) => {
+  const triggerSwipeAnimation = useCallback((direction: 'left' | 'right', callback: () => void) => {
     setIsAnimating(true);
     setIsDragging(false);
     setDragAction({ type: null, intensity: 0 });
@@ -264,12 +264,23 @@ export default function ProfileCard({
       setPosition({ x: 0, y: 0 });
       setIsAnimating(false);
     }, 250);
-  };
+  }, [position.y]);
 
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => handleMove(e.clientX, e.clientY);
-    const handleMouseUp = () => handleEnd();
+    if (!isDragging) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDragging || isAnimating) return;
+      handleMove(e.clientX, e.clientY);
+    };
+    
+    const handleMouseUp = () => {
+      if (!isDragging) return;
+      handleEnd();
+    };
+    
     const handleTouchMove = (e: TouchEvent) => {
+      if (!isDragging || isAnimating) return;
       // Solo prevenir scroll si realmente estamos arrastrando (no es un botón)
       const target = e.target as HTMLElement;
       if (!target.closest('button')) {
@@ -278,7 +289,9 @@ export default function ProfileCard({
       }
       if (e.touches[0]) handleMove(e.touches[0].clientX, e.touches[0].clientY);
     };
+    
     const handleTouchEnd = (e: TouchEvent) => {
+      if (!isDragging) return;
       // NO prevenir aquí para permitir clicks en botones
       const target = e.target as HTMLElement;
       if (!target.closest('button')) {
@@ -287,12 +300,10 @@ export default function ProfileCard({
       handleEnd();
     };
 
-    if (isDragging) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
-      window.addEventListener('touchmove', handleTouchMove, { passive: false });
-      window.addEventListener('touchend', handleTouchEnd, { passive: false });
-    }
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('touchmove', handleTouchMove, { passive: false });
+    window.addEventListener('touchend', handleTouchEnd, { passive: false });
 
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
@@ -300,7 +311,7 @@ export default function ProfileCard({
       window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [isDragging, position, startPos, isAnimating, dragAction]);
+  }, [isDragging, isAnimating, handleMove, handleEnd]);
 
   // Resetear backUsed cada vez que cambia el perfil actual visible
   // Se resetea cuando cambias de perfil (avanzar o retroceder)
@@ -550,7 +561,21 @@ export default function ProfileCard({
                 alt={profile.profileData.username || 'Perfil'}
                 className="w-full h-full object-cover pointer-events-none"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = placeholderImage;
+                  const img = e.target as HTMLImageElement;
+                  // Prevenir que intente cargar via.placeholder.com
+                  if (img.src && img.src.includes('via.placeholder.com')) {
+                    img.src = placeholderImage;
+                    return;
+                  }
+                  // Si falla cualquier otra imagen, usar placeholder
+                  img.src = placeholderImage;
+                }}
+                onLoad={(e) => {
+                  const img = e.target as HTMLImageElement;
+                  // Si por alguna razón se carga via.placeholder.com, reemplazarlo
+                  if (img.src && img.src.includes('via.placeholder.com')) {
+                    img.src = placeholderImage;
+                  }
                 }}
               />
             ) : (
