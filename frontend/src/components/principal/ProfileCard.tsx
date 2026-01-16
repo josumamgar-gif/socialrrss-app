@@ -120,6 +120,55 @@ export default function ProfileCard({
     setDragAction({ type: null, intensity: 0 });
   };
 
+  const resetPosition = useCallback(() => {
+    setPosition({ x: 0, y: 0 });
+    setIsAnimating(false);
+    setIsDragging(false);
+    setDragAction({ type: null, intensity: 0 });
+    if (cardRef.current) {
+      cardRef.current.style.transform = '';
+      cardRef.current.style.opacity = '';
+      cardRef.current.style.transition = '';
+    }
+  }, []);
+
+  const triggerSwipeAnimation = useCallback((direction: 'left' | 'right', callback: () => void) => {
+    setIsAnimating(true);
+    setIsDragging(false);
+    setDragAction({ type: null, intensity: 0 });
+    
+    const card = cardRef.current;
+    if (!card) {
+      setIsAnimating(false);
+      return;
+    }
+
+    const translateX = direction === 'left' ? '-100vw' : '100vw';
+    
+    // Optimizar para animaciones fluidas
+    card.style.willChange = 'transform, opacity';
+    card.style.transform = `translate(${translateX}, ${position.y}px) rotate(${direction === 'left' ? '-30deg' : '30deg'})`;
+    card.style.opacity = '0';
+    card.style.transition = 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1)';
+
+    // Ejecutar callback más rápido para mejor fluidez (antes de que termine la animación visual)
+    setTimeout(() => {
+      callback();
+    }, 100);
+
+    // Resetear estilos después de la animación
+    setTimeout(() => {
+      if (card) {
+        card.style.transform = '';
+        card.style.opacity = '';
+        card.style.transition = '';
+        card.style.willChange = '';
+      }
+      setPosition({ x: 0, y: 0 });
+      setIsAnimating(false);
+    }, 250);
+  }, [position.y]);
+
   const handleMove = useCallback((clientX: number, clientY: number) => {
     if (!isDragging || isAnimating) return;
     
@@ -216,55 +265,6 @@ export default function ProfileCard({
     // Si no se ejecutó ninguna acción, resetear
     resetPosition();
   }, [isDragging, isAnimating, position, dragAction, profile.link, onSwipeLeft, onSwipeRight, onSwipeUp, onShowDetail, profile, triggerSwipeAnimation, resetPosition]);
-
-  const resetPosition = useCallback(() => {
-    setPosition({ x: 0, y: 0 });
-    setIsAnimating(false);
-    setIsDragging(false);
-    setDragAction({ type: null, intensity: 0 });
-    if (cardRef.current) {
-      cardRef.current.style.transform = '';
-      cardRef.current.style.opacity = '';
-      cardRef.current.style.transition = '';
-    }
-  }, []);
-
-  const triggerSwipeAnimation = useCallback((direction: 'left' | 'right', callback: () => void) => {
-    setIsAnimating(true);
-    setIsDragging(false);
-    setDragAction({ type: null, intensity: 0 });
-    
-    const card = cardRef.current;
-    if (!card) {
-      setIsAnimating(false);
-      return;
-    }
-
-    const translateX = direction === 'left' ? '-100vw' : '100vw';
-    
-    // Optimizar para animaciones fluidas
-    card.style.willChange = 'transform, opacity';
-    card.style.transform = `translate(${translateX}, ${position.y}px) rotate(${direction === 'left' ? '-30deg' : '30deg'})`;
-    card.style.opacity = '0';
-    card.style.transition = 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1)';
-
-    // Ejecutar callback más rápido para mejor fluidez (antes de que termine la animación visual)
-    setTimeout(() => {
-      callback();
-    }, 100);
-
-    // Resetear estilos después de la animación
-    setTimeout(() => {
-      if (card) {
-        card.style.transform = '';
-        card.style.opacity = '';
-        card.style.transition = '';
-        card.style.willChange = '';
-      }
-      setPosition({ x: 0, y: 0 });
-      setIsAnimating(false);
-    }, 250);
-  }, [position.y]);
 
   useEffect(() => {
     if (!isDragging) return;

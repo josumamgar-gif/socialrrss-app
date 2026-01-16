@@ -11,7 +11,7 @@ import { profilesAPI } from '@/lib/api';
 interface PlanSelectorProps {
   profileId: string;
   profile?: any;
-  onPaymentSuccess?: () => void;
+  onPaymentSuccess?: (paymentData: any) => void;
 }
 
 export default function PlanSelector({ profileId, profile, onPaymentSuccess }: PlanSelectorProps) {
@@ -138,14 +138,35 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
       const response = await paymentsAPI.createOrder(profileId, selectedPlan, selectedPaymentMethod);
       setPaymentId(response.paymentId);
       
+      // Guardar datos del pago para mostrar recibo después
+      const selectedPlanData = plans.find(p => p.type === selectedPlan);
+      if (selectedPlanData && profileData) {
+        localStorage.setItem('lastPayment', JSON.stringify({
+          _id: response.paymentId,
+          amount: selectedPlanData.price,
+          planType: selectedPlan || '',
+          paymentMethod: selectedPaymentMethod,
+          createdAt: new Date().toISOString(),
+          profileId: profileId,
+        }));
+      }
+      
       if (selectedPaymentMethod === 'paypal' && response.orderId) {
         // Para PayPal, necesitamos redirigir al usuario a la página de aprobación
         const approvalUrl = response.approvalUrl;
         if (approvalUrl) {
           console.log('Redirigiendo a PayPal:', approvalUrl);
+          // Añadir paymentId a la URL de retorno
+          const returnUrl = new URL(approvalUrl);
+          const currentReturnUrl = returnUrl.searchParams.get('return_url') || '';
+          if (currentReturnUrl) {
+            const returnUrlObj = new URL(currentReturnUrl);
+            returnUrlObj.searchParams.set('paymentId', response.paymentId);
+            returnUrl.searchParams.set('return_url', returnUrlObj.toString());
+          }
           // No resetear loading aquí porque vamos a redirigir
           // Redirigir al usuario a PayPal
-          window.location.href = approvalUrl;
+          window.location.href = returnUrl.toString();
           return; // Salir temprano para no ejecutar el finally
         } else {
           console.error('No se recibió approvalUrl de PayPal');
@@ -175,8 +196,16 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
       const statusCheck = await paymentsAPI.checkPaymentStatus(paymentId);
       
       if (statusCheck.status === 'completed') {
-        if (onPaymentSuccess) {
-          onPaymentSuccess();
+        // Obtener información del pago completado
+        const selectedPlanData = plans.find(p => p.type === selectedPlan);
+        if (onPaymentSuccess && selectedPlanData && profileData) {
+          onPaymentSuccess({
+            _id: paymentId,
+            amount: selectedPlanData.price,
+            planType: selectedPlan || '',
+            paymentMethod: selectedPaymentMethod,
+            createdAt: new Date().toISOString(),
+          });
         }
       } else {
         setError('El pago está siendo procesado. Recibirás una confirmación cuando se complete.');

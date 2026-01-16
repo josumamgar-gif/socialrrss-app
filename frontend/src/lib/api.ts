@@ -224,6 +224,11 @@ export const paymentsAPI = {
     const response = await api.delete<{ message: string }>(`/payments/${paymentId}`);
     return response.data;
   },
+
+  sendReceipt: async (paymentId: string): Promise<{ message: string }> => {
+    const response = await api.post<{ message: string }>(`/payments/${paymentId}/send-receipt`);
+    return response.data;
+  },
 };
 
 export default api;

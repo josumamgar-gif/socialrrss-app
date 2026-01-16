@@ -7,6 +7,7 @@ import {
   getPendingPayments,
   resumePayment,
   deletePayment,
+  sendReceipt,
 } from '../controllers/payments.controller';
 import { authenticate } from '../middleware/auth.middleware';
 
@@ -17,6 +18,7 @@ router.post('/capture-order', authenticate, capturePaymentOrder);
 router.get('/history', authenticate, getPaymentHistory);
 router.get('/pending', authenticate, getPendingPayments);
 router.get('/resume/:paymentId', authenticate, resumePayment);
+router.post('/:paymentId/send-receipt', authenticate, sendReceipt);
 router.delete('/:paymentId', authenticate, deletePayment);
 router.get('/status/:paymentId', authenticate, checkPaymentStatus);
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import PaymentReceipt from '@/components/promocion/PaymentReceipt';
 import { useAuthStore } from '@/store/authStore';
 import { profilesAPI } from '@/lib/api';
 import { Profile, SocialNetwork } from '@/types';
@@ -83,6 +84,7 @@ export default function PromocionPage() {
   const [selectedProfile, setSelectedProfile] = useState<string | null>(null);
   const [showPlanSelector, setShowPlanSelector] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [profileData, setProfileData] = useState<Profile | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -102,7 +104,23 @@ export default function PromocionPage() {
         // Capturar el pago de PayPal
         handlePayPalReturn(token, PayerID);
       } else if (paypalSuccess === 'true') {
-        // Pago completado exitosamente
+        // Pago completado exitosamente - obtener datos del pago desde localStorage o query params
+        const paymentData = localStorage.getItem('lastPayment');
+        if (paymentData) {
+          try {
+            const parsed = JSON.parse(paymentData);
+            const paidProfile = profiles.find(p => p._id === parsed.profileId);
+            if (paidProfile) {
+              setPaymentReceipt({
+                payment: parsed,
+                profile: paidProfile,
+              });
+            }
+            localStorage.removeItem('lastPayment');
+          } catch (e) {
+            console.error('Error parseando payment data:', e);
+          }
+        }
         loadProfiles();
         // Limpiar URL
         window.history.replaceState({}, '', '/promocion');
@@ -112,9 +130,38 @@ export default function PromocionPage() {
 
   const handlePayPalReturn = async (token: string, PayerID: string) => {
     try {
-      // Buscar el pago pendiente y capturarlo
-      // Esto se manejará en el backend cuando se implemente la ruta de retorno
-      console.log('PayPal return:', token, PayerID);
+      // Capturar el pago de PayPal
+      const params = new URLSearchParams(window.location.search);
+      const paymentId = params.get('paymentId');
+      
+      if (paymentId) {
+        await paymentsAPI.captureOrder(token);
+        const statusCheck = await paymentsAPI.checkPaymentStatus(paymentId);
+        
+        if (statusCheck.status === 'completed') {
+          // Obtener datos del pago desde localStorage
+          const paymentData = localStorage.getItem('lastPayment');
+          if (paymentData) {
+            try {
+              const parsed = JSON.parse(paymentData);
+              const paidProfile = profiles.find(p => p._id === parsed.profileId) || profileData;
+              if (paidProfile) {
+                setPaymentReceipt({
+                  payment: {
+                    ...parsed,
+                    _id: paymentId,
+                  },
+                  profile: paidProfile,
+                });
+              }
+              localStorage.removeItem('lastPayment');
+            } catch (e) {
+              console.error('Error parseando payment data:', e);
+            }
+          }
+        }
+      }
+      
       loadProfiles();
       window.history.replaceState({}, '', '/promocion');
     } catch (error) {
@@ -146,6 +193,7 @@ export default function PromocionPage() {
       // Si tenemos el perfil creado, añadirlo directamente a la lista
       if (createdProfile) {
         console.log('🖼️ Imágenes del perfil creado:', createdProfile.images);
+        setProfileData(createdProfile);
         setProfiles(prev => {
           // Evitar duplicados
           const exists = prev.find(p => p._id === createdProfile._id);
@@ -172,9 +220,23 @@ export default function PromocionPage() {
     }
   };
 
-  const handlePaymentSuccess = () => {
+  const [paymentReceipt, setPaymentReceipt] = useState<{ payment: any; profile: Profile } | null>(null);
+
+  const handlePaymentSuccess = (paymentData: any) => {
+    // Obtener el perfil actual para mostrar en el recibo
+    const paidProfile = profiles.find(p => p._id === selectedProfile) || profileData;
+    if (paidProfile) {
+      // Guardar en localStorage por si es PayPal redirect
+      localStorage.setItem('lastPayment', JSON.stringify({
+        ...paymentData,
+        profileId: selectedProfile,
+      }));
+      setPaymentReceipt({
+        payment: paymentData,
+        profile: paidProfile,
+      });
+    }
     setShowPlanSelector(false);
-    setSelectedProfile(null);
     loadProfiles();
   };
 
@@ -395,6 +457,21 @@ export default function PromocionPage() {
           </div>
         )}
       </div>
+
+      {/* Recibo de pago */}
+      {paymentReceipt && (
+        <PaymentReceipt
+          payment={paymentReceipt.payment}
+          profile={paymentReceipt.profile}
+          onClose={() => {
+            setPaymentReceipt(null);
+            setSelectedProfile(null);
+          }}
+          onViewProfile={() => {
+            // El componente PaymentReceipt maneja esto internamente
+          }}
+        />
+      )}
     </div>
   );
 }

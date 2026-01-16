@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { profilesAPI } from '@/lib/api';
 import { Profile, SocialNetwork } from '@/types';
@@ -111,16 +111,18 @@ export default function PrincipalPage() {
     { value: 'otros', label: 'Otros' },
   ];
 
-  const displayedProfiles = selectedNetworkFilter === 'all'
-    ? profiles
-    : profiles.filter((p) => p.socialNetwork === selectedNetworkFilter);
+  const displayedProfiles = useMemo(() => {
+    return selectedNetworkFilter === 'all'
+      ? profiles
+      : profiles.filter((p) => p.socialNetwork === selectedNetworkFilter);
+  }, [profiles, selectedNetworkFilter]);
 
   useEffect(() => {
     loadProfiles();
     checkDemoCompletion();
   }, [loadProfiles, checkDemoCompletion]);
 
-  const handleSwipeLeft = () => {
+  const handleSwipeLeft = useCallback(() => {
     const currentProfile = displayedProfiles[currentIndex];
     if (!currentProfile) return;
     
@@ -138,8 +140,8 @@ export default function PrincipalPage() {
     }
     
     if (currentIndex < displayedProfiles.length - 1) {
-      setHistory([...history, currentIndex]);
-      setCurrentIndex(currentIndex + 1);
+      setHistory((prev) => [...prev, currentIndex]);
+      setCurrentIndex((prev) => prev + 1);
     } else {
       // Si no hay más perfiles, recargar para obtener nuevos (sin los vistos)
       loadProfiles().then(() => {
@@ -148,9 +150,9 @@ export default function PrincipalPage() {
         setHistory([]);
       });
     }
-  };
+  }, [displayedProfiles, currentIndex, markProfileAsViewed, demoInteractions, hasCompletedDemo, loadProfiles]);
 
-  const handleSwipeRight = () => {
+  const handleSwipeRight = useCallback(() => {
     const currentProfile = displayedProfiles[currentIndex];
     if (!currentProfile) return;
     
@@ -168,8 +170,8 @@ export default function PrincipalPage() {
     }
     
     if (currentIndex < displayedProfiles.length - 1) {
-      setHistory([...history, currentIndex]);
-      setCurrentIndex(currentIndex + 1);
+      setHistory((prev) => [...prev, currentIndex]);
+      setCurrentIndex((prev) => prev + 1);
     } else {
       // Si no hay más perfiles, recargar para obtener nuevos (sin los vistos)
       loadProfiles().then(() => {
@@ -178,9 +180,9 @@ export default function PrincipalPage() {
         setHistory([]);
       });
     }
-  };
+  }, [displayedProfiles, currentIndex, markProfileAsViewed, demoInteractions, hasCompletedDemo, loadProfiles]);
 
-  const handleSwipeUp = () => {
+  const handleSwipeUp = useCallback(() => {
     const currentProfile = displayedProfiles[currentIndex];
     if (!currentProfile) return;
     
@@ -197,15 +199,18 @@ export default function PrincipalPage() {
       }
     }
     // Los detalles se manejan dentro del ProfileCard
-  };
+  }, [displayedProfiles, currentIndex, markProfileAsViewed, demoInteractions, hasCompletedDemo]);
 
-  const handleGoBack = () => {
-    if (history.length > 0) {
-      const previousIndex = history[history.length - 1];
-      setHistory(history.slice(0, -1));
-      setCurrentIndex(previousIndex);
-    }
-  };
+  const handleGoBack = useCallback(() => {
+    setHistory((prev) => {
+      if (prev.length > 0) {
+        const previousIndex = prev[prev.length - 1];
+        setCurrentIndex(previousIndex);
+        return prev.slice(0, -1);
+      }
+      return prev;
+    });
+  }, []);
 
   if (loading) {
     return (
@@ -247,11 +252,11 @@ export default function PrincipalPage() {
   }, [selectedNetworkFilter]);
 
   useEffect(() => {
-    if (currentIndex >= displayedProfiles.length) {
+    if (displayedProfiles.length > 0 && currentIndex >= displayedProfiles.length) {
       setCurrentIndex(0);
       setHistory([]);
     }
-  }, [displayedProfiles, currentIndex]);
+  }, [displayedProfiles.length, currentIndex]);
 
   return (
     <div className="w-full bg-white flex items-center justify-center px-4 overflow-hidden relative" style={{ 
