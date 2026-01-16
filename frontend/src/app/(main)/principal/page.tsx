@@ -281,7 +281,13 @@ export default function PrincipalPage() {
           </select>
         </div>
 
-        <div className="text-center px-4 pt-28 sm:pt-32">
+        <div className="text-center px-4" style={{ 
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          paddingTop: '4rem'
+        }}>
           <p className="text-gray-600 text-lg mb-2">No hay perfiles disponibles para esta red social</p>
           <p className="text-gray-500 text-sm">Intenta seleccionar otra red social o recargar la página</p>
         </div>
@@ -334,7 +340,13 @@ export default function PrincipalPage() {
           </select>
         </div>
 
-        <div className="text-center px-4 pt-28 sm:pt-32">
+        <div className="text-center px-4" style={{ 
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          paddingTop: '4rem'
+        }}>
           <p className="text-gray-600 text-lg mb-2">No hay perfiles disponibles por el momento</p>
           <p className="text-gray-500 text-sm">Intenta recargar la página o contacta al administrador</p>
         </div>
@@ -382,7 +394,7 @@ export default function PrincipalPage() {
         }}
       />
       {/* Filtro de redes sociales - Parte superior central con efecto liquid glass */}
-      <div className="absolute top-4 sm:top-6 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-xs px-4">
+      <div className="absolute top-2 sm:top-3 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-xs px-4">
         <select
           value={selectedNetworkFilter}
           onChange={(e) => setSelectedNetworkFilter(e.target.value as 'all' | SocialNetwork)}
@@ -417,7 +429,14 @@ export default function PrincipalPage() {
         </select>
       </div>
 
-      <div className="flex flex-col items-center justify-center w-full max-w-md mx-auto pt-40 sm:pt-48">
+      <div className="flex flex-col items-center justify-center w-full" style={{ 
+        position: 'absolute',
+        top: '55%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: '100%',
+        maxWidth: '28rem'
+      }}>
         {needsDemoInteraction && (
           <div className="mb-4 max-w-md w-full mx-auto bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4 z-40">
             <div className="flex items-start">
@@ -439,7 +458,7 @@ export default function PrincipalPage() {
         )}
 
         {filteredProfiles.length > 0 && currentProfile && (
-          <div className="relative w-full h-full profile-card-container" style={{ overflow: 'visible', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, touchAction: 'none' }}>
+          <div className="relative w-full max-w-md mx-auto profile-card-container" style={{ overflow: 'visible', touchAction: 'none', width: '100%' }}>
             {filteredProfiles.slice(currentIndex, currentIndex + 3).map((profile, idx) => (
               <div
                 key={profile._id}
