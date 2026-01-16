@@ -7,6 +7,12 @@ import { Profile, SocialNetwork } from '@/types';
 import ProfileCard from '@/components/principal/ProfileCard';
 import ProfileDetail from '@/components/principal/ProfileDetail';
 import { demoProfiles } from '@/data/demoProfiles';
+import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  ArrowUpIcon,
+  ArrowUturnLeftIcon,
+} from '@heroicons/react/24/outline';
 
 export default function PrincipalPage() {
   const user = useAuthStore((state) => state.user);
@@ -20,6 +26,8 @@ export default function PrincipalPage() {
   const [selectedNetworkFilter, setSelectedNetworkFilter] = useState<'all' | SocialNetwork>('all');
   const [cornerEffects, setCornerEffects] = useState({ left: 0, right: 0, top: 0, bottom: 0 });
   const [lastSwipeDirection, setLastSwipeDirection] = useState<'left' | 'right' | 'up' | 'down' | 'back' | null>(null);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [backUsed, setBackUsed] = useState(false);
 
   // Opciones del filtro
   const networkOptions: { value: 'all' | SocialNetwork; label: string }[] = [
@@ -221,13 +229,19 @@ export default function PrincipalPage() {
   };
 
   const handleGoBack = () => {
-    if (history.length > 0) {
+    if (history.length > 0 && !backUsed) {
       setLastSwipeDirection('back');
+      setBackUsed(true);
       const previousIndex = history[history.length - 1];
       setCurrentIndex(previousIndex);
       setHistory(history.slice(0, -1));
     }
   };
+
+  // Resetear backUsed cuando cambia el índice del perfil
+  useEffect(() => {
+    setBackUsed(false);
+  }, [currentIndex]);
 
   if (loading) {
     return (
@@ -510,6 +524,100 @@ export default function PrincipalPage() {
           profile={selectedProfile}
           onClose={() => setSelectedProfile(null)}
         />
+      )}
+
+      {/* Botones de acción independientes - Justo encima de las pestañas */}
+      {filteredProfiles.length > 0 && currentProfile && (
+        <div className="fixed bottom-20 md:bottom-16 left-1/2 transform -translate-x-1/2 z-50 flex justify-center space-x-4 px-4">
+          {/* Botón Izquierda (Siguiente Perfil) */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              if (!isAnimating) {
+                setIsAnimating(true);
+                handleSwipeLeft();
+                setTimeout(() => setIsAnimating(false), 300);
+              }
+            }}
+            disabled={isAnimating}
+            className="bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-full shadow-xl hover:shadow-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-red-500 focus:ring-offset-2 w-14 h-14 flex items-center justify-center transform hover:scale-110 active:scale-95"
+            aria-label="Siguiente Perfil"
+          >
+            <ArrowLeftIcon className="h-7 w-7" />
+          </button>
+
+          {/* Botón Arriba (Ver Detalles) */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              if (!isAnimating && currentProfile) {
+                setIsAnimating(true);
+                setSelectedProfile(currentProfile);
+                setTimeout(() => setIsAnimating(false), 300);
+              }
+            }}
+            disabled={isAnimating}
+            className="bg-gradient-to-br from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white rounded-full shadow-xl hover:shadow-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-yellow-500 focus:ring-offset-2 w-14 h-14 flex items-center justify-center transform hover:scale-110 active:scale-95"
+            aria-label="Ver Detalles"
+          >
+            <ArrowUpIcon className="h-7 w-7" />
+          </button>
+
+          {/* Botón Retroceder */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              if (!isAnimating && !backUsed && history.length > 0) {
+                setIsAnimating(true);
+                handleGoBack();
+                setTimeout(() => setIsAnimating(false), 300);
+              }
+            }}
+            disabled={isAnimating || backUsed || history.length === 0}
+            className={`${
+              backUsed || history.length === 0
+                ? 'bg-gradient-to-br from-gray-400 to-gray-500 cursor-not-allowed'
+                : 'bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700'
+            } text-white rounded-full shadow-xl hover:shadow-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-green-500 focus:ring-offset-2 w-14 h-14 flex items-center justify-center transform hover:scale-110 active:scale-95`}
+            aria-label="Retroceder"
+          >
+            <ArrowUturnLeftIcon className="h-7 w-7" />
+          </button>
+
+          {/* Botón Derecha (Ir al Enlace) */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              if (!isAnimating && currentProfile) {
+                setIsAnimating(true);
+                // Abrir enlace primero
+                if (currentProfile.link) {
+                  const linkWindow = window.open(currentProfile.link, '_blank', 'noopener,noreferrer');
+                  if (!linkWindow || linkWindow.closed || typeof linkWindow.closed === 'undefined') {
+                    setTimeout(() => {
+                      window.open(currentProfile.link, '_blank', 'noopener,noreferrer');
+                    }, 100);
+                  }
+                }
+                handleSwipeRight();
+                setTimeout(() => setIsAnimating(false), 300);
+              }
+            }}
+            disabled={isAnimating}
+            className="bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-full shadow-xl hover:shadow-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 w-14 h-14 flex items-center justify-center transform hover:scale-110 active:scale-95"
+            aria-label="Ir al Enlace"
+          >
+            <ArrowRightIcon className="h-7 w-7" />
+          </button>
+        </div>
       )}
     </div>
   );

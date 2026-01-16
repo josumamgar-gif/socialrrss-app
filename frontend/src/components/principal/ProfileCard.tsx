@@ -772,8 +772,8 @@ export default function ProfileCard({
             </h2>
           </div>
 
-          {/* Imagen */}
-          <div className="relative h-64 bg-gray-200">
+          {/* Imagen con descripción y datos superpuestos */}
+          <div className="relative h-[500px] bg-gray-200">
             {profile.images && profile.images.length > 0 ? (
               <img
                 src={getImageUrl(profile.images[0])}
@@ -781,17 +781,14 @@ export default function ProfileCard({
                 className="w-full h-full object-cover pointer-events-none"
                 onError={(e) => {
                   const img = e.target as HTMLImageElement;
-                  // Prevenir que intente cargar via.placeholder.com
                   if (img.src && img.src.includes('via.placeholder.com')) {
                     img.src = placeholderImage;
                     return;
                   }
-                  // Si falla cualquier otra imagen, usar placeholder
                   img.src = placeholderImage;
                 }}
                 onLoad={(e) => {
                   const img = e.target as HTMLImageElement;
-                  // Si por alguna razón se carga via.placeholder.com, reemplazarlo
                   if (img.src && img.src.includes('via.placeholder.com')) {
                     img.src = placeholderImage;
                   }
@@ -802,139 +799,59 @@ export default function ProfileCard({
                 <span className="text-6xl">📷</span>
               </div>
             )}
-          </div>
 
-          {/* Información */}
-          <div className="p-6 pb-24">
-            <p className="text-gray-600 mb-4 line-clamp-3">
-              {profile.profileData.description || 'Sin descripción'}
-            </p>
-            <div className="flex flex-wrap gap-2">
+            {/* Datos de redes sociales - Pastillas blancas superpuestas en la parte superior */}
+            <div className="absolute top-4 left-4 right-4 flex flex-wrap gap-2 z-10">
               {profile.profileData.followers && (
-                <span className="px-3 py-1 bg-gray-100 rounded-full text-sm">
+                <span className="px-4 py-2 bg-white rounded-full text-sm font-semibold text-black shadow-lg">
                   👥 {profile.profileData.followers.toLocaleString()}
                 </span>
               )}
               {profile.profileData.subscribers && (
-                <span className="px-3 py-1 bg-gray-100 rounded-full text-sm">
+                <span className="px-4 py-2 bg-white rounded-full text-sm font-semibold text-black shadow-lg">
                   👥 {profile.profileData.subscribers.toLocaleString()}
                 </span>
               )}
               {profile.profileData.videos && (
-                <span className="px-3 py-1 bg-gray-100 rounded-full text-sm">
+                <span className="px-4 py-2 bg-white rounded-full text-sm font-semibold text-black shadow-lg">
                   🎥 {profile.profileData.videos.toLocaleString()}
                 </span>
               )}
               {profile.profileData.videoCount && (
-                <span className="px-3 py-1 bg-gray-100 rounded-full text-sm">
+                <span className="px-4 py-2 bg-white rounded-full text-sm font-semibold text-black shadow-lg">
                   🎥 {profile.profileData.videoCount.toLocaleString()}
                 </span>
               )}
               {profile.profileData.posts && (
-                <span className="px-3 py-1 bg-gray-100 rounded-full text-sm">
+                <span className="px-4 py-2 bg-white rounded-full text-sm font-semibold text-black shadow-lg">
                   📸 {profile.profileData.posts.toLocaleString()}
                 </span>
               )}
+              {profile.profileData.likes && (
+                <span className="px-4 py-2 bg-white rounded-full text-sm font-semibold text-black shadow-lg">
+                  ❤️ {profile.profileData.likes.toLocaleString()}
+                </span>
+              )}
+              {profile.profileData.tweets && (
+                <span className="px-4 py-2 bg-white rounded-full text-sm font-semibold text-black shadow-lg">
+                  🐦 {profile.profileData.tweets.toLocaleString()}
+                </span>
+              )}
             </div>
-          </div>
 
-          {/* Botones de acción */}
-          <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-3 px-4 md:space-x-4 bg-white/95 backdrop-blur-sm py-3 rounded-t-xl border-t border-gray-200 pointer-events-auto" style={{ touchAction: 'auto', zIndex: 9999 }}>
-            <Tooltip text="Siguiente Perfil">
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  if (!isAnimating && onSwipeLeft) {
-                    triggerButtonAnimation('left', onSwipeLeft);
-                  }
+            {/* Descripción superpuesta en la parte inferior con fondo opaco 75% */}
+            {profile.profileData.description && (
+              <div 
+                className="absolute bottom-0 left-0 right-0 p-6 z-10"
+                style={{
+                  background: 'linear-gradient(to top, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.5), transparent)',
                 }}
-                onMouseUp={(e) => e.currentTarget.blur()}
-                disabled={isAnimating}
-                className="bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white p-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 w-12 h-12 flex items-center justify-center transform hover:scale-105 active:scale-95"
-                style={{ touchAction: 'auto', pointerEvents: 'auto' }}
-                aria-label="Siguiente Perfil"
               >
-                <ArrowLeftIcon className="h-6 w-6" />
-              </button>
-            </Tooltip>
-
-            <Tooltip text="Ver Detalles">
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  if (!isAnimating) {
-                    triggerButtonAnimation('up', () => {
-                      const currentOnShowDetail = onShowDetailRef.current;
-                      const currentProfile = profileRef.current;
-                      if (currentOnShowDetail) {
-                        currentOnShowDetail(currentProfile);
-                      }
-                    });
-                  }
-                }}
-                onMouseUp={(e) => e.currentTarget.blur()}
-                disabled={isAnimating}
-                className="bg-gradient-to-br from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white p-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 w-12 h-12 flex items-center justify-center transform hover:scale-105 active:scale-95"
-                style={{ touchAction: 'auto', pointerEvents: 'auto' }}
-                aria-label="Ver Detalles"
-              >
-                <ArrowUpIcon className="h-6 w-6" />
-              </button>
-            </Tooltip>
-
-            <Tooltip text={backUsed ? "Ya retrocediste" : "Retroceder"}>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  if (!isAnimating && !backUsed && canGoBack && onGoBack) {
-                    triggerBackAnimation(onGoBack);
-                  }
-                }}
-                onMouseUp={(e) => e.currentTarget.blur()}
-                disabled={isAnimating || backUsed || !canGoBack}
-                className={`${
-                  backUsed || !canGoBack
-                    ? 'bg-gradient-to-br from-gray-400 to-gray-500 cursor-not-allowed'
-                    : 'bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700'
-                } text-white p-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 w-12 h-12 flex items-center justify-center transform hover:scale-105 active:scale-95`}
-                style={{ touchAction: 'auto', pointerEvents: 'auto' }}
-                aria-label="Retroceder"
-              >
-                <ArrowUturnLeftIcon className="h-6 w-6" />
-              </button>
-            </Tooltip>
-
-            <Tooltip text="Ir al Enlace">
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  if (!isAnimating && onSwipeRight) {
-                    // SIEMPRE abrir enlace primero
-                    if (profile.link) {
-                      setTimeout(() => {
-                        window.open(profile.link, '_blank', 'noopener,noreferrer');
-                      }, 50);
-                    }
-                    triggerButtonAnimation('right', onSwipeRight);
-                  }
-                }}
-                onMouseUp={(e) => e.currentTarget.blur()}
-                disabled={isAnimating}
-                className="bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white p-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 w-12 h-12 flex items-center justify-center transform hover:scale-105 active:scale-95"
-                style={{ touchAction: 'auto', pointerEvents: 'auto' }}
-                aria-label="Ir al Enlace"
-              >
-                <ArrowRightIcon className="h-6 w-6" />
-              </button>
-            </Tooltip>
+                <p className="text-white text-base font-medium leading-relaxed line-clamp-4 drop-shadow-lg">
+                  {profile.profileData.description}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>
