@@ -182,6 +182,11 @@ export const paymentsAPI = {
     return response.data;
   },
 
+  resumePayment: async (paymentId: string): Promise<{ resumeUrl?: string | null; message?: string }> => {
+    const response = await api.get<{ resumeUrl?: string | null; message?: string }>(`/payments/resume/${paymentId}`);
+    return response.data;
+  },
+
   deletePayment: async (paymentId: string): Promise<{ message: string }> => {
     const response = await api.delete<{ message: string }>(`/payments/${paymentId}`);
     return response.data;

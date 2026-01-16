@@ -5,6 +5,7 @@ import {
   getPaymentHistory,
   checkPaymentStatus,
   getPendingPayments,
+  resumePayment,
   deletePayment,
 } from '../controllers/payments.controller';
 import { authenticate } from '../middleware/auth.middleware';
@@ -15,6 +16,7 @@ router.post('/create-order', authenticate, createPaymentOrder);
 router.post('/capture-order', authenticate, capturePaymentOrder);
 router.get('/history', authenticate, getPaymentHistory);
 router.get('/pending', authenticate, getPendingPayments);
+router.get('/resume/:paymentId', authenticate, resumePayment);
 router.delete('/:paymentId', authenticate, deletePayment);
 router.get('/status/:paymentId', authenticate, checkPaymentStatus);
 

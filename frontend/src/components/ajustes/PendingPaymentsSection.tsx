@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { paymentsAPI } from '@/lib/api';
-import { TrashIcon } from '@heroicons/react/24/outline';
+import { ArrowPathIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 export default function PendingPaymentsSection() {
   const [pendingPayments, setPendingPayments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [resumingId, setResumingId] = useState<string | null>(null);
 
   useEffect(() => {
     loadPendingPayments();
@@ -37,6 +38,23 @@ export default function PendingPaymentsSection() {
       alert(error.response?.data?.error || 'Error al eliminar pago');
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const handleResume = async (paymentId: string) => {
+    setResumingId(paymentId);
+    try {
+      const response = await paymentsAPI.resumePayment(paymentId);
+      if (response.resumeUrl) {
+        window.location.href = response.resumeUrl;
+        return;
+      }
+      alert(response.message || 'No se pudo reanudar el pago. Vuelve a intentar desde Promoción.');
+      window.location.href = '/promocion';
+    } catch (error: any) {
+      alert(error.response?.data?.error || 'Error al reanudar el pago');
+    } finally {
+      setResumingId(null);
     }
   };
 
@@ -86,14 +104,27 @@ export default function PendingPaymentsSection() {
                 Método: {payment.paymentMethod}
               </p>
             </div>
-            <button
-              onClick={() => handleDelete(payment._id)}
-              disabled={deletingId === payment._id}
-              className="ml-4 p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
-              title="Eliminar pago pendiente"
-            >
-              <TrashIcon className="h-5 w-5" />
-            </button>
+            <div className="ml-4 flex items-center gap-2">
+              <button
+                onClick={() => handleResume(payment._id)}
+                disabled={resumingId === payment._id || deletingId === payment._id}
+                className="px-3 py-2 text-sm font-medium text-yellow-900 bg-yellow-100 hover:bg-yellow-200 rounded-lg transition-colors disabled:opacity-50"
+                title="Reanudar pago pendiente"
+              >
+                <span className="inline-flex items-center gap-1">
+                  <ArrowPathIcon className="h-4 w-4" />
+                  Reanudar
+                </span>
+              </button>
+              <button
+                onClick={() => handleDelete(payment._id)}
+                disabled={deletingId === payment._id || resumingId === payment._id}
+                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                title="Eliminar pago pendiente"
+              >
+                <TrashIcon className="h-5 w-5" />
+              </button>
+            </div>
           </div>
         ))}
       </div>

@@ -364,6 +364,48 @@ export const getPendingPayments = async (req: AuthRequest, res: Response): Promi
   }
 };
 
+// Reanudar pago pendiente (solo PayPal por ahora)
+export const resumePayment = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ error: 'No autenticado' });
+      return;
+    }
+
+    const { paymentId } = req.params;
+    const payment = await Payment.findOne({
+      _id: paymentId,
+      userId: req.user.userId,
+      status: 'pending',
+    });
+
+    if (!payment) {
+      res.status(404).json({ error: 'Pago pendiente no encontrado' });
+      return;
+    }
+
+    if (payment.paymentMethod === 'paypal' && payment.paypalOrderId) {
+      const mode = process.env.PAYPAL_MODE || 'sandbox';
+      const paypalBaseUrl =
+        mode === 'production'
+          ? 'https://www.paypal.com/checkoutnow'
+          : 'https://www.sandbox.paypal.com/checkoutnow';
+      const resumeUrl = `${paypalBaseUrl}?token=${payment.paypalOrderId}`;
+      res.json({ resumeUrl });
+      return;
+    }
+
+    res.json({
+      resumeUrl: null,
+      reason: payment.paymentMethod,
+      message: 'Reanuda este pago desde la pantalla de Promoción.',
+    });
+  } catch (error: any) {
+    console.error('Error reanudando pago:', error);
+    res.status(500).json({ error: 'Error al reanudar el pago' });
+  }
+};
+
 // Eliminar un pago (solo pendientes o fallidos)
 export const deletePayment = async (req: AuthRequest, res: Response): Promise<void> => {
   try {

@@ -78,8 +78,6 @@ div[role="textbox"] {
 /* Mejorar visibilidad de títulos */
 .scroll-smooth {
   scroll-behavior: smooth;
-}
-
-.overscroll-contain {
+}.overscroll-contain {
   overscroll-behavior: contain;
 }
