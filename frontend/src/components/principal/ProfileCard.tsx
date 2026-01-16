@@ -68,6 +68,48 @@ export default function ProfileCard({
   const [backUsed, setBackUsed] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  // Refs para valores que cambian frecuentemente
+  const positionRef = useRef(position);
+  const startPosRef = useRef(startPos);
+  const dragActionRef = useRef(dragAction);
+  const isDraggingRef = useRef(isDragging);
+  const isAnimatingRef = useRef(isAnimating);
+  
+  // Refs para callbacks y props que pueden cambiar
+  const profileLinkRef = useRef(profile.link);
+  const profileRef = useRef(profile);
+  const onSwipeLeftRef = useRef(onSwipeLeft);
+  const onSwipeRightRef = useRef(onSwipeRight);
+  const onSwipeUpRef = useRef(onSwipeUp);
+  const onShowDetailRef = useRef(onShowDetail);
+  
+  // Actualizar refs cuando cambian los estados/props
+  useEffect(() => {
+    positionRef.current = position;
+  }, [position]);
+  useEffect(() => {
+    startPosRef.current = startPos;
+  }, [startPos]);
+  useEffect(() => {
+    dragActionRef.current = dragAction;
+  }, [dragAction]);
+  useEffect(() => {
+    isDraggingRef.current = isDragging;
+  }, [isDragging]);
+  useEffect(() => {
+    isAnimatingRef.current = isAnimating;
+  }, [isAnimating]);
+  useEffect(() => {
+    profileLinkRef.current = profile.link;
+    profileRef.current = profile;
+  }, [profile.link, profile._id]);
+  useEffect(() => {
+    onSwipeLeftRef.current = onSwipeLeft;
+    onSwipeRightRef.current = onSwipeRight;
+    onSwipeUpRef.current = onSwipeUp;
+    onShowDetailRef.current = onShowDetail;
+  }, [onSwipeLeft, onSwipeRight, onSwipeUp, onShowDetail]);
 
   const getActionForPosition = (x: number, y: number, width: number, height: number): DragAction => {
     const threshold = 40; // Reducir threshold para mayor sensibilidad
@@ -131,11 +173,13 @@ export default function ProfileCard({
       return;
     }
 
+    // Usar ref para obtener la posición actual
+    const currentPosition = positionRef.current;
     const translateX = direction === 'left' ? '-100vw' : '100vw';
     
     // Optimizar para animaciones fluidas
     card.style.willChange = 'transform, opacity';
-    card.style.transform = `translate(${translateX}, ${position.y}px) rotate(${direction === 'left' ? '-30deg' : '30deg'})`;
+    card.style.transform = `translate(${translateX}, ${currentPosition.y}px) rotate(${direction === 'left' ? '-30deg' : '30deg'})`;
     card.style.opacity = '0';
     card.style.transition = 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1)';
 
@@ -155,13 +199,15 @@ export default function ProfileCard({
       setPosition({ x: 0, y: 0 });
       setIsAnimating(false);
     }, 250);
-  }, [position.y]);
+  }, []); // Sin dependencias - usa ref para posición
 
   const handleMove = useCallback((clientX: number, clientY: number) => {
-    if (!isDragging || isAnimating) return;
+    // Usar refs para obtener valores actuales sin dependencias
+    if (!isDraggingRef.current || isAnimatingRef.current) return;
     
-    const deltaX = clientX - startPos.x;
-    const deltaY = clientY - startPos.y;
+    const currentStartPos = startPosRef.current;
+    const deltaX = clientX - currentStartPos.x;
+    const deltaY = clientY - currentStartPos.y;
     setPosition({ x: deltaX, y: deltaY });
     
     // Obtener dimensiones del contenedor
@@ -170,45 +216,56 @@ export default function ProfileCard({
       const action = getActionForPosition(deltaX, deltaY, cardRect.width, cardRect.height);
       setDragAction(action);
     }
-  }, [isDragging, isAnimating, startPos]);
+  }, []); // Sin dependencias - usa refs
 
   const handleEnd = useCallback(() => {
-    if (!isDragging || isAnimating) {
+    // Usar refs para obtener valores actuales sin dependencias
+    if (!isDraggingRef.current || isAnimatingRef.current) {
       setIsDragging(false);
       return;
     }
     
+    const currentPosition = positionRef.current;
+    const currentDragAction = dragActionRef.current;
     const threshold = 40; // Mismo threshold que getActionForPosition
-    const absX = Math.abs(position.x);
-    const absY = Math.abs(position.y);
+    const absX = Math.abs(currentPosition.x);
+    const absY = Math.abs(currentPosition.y);
+
+    // Usar refs para obtener valores actuales
+    const currentProfileLink = profileLinkRef.current;
+    const currentProfile = profileRef.current;
+    const currentOnSwipeLeft = onSwipeLeftRef.current;
+    const currentOnSwipeRight = onSwipeRightRef.current;
+    const currentOnSwipeUp = onSwipeUpRef.current;
+    const currentOnShowDetail = onShowDetailRef.current;
 
     // Prioridad: usar dragAction si existe y tiene suficiente intensidad
-    if (dragAction.type && dragAction.intensity > 0.15) {
-      if (dragAction.type === 'left' && onSwipeLeft) {
-        triggerSwipeAnimation('left', onSwipeLeft);
+    if (currentDragAction.type && currentDragAction.intensity > 0.15) {
+      if (currentDragAction.type === 'left' && currentOnSwipeLeft) {
+        triggerSwipeAnimation('left', currentOnSwipeLeft);
         return;
-      } else if (dragAction.type === 'right') {
+      } else if (currentDragAction.type === 'right') {
         // Para el gesto a la derecha, SIEMPRE abrir el enlace si existe
-        if (profile.link) {
+        if (currentProfileLink) {
           // Abrir enlace en nueva pestaña
-          const linkWindow = window.open(profile.link, '_blank');
+          const linkWindow = window.open(currentProfileLink, '_blank');
           if (!linkWindow) {
             // Si no se pudo abrir (bloqueador de popups), intentar redirigir directamente
-            window.location.href = profile.link;
+            window.location.href = currentProfileLink;
           }
         }
         // Luego ejecutar el callback si existe
-        if (onSwipeRight) {
-          triggerSwipeAnimation('right', onSwipeRight);
+        if (currentOnSwipeRight) {
+          triggerSwipeAnimation('right', currentOnSwipeRight);
         } else {
           resetPosition();
         }
         return;
-      } else if (dragAction.type === 'up') {
-        if (onShowDetail) {
-          onShowDetail(profile);
-        } else if (onSwipeUp) {
-          onSwipeUp();
+      } else if (currentDragAction.type === 'up') {
+        if (currentOnShowDetail) {
+          currentOnShowDetail(currentProfile);
+        } else if (currentOnSwipeUp) {
+          currentOnSwipeUp();
         }
         resetPosition();
         return;
@@ -219,31 +276,31 @@ export default function ProfileCard({
     if (absX > threshold || absY > threshold) {
       if (absX > absY * 1.1) {
         // Movimiento horizontal dominante
-        if (position.x > threshold) {
+        if (currentPosition.x > threshold) {
           // Derecha - ABRIR ENLACE SIEMPRE PRIMERO
-          if (profile.link) {
-            const linkWindow = window.open(profile.link, '_blank');
+          if (currentProfileLink) {
+            const linkWindow = window.open(currentProfileLink, '_blank');
             if (!linkWindow) {
-              window.location.href = profile.link;
+              window.location.href = currentProfileLink;
             }
           }
-          if (onSwipeRight) {
-            triggerSwipeAnimation('right', onSwipeRight);
+          if (currentOnSwipeRight) {
+            triggerSwipeAnimation('right', currentOnSwipeRight);
           } else {
             resetPosition();
           }
           return;
-        } else if (position.x < -threshold && onSwipeLeft) {
+        } else if (currentPosition.x < -threshold && currentOnSwipeLeft) {
           // Izquierda
-          triggerSwipeAnimation('left', onSwipeLeft);
+          triggerSwipeAnimation('left', currentOnSwipeLeft);
           return;
         }
-      } else if (absY > absX * 1.1 && position.y < -threshold) {
+      } else if (absY > absX * 1.1 && currentPosition.y < -threshold) {
         // Movimiento hacia arriba dominante
-        if (onShowDetail) {
-          onShowDetail(profile);
-        } else if (onSwipeUp) {
-          onSwipeUp();
+        if (currentOnShowDetail) {
+          currentOnShowDetail(currentProfile);
+        } else if (currentOnSwipeUp) {
+          currentOnSwipeUp();
         }
         resetPosition();
         return;
@@ -252,23 +309,24 @@ export default function ProfileCard({
     
     // Si no se ejecutó ninguna acción, resetear
     resetPosition();
-  }, [isDragging, isAnimating, position, dragAction, profile.link, onSwipeLeft, onSwipeRight, onSwipeUp, onShowDetail, profile, triggerSwipeAnimation, resetPosition]);
+  }, [triggerSwipeAnimation, resetPosition]); // Solo dependencias estables
 
   useEffect(() => {
-    if (!isDragging) return;
+    // Usar ref para verificar isDragging sin dependencia
+    if (!isDraggingRef.current) return;
 
     const handleMouseMove = (e: MouseEvent) => {
-      if (!isDragging || isAnimating) return;
+      if (!isDraggingRef.current || isAnimatingRef.current) return;
       handleMove(e.clientX, e.clientY);
     };
     
     const handleMouseUp = () => {
-      if (!isDragging) return;
+      if (!isDraggingRef.current) return;
       handleEnd();
     };
     
     const handleTouchMove = (e: TouchEvent) => {
-      if (!isDragging || isAnimating) return;
+      if (!isDraggingRef.current || isAnimatingRef.current) return;
       // Solo prevenir scroll si realmente estamos arrastrando (no es un botón)
       const target = e.target as HTMLElement;
       if (!target.closest('button')) {
@@ -279,7 +337,7 @@ export default function ProfileCard({
     };
     
     const handleTouchEnd = (e: TouchEvent) => {
-      if (!isDragging) return;
+      if (!isDraggingRef.current) return;
       // NO prevenir aquí para permitir clicks en botones
       const target = e.target as HTMLElement;
       if (!target.closest('button')) {
@@ -299,7 +357,7 @@ export default function ProfileCard({
       window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [isDragging, isAnimating, handleMove, handleEnd]);
+  }, [isDragging, handleMove, handleEnd]); // handleMove y handleEnd son estables ahora
 
   // Resetear backUsed cada vez que cambia el perfil actual visible
   // Se resetea cuando cambias de perfil (avanzar o retroceder)
@@ -637,8 +695,10 @@ export default function ProfileCard({
                   e.preventDefault();
                   if (!isAnimating) {
                     triggerButtonAnimation('up', () => {
-                      if (onShowDetail) {
-                        onShowDetail(profile);
+                      const currentOnShowDetail = onShowDetailRef.current;
+                      const currentProfile = profileRef.current;
+                      if (currentOnShowDetail) {
+                        currentOnShowDetail(currentProfile);
                       }
                     });
                   }

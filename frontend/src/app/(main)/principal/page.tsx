@@ -19,23 +19,18 @@ export default function PrincipalPage() {
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
   const [selectedNetworkFilter, setSelectedNetworkFilter] = useState<'all' | SocialNetwork>('all');
 
+  // Ref para el userId actual (declarar primero para que esté disponible)
+  const userIdRef = useRef(user?.id);
+  useEffect(() => {
+    userIdRef.current = user?.id;
+  }, [user?.id]);
+
   const checkDemoCompletion = useCallback(() => {
     if (typeof window !== 'undefined') {
       const completed = localStorage.getItem('demoCompleted');
       setHasCompletedDemo(completed === 'true');
     }
   }, []);
-
-  // Obtener perfiles vistos por el usuario actual (funciona incluso sin usuario autenticado)
-  const getViewedProfiles = useCallback((): string[] => {
-    if (typeof window === 'undefined') return [];
-    
-    // Si hay usuario, usar su ID, sino usar 'anonymous'
-    const userId = user?.id || 'anonymous';
-    const key = `viewedProfiles_${userId}`;
-    const viewed = localStorage.getItem(key);
-    return viewed ? JSON.parse(viewed) : [];
-  }, [user]);
 
   // Marcar un perfil como visto (pero NO marcar demos como vistos permanentemente)
   const markProfileAsViewed = useCallback((profileId: string) => {
@@ -61,12 +56,6 @@ export default function PrincipalPage() {
       localStorage.setItem(key, JSON.stringify(viewed));
     }
   }, []); // Sin dependencias - usa ref para acceder al userId actual
-
-  // Ref para el userId actual
-  const userIdRef = useRef(user?.id);
-  useEffect(() => {
-    userIdRef.current = user?.id;
-  }, [user?.id]);
 
   const loadProfiles = useCallback(async () => {
     try {
@@ -147,15 +136,27 @@ export default function PrincipalPage() {
     loadProfiles();
     checkDemoCompletion();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id]); // Recargar cuando cambie el usuario
+  }, [user?.id]); // loadProfiles y checkDemoCompletion son estables (sin dependencias)
+
+  // Refs para callbacks estables
+  const markProfileAsViewedRef = useRef(markProfileAsViewed);
+  const loadProfilesRef = useRef(loadProfiles);
+  
+  useEffect(() => {
+    markProfileAsViewedRef.current = markProfileAsViewed;
+  }, [markProfileAsViewed]);
+  
+  useEffect(() => {
+    loadProfilesRef.current = loadProfiles;
+  }, [loadProfiles]);
 
   const handleSwipeLeft = useCallback(() => {
     const profiles = displayedProfilesRef.current;
     const currentProfile = profiles[currentIndex];
     if (!currentProfile) return;
     
-    // Marcar perfil como visto
-    markProfileAsViewed(currentProfile._id);
+    // Marcar perfil como visto usando ref
+    markProfileAsViewedRef.current(currentProfile._id);
     
     if (currentProfile._id.startsWith('demo-')) {
       setDemoInteractions((prev) => {
@@ -176,20 +177,20 @@ export default function PrincipalPage() {
       setCurrentIndex(currentIndex + 1);
     } else {
       // Si no hay más perfiles, recargar para obtener nuevos (sin los vistos)
-      loadProfiles().then(() => {
+      loadProfilesRef.current().then(() => {
         setCurrentIndex(0);
         setHistory([]);
       });
     }
-  }, [currentIndex, markProfileAsViewed, loadProfiles]);
+  }, [currentIndex]); // Solo currentIndex como dependencia
 
   const handleSwipeRight = useCallback(() => {
     const profiles = displayedProfilesRef.current;
     const currentProfile = profiles[currentIndex];
     if (!currentProfile) return;
     
-    // Marcar perfil como visto
-    markProfileAsViewed(currentProfile._id);
+    // Marcar perfil como visto usando ref
+    markProfileAsViewedRef.current(currentProfile._id);
     
     if (currentProfile._id.startsWith('demo-')) {
       setDemoInteractions((prev) => {
@@ -210,20 +211,20 @@ export default function PrincipalPage() {
       setCurrentIndex(currentIndex + 1);
     } else {
       // Si no hay más perfiles, recargar para obtener nuevos (sin los vistos)
-      loadProfiles().then(() => {
+      loadProfilesRef.current().then(() => {
         setCurrentIndex(0);
         setHistory([]);
       });
     }
-  }, [currentIndex, markProfileAsViewed, loadProfiles]);
+  }, [currentIndex]); // Solo currentIndex como dependencia
 
   const handleSwipeUp = useCallback(() => {
     const profiles = displayedProfilesRef.current;
     const currentProfile = profiles[currentIndex];
     if (!currentProfile) return;
     
-    // Marcar perfil como visto cuando se ven los detalles
-    markProfileAsViewed(currentProfile._id);
+    // Marcar perfil como visto cuando se ven los detalles usando ref
+    markProfileAsViewedRef.current(currentProfile._id);
     
     if (currentProfile._id.startsWith('demo-')) {
       setDemoInteractions((prev) => {
@@ -239,7 +240,7 @@ export default function PrincipalPage() {
       });
     }
     // Los detalles se manejan dentro del ProfileCard
-  }, [currentIndex, markProfileAsViewed]);
+  }, [currentIndex]); // Solo currentIndex como dependencia
 
   const handleGoBack = useCallback(() => {
     setHistory((prev) => {

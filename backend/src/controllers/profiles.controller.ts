@@ -209,7 +209,7 @@ export const createProfile = async (req: AuthRequest, res: Response): Promise<vo
     }
 
     // Validar que la red social sea válida
-    const validNetworks = ['tiktok', 'youtube', 'instagram', 'twitch', 'facebook', 'x', 'otros'];
+    const validNetworks = ['tiktok', 'youtube', 'instagram', 'twitch', 'facebook', 'x', 'linkedin', 'otros'];
     if (!validNetworks.includes(socialNetwork.trim())) {
       res.status(400).json({ error: `Red social no válida. Redes válidas: ${validNetworks.join(', ')}` });
       return;
