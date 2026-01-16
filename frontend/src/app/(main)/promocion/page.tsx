@@ -25,6 +25,13 @@ const socialNetworks: SocialNetworkOption[] = [
     stats: ['Seguidores', 'Publicaciones', 'Engagement'],
   },
   {
+    id: 'linkedin',
+    name: 'LinkedIn',
+    color: 'bg-blue-700',
+    description: 'La red profesional más importante',
+    stats: ['Seguidores', 'Conexiones', 'Publicaciones'],
+  },
+  {
     id: 'tiktok',
     name: 'TikTok',
     color: 'bg-black',

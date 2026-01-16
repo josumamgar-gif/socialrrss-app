@@ -173,7 +173,7 @@ export const updateProfile = async (req: AuthRequest, res: Response): Promise<vo
       return;
     }
 
-    const { username, email } = req.body;
+    const { username, email, fullName, bio, age, location, interests, favoriteSocialNetwork } = req.body;
 
     const user = await User.findById(req.user.userId);
 
@@ -203,6 +203,13 @@ export const updateProfile = async (req: AuthRequest, res: Response): Promise<vo
       user.email = email.toLowerCase();
     }
 
+    if (fullName !== undefined) user.fullName = fullName || undefined;
+    if (bio !== undefined) user.bio = bio || undefined;
+    if (age !== undefined) user.age = age ? parseInt(age) : undefined;
+    if (location !== undefined) user.location = location || undefined;
+    if (interests !== undefined) user.interests = Array.isArray(interests) ? interests : [];
+    if (favoriteSocialNetwork !== undefined) user.favoriteSocialNetwork = favoriteSocialNetwork || undefined;
+
     await user.save();
 
     res.json({
@@ -211,6 +218,12 @@ export const updateProfile = async (req: AuthRequest, res: Response): Promise<vo
         id: user._id.toString(),
         username: user.username,
         email: user.email,
+        fullName: user.fullName,
+        bio: user.bio,
+        age: user.age,
+        location: user.location,
+        interests: user.interests,
+        favoriteSocialNetwork: user.favoriteSocialNetwork,
       },
     });
   } catch (error: any) {

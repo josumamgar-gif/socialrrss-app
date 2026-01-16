@@ -6,6 +6,7 @@ import { profilesAPI } from '@/lib/api';
 export default function AutoRenewalSection() {
   const [profiles, setProfiles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   useEffect(() => {
     loadProfiles();
@@ -27,9 +28,20 @@ export default function AutoRenewalSection() {
   };
 
   const handleToggleRenewal = async (profileId: string, currentStatus: boolean) => {
-    // Aquí implementarías la lógica para deshabilitar/habilitar renovación automática
-    // Por ahora, solo mostramos la interfaz
-    alert('Funcionalidad de renovación automática próximamente disponible');
+    const newStatus = !currentStatus;
+    setUpdatingId(profileId);
+    try {
+      const response = await profilesAPI.updateAutoRenewal(profileId, newStatus);
+      setProfiles((prev) =>
+        prev.map((profile) =>
+          profile._id === profileId ? { ...profile, autoRenewal: response.profile.autoRenewal } : profile
+        )
+      );
+    } catch (error: any) {
+      alert(error.response?.data?.error || 'Error al actualizar la renovación automática');
+    } finally {
+      setUpdatingId(null);
+    }
   };
 
   if (loading) {
@@ -91,8 +103,9 @@ export default function AutoRenewalSection() {
               <label className="relative inline-flex items-center cursor-pointer ml-4">
                 <input
                   type="checkbox"
-                  checked={true} // Por ahora siempre activo
-                  onChange={() => handleToggleRenewal(profile._id, true)}
+                  checked={profile.autoRenewal ?? true}
+                  onChange={() => handleToggleRenewal(profile._id, profile.autoRenewal ?? true)}
+                  disabled={updatingId === profile._id}
                   className="sr-only peer"
                 />
                 <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>

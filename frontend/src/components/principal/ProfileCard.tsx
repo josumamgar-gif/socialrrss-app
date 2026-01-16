@@ -58,6 +58,19 @@ export default function ProfileCard({
   canGoBack = false,
   currentProfileIndex,
 }: ProfileCardProps) {
+  const placeholderImage =
+    "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='600' viewBox='0 0 400 600'%3E%3Crect width='400' height='600' fill='%23f3f4f6'/%3E%3Ctext x='200' y='300' text-anchor='middle' fill='%239ca3af' font-family='Arial' font-size='20'%3EImagen no disponible%3C/text%3E%3C/svg%3E";
+
+  const getImageUrl = (imagePath: string) => {
+    if (!imagePath) return '';
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      return imagePath;
+    }
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+    const baseUrl = apiUrl.replace('/api', '');
+    const cleanPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
+    return `${baseUrl}${cleanPath}`;
+  };
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
@@ -305,6 +318,7 @@ export default function ProfileCard({
       youtube: 'bg-red-500',
       instagram: 'bg-purple-600',
       facebook: 'bg-blue-600',
+      linkedin: 'bg-blue-700',
       twitch: 'bg-purple-600',
       x: 'bg-black',
       otros: 'bg-gray-500',
@@ -532,13 +546,11 @@ export default function ProfileCard({
           <div className="relative h-64 bg-gray-200">
             {profile.images && profile.images.length > 0 ? (
               <img
-                src={profile.images[0].startsWith('http') 
-                  ? profile.images[0] 
-                  : `http://localhost:5000${profile.images[0]}`}
+                src={getImageUrl(profile.images[0])}
                 alt={profile.profileData.username || 'Perfil'}
                 className="w-full h-full object-cover pointer-events-none"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x600?text=Imagen';
+                  (e.target as HTMLImageElement).src = placeholderImage;
                 }}
               />
             ) : (

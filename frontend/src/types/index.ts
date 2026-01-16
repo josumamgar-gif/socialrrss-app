@@ -1,4 +1,4 @@
-export type SocialNetwork = 'tiktok' | 'youtube' | 'twitch' | 'instagram' | 'facebook' | 'x' | 'otros';
+export type SocialNetwork = 'tiktok' | 'youtube' | 'twitch' | 'instagram' | 'facebook' | 'linkedin' | 'x' | 'otros';
 
 export interface User {
   id: string;
@@ -42,6 +42,7 @@ export interface Profile {
   socialNetwork: SocialNetwork;
   isActive: boolean;
   isPaid: boolean;
+  autoRenewal?: boolean;
   paidUntil: string | null;
   planType: PlanType | null;
   profileData: ProfileData;

@@ -3,7 +3,26 @@
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { authAPI } from '@/lib/api';
-import { TrashIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import MyProfilesGallery from './MyProfilesGallery';
+
+const INTERESTS_OPTIONS = [
+  'Gaming', 'Música', 'Fitness', 'Moda', 'Cocina', 'Viajes',
+  'Tecnología', 'Fotografía', 'Arte', 'Deportes', 'Cine', 'Libros',
+  'Mascotas', 'Comedia', 'Educación', 'Negocios'
+];
+
+const SOCIAL_NETWORKS = [
+  { value: '', label: 'Ninguna' },
+  { value: 'instagram', label: 'Instagram' },
+  { value: 'linkedin', label: 'LinkedIn' },
+  { value: 'tiktok', label: 'TikTok' },
+  { value: 'youtube', label: 'YouTube' },
+  { value: 'facebook', label: 'Facebook' },
+  { value: 'x', label: 'X (Twitter)' },
+  { value: 'twitch', label: 'Twitch' },
+  { value: 'otros', label: 'Otros' },
+];
 
 export default function ProfileSection() {
   const user = useAuthStore((state) => state.user);
@@ -12,12 +31,19 @@ export default function ProfileSection() {
 
   const [username, setUsername] = useState(user?.username || '');
   const [email, setEmail] = useState(user?.email || '');
+  const [fullName, setFullName] = useState(user?.fullName || '');
+  const [bio, setBio] = useState(user?.bio || '');
+  const [age, setAge] = useState(user?.age?.toString() || '');
+  const [location, setLocation] = useState(user?.location || '');
+  const [interests, setInterests] = useState<string[]>(user?.interests || []);
+  const [favoriteSocialNetwork, setFavoriteSocialNetwork] = useState(user?.favoriteSocialNetwork || '');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
   const [editingProfile, setEditingProfile] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
+  const [showMyProfiles, setShowMyProfiles] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -26,12 +52,18 @@ export default function ProfileSection() {
     if (user) {
       setUsername(user.username || '');
       setEmail(user.email || '');
+      setFullName(user.fullName || '');
+      setBio(user.bio || '');
+      setAge(user.age?.toString() || '');
+      setLocation(user.location || '');
+      setInterests(user.interests || []);
+      setFavoriteSocialNetwork(user.favoriteSocialNetwork || '');
     }
   }, [user]);
 
   const handleUpdateProfile = async () => {
     if (!username.trim() || !email.trim()) {
-      setError('Todos los campos son requeridos');
+      setError('Usuario y email son requeridos');
       return;
     }
 
@@ -40,11 +72,19 @@ export default function ProfileSection() {
     setSuccess(null);
 
     try {
-      const response = await authAPI.updateProfile(username, email);
+      const response = await authAPI.updateProfile({
+        username,
+        email,
+        fullName: fullName.trim() || undefined,
+        bio: bio.trim() || undefined,
+        age: age ? parseInt(age) : undefined,
+        location: location.trim() || undefined,
+        interests: interests.length > 0 ? interests : undefined,
+        favoriteSocialNetwork: favoriteSocialNetwork || undefined,
+      });
       setUser({
         ...user!,
-        username: response.user.username,
-        email: response.user.email,
+        ...response.user,
       });
       setSuccess('Perfil actualizado exitosamente');
       setEditingProfile(false);
@@ -97,18 +137,20 @@ export default function ProfileSection() {
   };
 
   return (
-    <div className="bg-white rounded-none sm:rounded-lg shadow p-4 sm:p-6 space-y-4 sm:space-y-6 max-w-3xl w-full mx-auto">
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold text-gray-900">Información de Cuenta</h2>
-        {!editingProfile && (
-          <button
-            onClick={() => setEditingProfile(true)}
-            className="text-primary-600 hover:text-primary-700 font-medium text-sm"
-          >
-            Editar
-          </button>
-        )}
-      </div>
+    <div className="space-y-6 max-w-4xl w-full mx-auto">
+      {/* Información de Cuenta */}
+      <div className="bg-white rounded-none sm:rounded-lg shadow p-4 sm:p-6 space-y-4 sm:space-y-6">
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-semibold text-gray-900">Información de Cuenta</h2>
+          {!editingProfile && (
+            <button
+              onClick={() => setEditingProfile(true)}
+              className="text-primary-600 hover:text-primary-700 font-medium text-sm"
+            >
+              Editar
+            </button>
+          )}
+        </div>
 
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
@@ -123,37 +165,186 @@ export default function ProfileSection() {
       )}
 
       <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Nombre de Usuario *
+            </label>
+            {editingProfile ? (
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 placeholder:text-gray-400"
+                disabled={loading}
+                required
+              />
+            ) : (
+              <p className="text-gray-900 py-2">{user?.username || 'N/A'}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Email *
+            </label>
+            {editingProfile ? (
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 placeholder:text-gray-400"
+                disabled={loading}
+                required
+              />
+            ) : (
+              <p className="text-gray-900 py-2">{user?.email || 'N/A'}</p>
+            )}
+          </div>
+        </div>
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Nombre de Usuario
+            Nombre Completo
           </label>
           {editingProfile ? (
             <input
               type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 placeholder:text-gray-400"
               disabled={loading}
+              placeholder="Tu nombre completo"
             />
           ) : (
-            <p className="text-gray-900 py-2">{user?.username || 'N/A'}</p>
+            <p className="text-gray-900 py-2">{user?.fullName || 'No especificado'}</p>
           )}
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Email
+            Biografía
           </label>
           {editingProfile ? (
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 placeholder:text-gray-400"
+            <textarea
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 placeholder:text-gray-400 resize-none"
+              rows={3}
               disabled={loading}
+              placeholder="Cuéntanos sobre ti..."
+              maxLength={500}
             />
           ) : (
-            <p className="text-gray-900 py-2">{user?.email || 'N/A'}</p>
+            <p className="text-gray-900 py-2">{user?.bio || 'Sin biografía'}</p>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Edad
+            </label>
+            {editingProfile ? (
+              <input
+                type="number"
+                value={age}
+                onChange={(e) => setAge(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 placeholder:text-gray-400"
+                disabled={loading}
+                min="13"
+                max="120"
+                placeholder="Tu edad"
+              />
+            ) : (
+              <p className="text-gray-900 py-2">{user?.age ? `${user.age} años` : 'No especificado'}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Ubicación
+            </label>
+            {editingProfile ? (
+              <input
+                type="text"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 placeholder:text-gray-400"
+                disabled={loading}
+                placeholder="Ciudad, País"
+              />
+            ) : (
+              <p className="text-gray-900 py-2">{user?.location || 'No especificado'}</p>
+            )}
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Intereses
+          </label>
+          {editingProfile ? (
+            <div className="flex flex-wrap gap-2">
+              {INTERESTS_OPTIONS.map((interest) => (
+                <button
+                  key={interest}
+                  type="button"
+                  onClick={() => {
+                    if (interests.includes(interest)) {
+                      setInterests(interests.filter(i => i !== interest));
+                    } else {
+                      setInterests([...interests, interest]);
+                    }
+                  }}
+                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                    interests.includes(interest)
+                      ? 'bg-primary-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  {interest}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {user?.interests && user.interests.length > 0 ? (
+                user.interests.map((interest) => (
+                  <span key={interest} className="px-3 py-1.5 bg-primary-100 text-primary-700 rounded-full text-sm font-medium">
+                    {interest}
+                  </span>
+                ))
+              ) : (
+                <p className="text-gray-500 text-sm">No has seleccionado intereses</p>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Red Social Favorita
+          </label>
+          {editingProfile ? (
+            <select
+              value={favoriteSocialNetwork}
+              onChange={(e) => setFavoriteSocialNetwork(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 bg-white"
+              disabled={loading}
+            >
+              {SOCIAL_NETWORKS.map((network) => (
+                <option key={network.value} value={network.value}>
+                  {network.label}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <p className="text-gray-900 py-2">
+              {user?.favoriteSocialNetwork 
+                ? SOCIAL_NETWORKS.find(n => n.value === user.favoriteSocialNetwork)?.label || user.favoriteSocialNetwork
+                : 'No especificada'}
+            </p>
           )}
         </div>
 
@@ -175,6 +366,12 @@ export default function ProfileSection() {
                 if (user) {
                   setUsername(user.username || '');
                   setEmail(user.email || '');
+                  setFullName(user.fullName || '');
+                  setBio(user.bio || '');
+                  setAge(user.age?.toString() || '');
+                  setLocation(user.location || '');
+                  setInterests(user.interests || []);
+                  setFavoriteSocialNetwork(user.favoriteSocialNetwork || '');
                 }
               }}
               disabled={loading}
@@ -279,6 +476,24 @@ export default function ProfileSection() {
         >
           Cerrar Sesión
         </button>
+      </div>
+      </div>
+
+      {/* Botón para ver perfiles contratados */}
+      <div className="bg-white rounded-none sm:rounded-lg shadow p-4 sm:p-6">
+        <div className="text-center">
+          <button
+            onClick={() => setShowMyProfiles(!showMyProfiles)}
+            className="w-full bg-gradient-to-r from-primary-600 to-primary-700 text-white py-4 px-6 rounded-xl hover:from-primary-700 hover:to-primary-800 transition-all font-bold text-lg shadow-lg hover:shadow-xl"
+          >
+            {showMyProfiles ? 'Ocultar Mis Perfiles' : '📋 Comprueba tus Perfiles'}
+          </button>
+          {showMyProfiles && (
+            <div className="mt-6">
+              <MyProfilesGallery />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -11,6 +11,19 @@ interface ProfileDetailProps {
 }
 
 export default function ProfileDetail({ profile, onClose }: ProfileDetailProps) {
+  const placeholderImage =
+    "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='600' viewBox='0 0 400 600'%3E%3Crect width='400' height='600' fill='%23f3f4f6'/%3E%3Ctext x='200' y='300' text-anchor='middle' fill='%239ca3af' font-family='Arial' font-size='20'%3EImagen no disponible%3C/text%3E%3C/svg%3E";
+
+  const getImageUrl = (imagePath: string) => {
+    if (!imagePath) return '';
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      return imagePath;
+    }
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+    const baseUrl = apiUrl.replace('/api', '');
+    const cleanPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
+    return `${baseUrl}${cleanPath}`;
+  };
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const getNetworkColor = (network: string) => {
@@ -19,6 +32,7 @@ export default function ProfileDetail({ profile, onClose }: ProfileDetailProps) 
       youtube: 'bg-red-500',
       instagram: 'bg-gradient-to-r from-purple-500 to-pink-500',
       facebook: 'bg-blue-600',
+      linkedin: 'bg-blue-700',
       twitch: 'bg-purple-600',
       x: 'bg-black',
       otros: 'bg-gray-500',
@@ -32,6 +46,7 @@ export default function ProfileDetail({ profile, onClose }: ProfileDetailProps) 
       youtube: 'YouTube',
       instagram: 'Instagram',
       facebook: 'Facebook',
+      linkedin: 'LinkedIn',
       twitch: 'Twitch',
       x: 'X (Twitter)',
       otros: 'Otros',
@@ -110,13 +125,11 @@ export default function ProfileDetail({ profile, onClose }: ProfileDetailProps) 
                 {images.length > 0 ? (
                   <>
                     <img
-                      src={images[currentImageIndex].startsWith('http') 
-                        ? images[currentImageIndex] 
-                        : `http://localhost:5000${images[currentImageIndex]}`}
+                      src={getImageUrl(images[currentImageIndex])}
                       alt="Profile"
                       className="w-full h-full object-cover"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x600?text=Imagen';
+                        (e.target as HTMLImageElement).src = placeholderImage;
                       }}
                     />
                     {hasMultipleImages && (

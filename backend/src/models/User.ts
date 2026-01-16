@@ -65,7 +65,7 @@ const UserSchema: Schema = new Schema(
     },
     favoriteSocialNetwork: {
       type: String,
-      enum: ['tiktok', 'youtube', 'instagram', 'facebook', 'twitch', 'x', 'otros', null],
+      enum: ['tiktok', 'youtube', 'instagram', 'facebook', 'linkedin', 'twitch', 'x', 'otros', null],
       default: null,
     },
   },

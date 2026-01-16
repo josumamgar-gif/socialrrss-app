@@ -417,6 +417,68 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork, onNet
           </>
         );
 
+      case 'linkedin':
+        return (
+          <>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Nombre del perfil o empresa
+              </label>
+              <input
+                type="text"
+                value={profileData.username || ''}
+                onChange={(e) => setProfileData({ ...profileData, username: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 placeholder:text-gray-400"
+                placeholder="Nombre en LinkedIn"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Seguidores / Conexiones
+              </label>
+              <input
+                type="number"
+                value={profileData.followers ?? ''}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setProfileData({ ...profileData, followers: val === '' ? undefined : parseInt(val) || undefined });
+                }}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 placeholder:text-gray-400"
+                placeholder="10000"
+                min="0"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Publicaciones
+              </label>
+              <input
+                type="number"
+                value={profileData.posts ?? ''}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setProfileData({ ...profileData, posts: val === '' ? undefined : parseInt(val) || undefined });
+                }}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 placeholder:text-gray-400"
+                placeholder="200"
+                min="0"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Descripción (opcional)
+              </label>
+              <textarea
+                value={profileData.description || ''}
+                onChange={(e) => setProfileData({ ...profileData, description: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-gray-900 placeholder:text-gray-400 resize-none"
+                rows={3}
+                placeholder="Describe tu perfil de LinkedIn..."
+              />
+            </div>
+          </>
+        );
+
       case 'twitch':
         return (
           <>
@@ -629,6 +691,7 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork, onNet
           <option value="tiktok">TikTok</option>
           <option value="youtube">YouTube</option>
           <option value="instagram">Instagram</option>
+          <option value="linkedin">LinkedIn</option>
           <option value="twitch">Twitch</option>
           <option value="facebook">Facebook</option>
           <option value="x">X (Twitter)</option>

@@ -67,6 +67,112 @@ export const getMyProfiles = async (req: AuthRequest, res: Response): Promise<vo
   }
 };
 
+export const updateAutoRenewal = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ error: 'No autenticado' });
+      return;
+    }
+
+    const { profileId } = req.params;
+    const { autoRenewal } = req.body;
+
+    if (typeof autoRenewal !== 'boolean') {
+      res.status(400).json({ error: 'Valor de autoRenewal inválido' });
+      return;
+    }
+
+    const profile = await Profile.findOne({
+      _id: profileId,
+      userId: req.user.userId,
+    });
+
+    if (!profile) {
+      res.status(404).json({ error: 'Perfil no encontrado' });
+      return;
+    }
+
+    profile.autoRenewal = autoRenewal;
+    await profile.save();
+
+    res.json({ profile });
+  } catch (error: any) {
+    console.error('Error actualizando autoRenewal:', error);
+    res.status(500).json({ error: 'Error al actualizar la renovación automática' });
+  }
+};
+
+// Actualizar un perfil de RRSS
+export const updateProfile = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ error: 'No autenticado' });
+      return;
+    }
+
+    const { profileId } = req.params;
+    const { profileData, link, socialNetwork } = req.body;
+    const files = req.files as Express.Multer.File[];
+
+    const profile = await Profile.findOne({
+      _id: profileId,
+      userId: req.user.userId,
+    });
+
+    if (!profile) {
+      res.status(404).json({ error: 'Perfil no encontrado' });
+      return;
+    }
+
+    // Parsear profileData de forma segura
+    let parsedProfileData: Record<string, any> = {};
+    if (profileData && typeof profileData === 'string' && profileData.trim() !== '') {
+      try {
+        const parsed = JSON.parse(profileData);
+        // Limpiar valores inválidos
+        const cleaned: Record<string, any> = {};
+        Object.keys(parsed).forEach((key) => {
+          const value = parsed[key];
+          if (value !== null && value !== undefined && value !== '') {
+            cleaned[key] = value;
+          }
+        });
+        parsedProfileData = cleaned;
+      } catch (parseError) {
+        console.error('Error parseando profileData:', parseError);
+        parsedProfileData = {};
+      }
+    } else if (profileData && typeof profileData === 'object' && profileData !== null) {
+      parsedProfileData = profileData;
+    }
+
+    // Actualizar campos
+    if (link) profile.link = link.trim();
+    if (socialNetwork) profile.socialNetwork = socialNetwork.trim();
+    if (Object.keys(parsedProfileData).length > 0) {
+      profile.profileData = { ...profile.profileData, ...parsedProfileData };
+    }
+
+    // Actualizar imágenes si se proporcionan nuevas
+    if (files && files.length > 0) {
+      const imagePaths = files.map((file) => `/uploads/${file.filename}`);
+      // Si hay nuevas imágenes, reemplazar las existentes o añadirlas según la lógica
+      // Por ahora, reemplazamos todas
+      profile.images = imagePaths;
+    }
+
+    await profile.save();
+
+    res.json({
+      message: 'Perfil actualizado exitosamente',
+      profile,
+    });
+  } catch (error: any) {
+    console.error('Error actualizando perfil:', error);
+    res.status(500).json({ error: error.message || 'Error al actualizar el perfil' });
+  }
+};
+
 export const createProfile = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     if (!req.user) {

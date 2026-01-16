@@ -80,11 +80,17 @@ export const authAPI = {
     return response.data;
   },
 
-  updateProfile: async (username?: string, email?: string): Promise<{ message: string; user: User }> => {
-    const response = await api.put<{ message: string; user: User }>('/auth/profile', {
-      username,
-      email,
-    });
+  updateProfile: async (data: {
+    username?: string;
+    email?: string;
+    fullName?: string;
+    bio?: string;
+    age?: number;
+    location?: string;
+    interests?: string[];
+    favoriteSocialNetwork?: string;
+  }): Promise<{ message: string; user: User }> => {
+    const response = await api.put<{ message: string; user: User }>('/auth/profile', data);
     return response.data;
   },
 
@@ -113,6 +119,21 @@ export const profilesAPI = {
     // Para FormData, axios establece automáticamente el Content-Type con el boundary correcto
     // El interceptor elimina el Content-Type cuando detecta FormData
     const response = await api.post<{ message: string; profile: Profile }>('/profiles', data);
+    return response.data;
+  },
+
+  updateAutoRenewal: async (
+    profileId: string,
+    autoRenewal: boolean
+  ): Promise<{ profile: Profile }> => {
+    const response = await api.put<{ profile: Profile }>(`/profiles/${profileId}/auto-renewal`, {
+      autoRenewal,
+    });
+    return response.data;
+  },
+
+  update: async (profileId: string, data: FormData): Promise<{ message: string; profile: Profile }> => {
+    const response = await api.put<{ message: string; profile: Profile }>(`/profiles/${profileId}`, data);
     return response.data;
   },
 };

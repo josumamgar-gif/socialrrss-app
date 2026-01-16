@@ -9,6 +9,7 @@ export interface IProfile extends Document {
   link: string;
   isActive: boolean;
   isPaid: boolean;
+  autoRenewal: boolean;
   planType: PlanType | null;
   paidUntil: Date | null;
   createdAt: Date;
@@ -45,6 +46,10 @@ const ProfileSchema: Schema = new Schema(
     isPaid: {
       type: Boolean,
       default: false,
+    },
+    autoRenewal: {
+      type: Boolean,
+      default: true,
     },
     planType: {
       type: String,

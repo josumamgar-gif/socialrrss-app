@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { profilesAPI } from '@/lib/api';
-import { Profile } from '@/types';
+import { Profile, SocialNetwork } from '@/types';
 import ProfileCard from '@/components/principal/ProfileCard';
 import ProfileDetail from '@/components/principal/ProfileDetail';
 import { demoProfiles } from '@/data/demoProfiles';
@@ -17,6 +17,7 @@ export default function PrincipalPage() {
   const [demoInteractions, setDemoInteractions] = useState(0);
   const [hasCompletedDemo, setHasCompletedDemo] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
+  const [selectedNetworkFilter, setSelectedNetworkFilter] = useState<'all' | SocialNetwork>('all');
 
   const checkDemoCompletion = useCallback(() => {
     if (typeof window !== 'undefined') {
@@ -98,13 +99,29 @@ export default function PrincipalPage() {
     }
   }, [getViewedProfiles]);
 
+  const networkOptions: { value: 'all' | SocialNetwork; label: string }[] = [
+    { value: 'all', label: 'Todas' },
+    { value: 'instagram', label: 'Instagram' },
+    { value: 'linkedin', label: 'LinkedIn' },
+    { value: 'tiktok', label: 'TikTok' },
+    { value: 'youtube', label: 'YouTube' },
+    { value: 'facebook', label: 'Facebook' },
+    { value: 'x', label: 'X (Twitter)' },
+    { value: 'twitch', label: 'Twitch' },
+    { value: 'otros', label: 'Otros' },
+  ];
+
+  const displayedProfiles = selectedNetworkFilter === 'all'
+    ? profiles
+    : profiles.filter((p) => p.socialNetwork === selectedNetworkFilter);
+
   useEffect(() => {
     loadProfiles();
     checkDemoCompletion();
   }, [loadProfiles, checkDemoCompletion]);
 
   const handleSwipeLeft = () => {
-    const currentProfile = profiles[currentIndex];
+    const currentProfile = displayedProfiles[currentIndex];
     if (!currentProfile) return;
     
     // Marcar perfil como visto
@@ -120,7 +137,7 @@ export default function PrincipalPage() {
       }
     }
     
-    if (currentIndex < profiles.length - 1) {
+    if (currentIndex < displayedProfiles.length - 1) {
       setHistory([...history, currentIndex]);
       setCurrentIndex(currentIndex + 1);
     } else {
@@ -134,7 +151,7 @@ export default function PrincipalPage() {
   };
 
   const handleSwipeRight = () => {
-    const currentProfile = profiles[currentIndex];
+    const currentProfile = displayedProfiles[currentIndex];
     if (!currentProfile) return;
     
     // Marcar perfil como visto
@@ -150,7 +167,7 @@ export default function PrincipalPage() {
       }
     }
     
-    if (currentIndex < profiles.length - 1) {
+    if (currentIndex < displayedProfiles.length - 1) {
       setHistory([...history, currentIndex]);
       setCurrentIndex(currentIndex + 1);
     } else {
@@ -164,7 +181,7 @@ export default function PrincipalPage() {
   };
 
   const handleSwipeUp = () => {
-    const currentProfile = profiles[currentIndex];
+    const currentProfile = displayedProfiles[currentIndex];
     if (!currentProfile) return;
     
     // Marcar perfil como visto cuando se ven los detalles
@@ -202,7 +219,7 @@ export default function PrincipalPage() {
   }
 
   // Mostrar mensaje si no hay perfiles después de cargar
-  if (!loading && profiles.length === 0) {
+  if (!loading && displayedProfiles.length === 0) {
     return (
       <div className="w-full bg-white flex items-center justify-center" style={{ 
         height: 'calc(100vh - 4rem)', 
@@ -220,9 +237,21 @@ export default function PrincipalPage() {
   // Solo mostrar interacción demo si el tutorial NO está completado
   const tutorialCompleted = typeof window !== 'undefined' ? 
     localStorage.getItem('tutorialCompleted') === 'true' : false;
-  const needsDemoInteraction = !tutorialCompleted && !hasCompletedDemo && profiles.length > 0 && currentIndex < demoProfiles.length;
-  const currentProfile = profiles[currentIndex];
+  const needsDemoInteraction = !tutorialCompleted && !hasCompletedDemo && displayedProfiles.length > 0 && currentIndex < demoProfiles.length;
+  const currentProfile = displayedProfiles[currentIndex];
   const isDemoProfile = currentProfile?._id.startsWith('demo-');
+
+  useEffect(() => {
+    setCurrentIndex(0);
+    setHistory([]);
+  }, [selectedNetworkFilter]);
+
+  useEffect(() => {
+    if (currentIndex >= displayedProfiles.length) {
+      setCurrentIndex(0);
+      setHistory([]);
+    }
+  }, [displayedProfiles, currentIndex]);
 
   return (
     <div className="w-full bg-white flex items-center justify-center px-4 overflow-hidden" style={{ 
@@ -233,6 +262,22 @@ export default function PrincipalPage() {
       justifyContent: 'center'
     }}>
       <div className="flex flex-col items-center justify-center w-full max-w-md mx-auto">
+        <div className="w-full mb-4">
+          <label className="block text-xs font-medium text-gray-600 mb-2 text-center">
+            Filtrar por red social
+          </label>
+          <select
+            value={selectedNetworkFilter}
+            onChange={(e) => setSelectedNetworkFilter(e.target.value as 'all' | SocialNetwork)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-primary-500"
+          >
+            {networkOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
         {needsDemoInteraction && (
           <div className="mb-4 max-w-md w-full mx-auto bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4 z-50">
             <div className="flex items-start">
@@ -253,9 +298,9 @@ export default function PrincipalPage() {
           </div>
         )}
 
-        {profiles.length > 0 && currentProfile && (
+      {displayedProfiles.length > 0 && currentProfile && (
           <div className="relative w-full max-w-md mx-auto profile-card-container" style={{ overflow: 'hidden' }}>
-            {profiles.slice(currentIndex, currentIndex + 3).map((profile, idx) => (
+          {displayedProfiles.slice(currentIndex, currentIndex + 3).map((profile, idx) => (
               <div
                 key={profile._id}
                 className={idx === 0 ? 'relative z-10' : 'absolute top-0 left-0 right-0 opacity-50 scale-95'}

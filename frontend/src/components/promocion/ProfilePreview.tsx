@@ -8,12 +8,15 @@ interface ProfilePreviewProps {
 }
 
 export default function ProfilePreview({ profile }: ProfilePreviewProps) {
+  const placeholderImage =
+    "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='600' viewBox='0 0 400 600'%3E%3Crect width='400' height='600' fill='%23f3f4f6'/%3E%3Ctext x='200' y='300' text-anchor='middle' fill='%239ca3af' font-family='Arial' font-size='20'%3EImagen no disponible%3C/text%3E%3C/svg%3E";
   const getNetworkColor = (network: string) => {
     const colors: Record<string, string> = {
       tiktok: 'bg-pink-500',
       youtube: 'bg-red-500',
       instagram: 'bg-purple-600',
       facebook: 'bg-blue-600',
+      linkedin: 'bg-blue-700',
       twitch: 'bg-purple-600',
       x: 'bg-black',
       otros: 'bg-gray-500',
@@ -79,7 +82,7 @@ export default function ProfilePreview({ profile }: ProfilePreviewProps) {
               onError={(e) => {
                 console.error('❌ Error cargando imagen. URL intentada:', getImageUrl(profile.images[0]));
                 console.error('❌ Perfil completo:', profile);
-                (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x600?text=Imagen+No+Disponible';
+                (e.target as HTMLImageElement).src = placeholderImage;
               }}
             />
           ) : (
