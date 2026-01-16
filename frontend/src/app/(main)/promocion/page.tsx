@@ -255,8 +255,8 @@ export default function PromocionPage() {
   // Vista de selección de planes
   if (showPlanSelector && selectedProfile) {
     return (
-      <div className="min-h-[calc(100vh-4rem)] bg-white px-0 sm:px-4">
-        <div className="max-w-4xl mx-auto w-full min-h-full flex flex-col">
+      <div className="fixed inset-0 bg-white px-0 sm:px-4" style={{ height: '100vh', width: '100vw', touchAction: 'none', overflow: 'hidden' }}>
+        <div className="max-w-4xl mx-auto w-full h-full flex flex-col overflow-hidden">
           <div className="text-center py-3 flex-shrink-0">
             <button
               onClick={handleBack}
@@ -289,7 +289,7 @@ export default function PromocionPage() {
     const displayNetwork = currentNetwork || selectedNetwork;
     
     return (
-      <div className="h-[calc(100vh-4rem)] bg-white overflow-hidden px-0 sm:px-4">
+      <div className="fixed inset-0 bg-white overflow-hidden px-0 sm:px-4" style={{ height: '100vh', width: '100vw', touchAction: 'none' }}>
         <div className="max-w-2xl mx-auto w-full h-full flex flex-col">
           <div className="text-center py-4 flex-shrink-0 px-4 sm:px-0">
             <button
@@ -299,7 +299,7 @@ export default function PromocionPage() {
               ← Volver a redes sociales
             </button>
           </div>
-          <div className="bg-white rounded-none sm:rounded-lg shadow-lg p-4 sm:p-6 flex-1 overflow-y-auto">
+          <div className="bg-white rounded-none sm:rounded-lg shadow-lg p-4 sm:p-6 flex-1 overflow-hidden">
             <div className="mb-6">
               {(() => {
                 const network = socialNetworks.find(n => n.id === displayNetwork);

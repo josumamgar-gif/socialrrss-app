@@ -147,7 +147,7 @@ export default function MainLayout({
       </nav>
 
       {/* Contenido principal */}
-      <main className="flex-1 pt-16 md:pt-28 pb-24 md:pb-20 flex items-center justify-center" style={{ minHeight: 'calc(100vh - 4rem)' }}>
+      <main className="flex-1 pt-16 md:pt-28 pb-24 md:pb-20 flex items-center justify-center overflow-hidden" style={{ minHeight: 'calc(100vh - 4rem)' }}>
         {children}
       </main>
 

@@ -347,13 +347,26 @@ export default function PrincipalPage() {
   const currentProfile = filteredProfiles[currentIndex];
 
   return (
-    <div className="w-full bg-white flex items-center justify-center px-4 overflow-hidden relative" style={{ 
-      height: '100%',
-      minHeight: '100%',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center'
-    }}>
+    <div 
+      className="w-full bg-white flex items-center justify-center px-4 overflow-hidden relative fixed inset-0" 
+      style={{ 
+        height: '100vh',
+        width: '100vw',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden',
+        touchAction: 'none',
+      }}
+      onWheel={(e) => e.preventDefault()}
+      onTouchMove={(e) => {
+        // Permitir movimiento solo si es dentro de una tarjeta
+        const target = e.target as HTMLElement;
+        if (!target.closest('.profile-card-container')) {
+          e.preventDefault();
+        }
+      }}
+    >
       {/* Filtro de redes sociales - Parte superior central con efecto liquid glass */}
       <div className="absolute top-4 sm:top-6 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-xs px-4">
         <select
@@ -412,7 +425,7 @@ export default function PrincipalPage() {
         )}
 
         {filteredProfiles.length > 0 && currentProfile && (
-          <div className="relative w-full max-w-md mx-auto profile-card-container" style={{ overflow: 'hidden' }}>
+          <div className="relative w-full h-full profile-card-container" style={{ overflow: 'visible', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, touchAction: 'none' }}>
             {filteredProfiles.slice(currentIndex, currentIndex + 3).map((profile, idx) => (
               <div
                 key={profile._id}

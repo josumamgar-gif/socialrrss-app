@@ -555,8 +555,16 @@ export default function ProfileCard({
           className="relative w-full bg-white overflow-hidden cursor-grab active:cursor-grabbing select-none"
             style={{
               borderRadius: '24px',
-              border: '2px solid rgba(255, 255, 255, 0.8)',
-              boxShadow: '0 20px 60px -12px rgba(0, 0, 0, 0.25), 0 8px 24px -8px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05), inset 0 1px 0 0 rgba(255, 255, 255, 0.9)',
+              border: '1px solid rgba(0, 0, 0, 0.1)',
+              boxShadow: `
+                0 0 0 1px rgba(0, 0, 0, 0.05),
+                0 2px 4px rgba(0, 0, 0, 0.1),
+                0 8px 16px rgba(0, 0, 0, 0.15),
+                0 16px 32px rgba(0, 0, 0, 0.2),
+                0 32px 64px rgba(0, 0, 0, 0.25),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.05)
+              `,
             transform: buttonAction.type 
               ? undefined // La transformación de botones se maneja con style inline
               : `translate(${position.x}px, ${position.y}px) rotate(${rotation}deg)`,
@@ -679,7 +687,7 @@ export default function ProfileCard({
                 }}
                 onMouseUp={(e) => e.currentTarget.blur()}
                 disabled={isAnimating}
-                className="bg-red-500 hover:bg-red-600 text-white p-3 rounded-full shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none w-12 h-12 flex items-center justify-center"
+                className="bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white p-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 w-12 h-12 flex items-center justify-center transform hover:scale-105 active:scale-95"
                 style={{ touchAction: 'auto', pointerEvents: 'auto' }}
                 aria-label="Siguiente Perfil"
               >
@@ -705,7 +713,7 @@ export default function ProfileCard({
                 }}
                 onMouseUp={(e) => e.currentTarget.blur()}
                 disabled={isAnimating}
-                className="bg-yellow-500 hover:bg-yellow-600 text-white p-3 rounded-full shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none w-12 h-12 flex items-center justify-center"
+                className="bg-gradient-to-br from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white p-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 w-12 h-12 flex items-center justify-center transform hover:scale-105 active:scale-95"
                 style={{ touchAction: 'auto', pointerEvents: 'auto' }}
                 aria-label="Ver Detalles"
               >
@@ -727,9 +735,9 @@ export default function ProfileCard({
                 disabled={isAnimating || backUsed || !canGoBack}
                 className={`${
                   backUsed || !canGoBack
-                    ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-green-500 hover:bg-green-600'
-                } text-white p-3 rounded-full shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none w-12 h-12 flex items-center justify-center`}
+                    ? 'bg-gradient-to-br from-gray-400 to-gray-500 cursor-not-allowed'
+                    : 'bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700'
+                } text-white p-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 w-12 h-12 flex items-center justify-center transform hover:scale-105 active:scale-95`}
                 style={{ touchAction: 'auto', pointerEvents: 'auto' }}
                 aria-label="Retroceder"
               >
@@ -756,7 +764,7 @@ export default function ProfileCard({
                 }}
                 onMouseUp={(e) => e.currentTarget.blur()}
                 disabled={isAnimating}
-                className="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-full shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none w-12 h-12 flex items-center justify-center"
+                className="bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white p-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 w-12 h-12 flex items-center justify-center transform hover:scale-105 active:scale-95"
                 style={{ touchAction: 'auto', pointerEvents: 'auto' }}
                 aria-label="Ir al Enlace"
               >

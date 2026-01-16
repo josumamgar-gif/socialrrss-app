@@ -31,7 +31,7 @@ export default function AjustesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white pt-16 sm:pt-20 pb-20 sm:pb-24 px-0 sm:px-4">
+    <div className="fixed inset-0 bg-white px-0 sm:px-4" style={{ height: '100vh', width: '100vw', touchAction: 'none', overflow: 'hidden' }}>
       {/* Tutorial - se muestra cuando showTutorial es true */}
       {showTutorial && (
         <WelcomeTutorial 
@@ -41,8 +41,8 @@ export default function AjustesPage() {
         />
       )}
 
-      <div className="max-w-6xl mx-auto w-full">
-        <div className="mb-6 text-center px-4">
+      <div className="max-w-6xl mx-auto w-full h-full overflow-y-auto overflow-x-hidden flex flex-col" style={{ paddingTop: '1rem', paddingBottom: '1rem' }}>
+        <div className="mb-6 text-center px-4 flex-shrink-0">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Ajustes</h1>
           <p className="text-gray-600 mb-4">Gestiona tu cuenta, pagos y configuración</p>
           
