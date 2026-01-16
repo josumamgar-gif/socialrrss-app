@@ -368,7 +368,7 @@ export default function RegisterPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-primary-600 text-white py-2.5 sm:py-3 px-4 rounded-md hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm sm:text-base transition-colors mt-3 sm:mt-4"
+                className="w-full bg-primary-600 text-white py-4 sm:py-5 px-6 rounded-xl hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-base sm:text-lg transition-all transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl mt-3 sm:mt-4"
               >
                 {loading ? 'Creando cuenta...' : 'Crear Cuenta'}
               </button>

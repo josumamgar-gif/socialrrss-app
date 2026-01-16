@@ -394,7 +394,7 @@ export default function PrincipalPage() {
         }}
       />
       {/* Filtro de redes sociales - Parte superior central con efecto liquid glass */}
-      <div className="absolute top-2 sm:top-3 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-xs px-4">
+      <div className="absolute top-3 sm:top-4 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-xs px-4">
         <select
           value={selectedNetworkFilter}
           onChange={(e) => setSelectedNetworkFilter(e.target.value as 'all' | SocialNetwork)}
@@ -431,12 +431,11 @@ export default function PrincipalPage() {
 
       <div className="flex flex-col items-center justify-center w-full" style={{ 
         position: 'absolute',
-        top: '50%',
+        top: '42%',
         left: '50%',
         transform: 'translate(-50%, -50%)',
         width: '100%',
-        maxWidth: '28rem',
-        marginTop: '1.5rem'
+        maxWidth: '28rem'
       }}>
         {needsDemoInteraction && (
           <div className="mb-4 max-w-md w-full mx-auto bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4 z-40">

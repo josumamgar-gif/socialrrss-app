@@ -87,6 +87,8 @@ export default function ProfileCard({
   const onSwipeUpRef = useRef(onSwipeUp);
   const onGoBackRef = useRef(onGoBack);
   const onShowDetailRef = useRef(onShowDetail);
+  const canGoBackRef = useRef(canGoBack);
+  const backUsedRef = useRef(backUsed);
   
   // Actualizar refs en useEffect para evitar problemas con React
   useEffect(() => {
@@ -113,8 +115,10 @@ export default function ProfileCard({
     onSwipeRightRef.current = onSwipeRight;
     onSwipeUpRef.current = onSwipeUp;
     onGoBackRef.current = onGoBack;
+    canGoBackRef.current = canGoBack;
+    backUsedRef.current = backUsed;
     onShowDetailRef.current = onShowDetail;
-  }, [onSwipeLeft, onSwipeRight, onSwipeUp, onShowDetail]);
+  }, [onSwipeLeft, onSwipeRight, onSwipeUp, onGoBack, onShowDetail, canGoBack, backUsed]);
 
   const getActionForPosition = (x: number, y: number, width: number, height: number): DragAction => {
     const threshold = 40; // Reducir threshold para mayor sensibilidad
@@ -123,8 +127,8 @@ export default function ProfileCard({
     const distanceFromCenter = Math.sqrt(x * x + y * y);
     const intensity = Math.min(1, distanceFromCenter / threshold);
     
-    // Si no ha alcanzado el umbral, no hay acción
-    if (intensity < 0.15) {
+    // Si no ha alcanzado el umbral mínimo, no hay acción (reducido para mayor sensibilidad)
+    if (intensity < 0.1) {
       return { type: null, intensity: 0 };
     }
     
@@ -145,8 +149,8 @@ export default function ProfileCard({
       if (y < 0) {
         // Hacia arriba
         return { type: 'up', intensity };
-      } else if (y > 0) {
-        // Hacia abajo - retroceder
+      } else {
+        // Hacia abajo - retroceder (y > 0)
         return { type: 'down', intensity };
       }
     }
@@ -244,6 +248,7 @@ export default function ProfileCard({
       const cardRect = cardRef.current.getBoundingClientRect();
       const action = getActionForPosition(deltaX, deltaY, cardRect.width, cardRect.height);
       setDragAction(action);
+      dragActionRef.current = action; // Actualizar ref inmediatamente
       
       // Calcular distancia a las esquinas para efecto de gradiente
       const viewportWidth = window.innerWidth;
@@ -288,8 +293,8 @@ export default function ProfileCard({
     const currentOnSwipeUp = onSwipeUpRef.current;
     const currentOnShowDetail = onShowDetailRef.current;
 
-    // Prioridad: usar dragAction si existe y tiene suficiente intensidad
-    if (currentDragAction.type && currentDragAction.intensity > 0.15) {
+    // Prioridad: usar dragAction si existe y tiene suficiente intensidad (reducido para mayor sensibilidad)
+    if (currentDragAction.type && currentDragAction.intensity > 0.1) {
       if (currentDragAction.type === 'left' && currentOnSwipeLeft) {
         // Resetear efectos antes de ejecutar acción
         setCornerEffects({ left: 0, right: 0, top: 0, bottom: 0 });
@@ -334,7 +339,9 @@ export default function ProfileCard({
       } else if (currentDragAction.type === 'down') {
         // Gesto hacia abajo - retroceder (igual que el botón)
         const currentOnGoBack = onGoBackRef.current;
-        if (currentOnGoBack && canGoBack && !backUsed) {
+        const currentCanGoBack = canGoBackRef.current;
+        const currentBackUsed = backUsedRef.current;
+        if (currentOnGoBack && currentCanGoBack && !currentBackUsed) {
           // Resetear efectos antes de ejecutar acción
           setCornerEffects({ left: 0, right: 0, top: 0, bottom: 0 });
           if (onCornerEffectsChange) {
@@ -400,7 +407,9 @@ export default function ProfileCard({
             onCornerEffectsChange({ left: 0, right: 0, top: 0, bottom: 0 });
           }
           const currentOnGoBack = onGoBackRef.current;
-          if (currentOnGoBack && canGoBack && !backUsed) {
+          const currentCanGoBack = canGoBackRef.current;
+          const currentBackUsed = backUsedRef.current;
+          if (currentOnGoBack && currentCanGoBack && !currentBackUsed) {
             triggerBackAnimation(currentOnGoBack);
           } else {
             resetPosition();
@@ -466,6 +475,7 @@ export default function ProfileCard({
     // Solo resetear para la tarjeta activa (index === 0) y cuando cambia el perfil actual
     if (index === 0) {
       setBackUsed(false);
+      backUsedRef.current = false;
     }
   }, [currentProfileIndex]);
 
@@ -520,11 +530,14 @@ export default function ProfileCard({
 
   const triggerBackAnimation = (callback: () => void) => {
     // Solo funciona si no se ha usado y está disponible
-    if (isAnimating || backUsed || !canGoBack || !callback) return;
+    const currentBackUsed = backUsedRef.current;
+    const currentCanGoBack = canGoBackRef.current;
+    if (isAnimating || currentBackUsed || !currentCanGoBack || !callback) return;
     
     setIsAnimating(true);
     setIsDragging(false);
     setBackUsed(true);
+    backUsedRef.current = true;
     setDragAction({ type: null, intensity: 0 });
     // Resetear efectos de esquina inmediatamente
     setCornerEffects({ left: 0, right: 0, top: 0, bottom: 0 });
