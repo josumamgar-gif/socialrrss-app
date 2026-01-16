@@ -553,9 +553,10 @@ export default function ProfileCard({
         <div
           ref={cardRef}
           className="relative w-full bg-white overflow-hidden cursor-grab active:cursor-grabbing select-none"
-          style={{
-            borderRadius: '24px',
-            boxShadow: '0 20px 60px -12px rgba(0, 0, 0, 0.25), 0 8px 24px -8px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05)',
+            style={{
+              borderRadius: '24px',
+              border: '2px solid rgba(255, 255, 255, 0.8)',
+              boxShadow: '0 20px 60px -12px rgba(0, 0, 0, 0.25), 0 8px 24px -8px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05), inset 0 1px 0 0 rgba(255, 255, 255, 0.9)',
             transform: buttonAction.type 
               ? undefined // La transformación de botones se maneja con style inline
               : `translate(${position.x}px, ${position.y}px) rotate(${rotation}deg)`,

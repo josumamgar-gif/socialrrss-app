@@ -245,7 +245,7 @@ export default function PrincipalPage() {
         justifyContent: 'center'
       }}>
         {/* Filtro siempre visible incluso sin perfiles */}
-        <div className="absolute top-8 sm:top-12 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-xs px-4">
+        <div className="absolute top-4 sm:top-6 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-xs px-4">
           <select
             value={selectedNetworkFilter}
             onChange={(e) => setSelectedNetworkFilter(e.target.value as 'all' | SocialNetwork)}
@@ -280,7 +280,7 @@ export default function PrincipalPage() {
           </select>
         </div>
 
-        <div className="text-center px-4 pt-24">
+        <div className="text-center px-4 pt-28 sm:pt-32">
           <p className="text-gray-600 text-lg mb-2">No hay perfiles disponibles para esta red social</p>
           <p className="text-gray-500 text-sm">Intenta seleccionar otra red social o recargar la página</p>
         </div>
@@ -298,7 +298,7 @@ export default function PrincipalPage() {
         justifyContent: 'center'
       }}>
         {/* Filtro siempre visible incluso sin perfiles */}
-        <div className="absolute top-8 sm:top-12 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-xs px-4">
+        <div className="absolute top-4 sm:top-6 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-xs px-4">
           <select
             value={selectedNetworkFilter}
             onChange={(e) => setSelectedNetworkFilter(e.target.value as 'all' | SocialNetwork)}
@@ -333,7 +333,7 @@ export default function PrincipalPage() {
           </select>
         </div>
 
-        <div className="text-center px-4 pt-24">
+        <div className="text-center px-4 pt-28 sm:pt-32">
           <p className="text-gray-600 text-lg mb-2">No hay perfiles disponibles por el momento</p>
           <p className="text-gray-500 text-sm">Intenta recargar la página o contacta al administrador</p>
         </div>
@@ -355,7 +355,7 @@ export default function PrincipalPage() {
       justifyContent: 'center'
     }}>
       {/* Filtro de redes sociales - Parte superior central con efecto liquid glass */}
-      <div className="absolute top-8 sm:top-12 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-xs px-4">
+      <div className="absolute top-4 sm:top-6 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-xs px-4">
         <select
           value={selectedNetworkFilter}
           onChange={(e) => setSelectedNetworkFilter(e.target.value as 'all' | SocialNetwork)}
@@ -390,7 +390,7 @@ export default function PrincipalPage() {
         </select>
       </div>
 
-      <div className="flex flex-col items-center justify-center w-full max-w-md mx-auto pt-16 sm:pt-20">
+      <div className="flex flex-col items-center justify-center w-full max-w-md mx-auto pt-28 sm:pt-32">
         {needsDemoInteraction && (
           <div className="mb-4 max-w-md w-full mx-auto bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4 z-40">
             <div className="flex items-start">
