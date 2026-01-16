@@ -34,12 +34,14 @@ export default function SupportSection() {
       });
       
       setSuccess(true);
+      setError(null);
       setFormData({ subject: '', message: '', email: '' });
-      
-      // Ocultar mensaje de éxito después de 5 segundos
-      setTimeout(() => setSuccess(false), 5000);
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Error al enviar el mensaje. Por favor, intenta de nuevo.');
+      const errorMessage = err.response?.data?.error || 
+                          err.message || 
+                          'Error al enviar el mensaje. Por favor, verifica tu conexión e intenta de nuevo.';
+      setError(errorMessage);
+      console.error('Error enviando mensaje de soporte:', err);
     } finally {
       setLoading(false);
     }

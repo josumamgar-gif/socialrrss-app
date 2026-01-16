@@ -4,12 +4,19 @@ import { OptionalAuthRequest } from '../middleware/optionalAuth.middleware';
 
 // Configurar transporter de nodemailer
 const createTransporter = () => {
+  const supportEmail = process.env.SUPPORT_EMAIL || 'oficialsocialrrss@gmail.com';
+  const supportPassword = process.env.SUPPORT_EMAIL_PASSWORD;
+
+  if (!supportPassword) {
+    throw new Error('SUPPORT_EMAIL_PASSWORD no está configurado. Por favor, configura la contraseña de aplicación de Gmail en las variables de entorno.');
+  }
+
   // Usar Gmail SMTP
   return nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: process.env.SUPPORT_EMAIL || 'oficialsocialrrss@gmail.com',
-      pass: process.env.SUPPORT_EMAIL_PASSWORD || '', // Contraseña de aplicación de Gmail
+      user: supportEmail,
+      pass: supportPassword,
     },
   });
 };
@@ -24,7 +31,41 @@ export const sendSupportEmail = async (req: OptionalAuthRequest, res: Response):
     }
 
     const supportEmail = process.env.SUPPORT_EMAIL || 'oficialsocialrrss@gmail.com';
-    const transporter = createTransporter();
+    
+    // Verificar que la contraseña esté configurada
+    if (!process.env.SUPPORT_EMAIL_PASSWORD) {
+      console.error('❌ SUPPORT_EMAIL_PASSWORD no está configurado en las variables de entorno');
+      res.status(500).json({
+        error: 'El servicio de email no está configurado correctamente. Por favor, contacta al administrador.',
+      });
+      return;
+    }
+
+    let transporter;
+    try {
+      transporter = createTransporter();
+      
+      // Verificar la conexión
+      await transporter.verify();
+    } catch (transporterError: any) {
+      console.error('❌ Error configurando el transporter de email:', transporterError);
+      
+      if (transporterError.message?.includes('SUPPORT_EMAIL_PASSWORD')) {
+        res.status(500).json({
+          error: 'El servicio de email no está configurado. Por favor, contacta al administrador.',
+        });
+        return;
+      }
+      
+      if (transporterError.code === 'EAUTH') {
+        res.status(500).json({
+          error: 'Error de autenticación con el servidor de email. Verifica las credenciales.',
+        });
+        return;
+      }
+      
+      throw transporterError;
+    }
 
     // Obtener información del usuario si está autenticado
     const userInfo = req.user
@@ -70,15 +111,42 @@ export const sendSupportEmail = async (req: OptionalAuthRequest, res: Response):
       `,
     };
 
-    await transporter.sendMail(mailOptions);
-
-    res.json({
-      message: 'Mensaje enviado exitosamente. Nos pondremos en contacto contigo pronto.',
-    });
+    try {
+      await transporter.sendMail(mailOptions);
+      console.log('✅ Email de soporte enviado exitosamente a:', supportEmail);
+      
+      res.json({
+        message: 'Mensaje enviado exitosamente. Nos pondremos en contacto contigo pronto.',
+      });
+    } catch (sendError: any) {
+      console.error('❌ Error enviando el email:', sendError);
+      
+      if (sendError.code === 'EAUTH') {
+        res.status(500).json({
+          error: 'Error de autenticación. Verifica que la contraseña de aplicación de Gmail sea correcta.',
+        });
+        return;
+      }
+      
+      if (sendError.code === 'ECONNECTION' || sendError.code === 'ETIMEDOUT') {
+        res.status(500).json({
+          error: 'Error de conexión con el servidor de email. Por favor, intenta más tarde.',
+        });
+        return;
+      }
+      
+      throw sendError;
+    }
   } catch (error: any) {
-    console.error('Error enviando email de soporte:', error);
+    console.error('❌ Error general en sendSupportEmail:', error);
+    
+    // Si el error ya fue manejado y se envió una respuesta, no hacer nada más
+    if (res.headersSent) {
+      return;
+    }
+    
     res.status(500).json({
-      error: 'Error al enviar el mensaje. Por favor, intenta de nuevo más tarde.',
+      error: error.message || 'Error al enviar el mensaje. Por favor, intenta de nuevo más tarde.',
     });
   }
 };
