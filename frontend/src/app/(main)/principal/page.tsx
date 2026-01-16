@@ -56,18 +56,31 @@ export default function PrincipalPage() {
         const viewedData = typeof window !== 'undefined' ? localStorage.getItem(key) : null;
         const viewedProfiles = viewedData ? JSON.parse(viewedData) : [];
         
-        const realProfiles = (response.profiles || [])
-          .filter((p: Profile) => !p._id.startsWith('demo-') && !viewedProfiles.includes(p._id));
+        // Separar perfiles demo de los reales
+        // Los perfiles demo tienen userId.username === 'demo' o userId._id === '000000000000000000000000'
+        const allProfiles = response.profiles || [];
+        const demoProfilesFromDB = allProfiles.filter((p: Profile) => {
+          const userIdObj = p.userId as any;
+          return userIdObj?.username === 'demo' || userIdObj?._id === '000000000000000000000000';
+        });
+        const realProfiles = allProfiles.filter((p: Profile) => {
+          const userIdObj = p.userId as any;
+          return userIdObj?.username !== 'demo' && userIdObj?._id !== '000000000000000000000000';
+        });
+        
+        // Filtrar perfiles ya vistos (solo para perfiles reales)
+        const unseenRealProfiles = realProfiles.filter((p: Profile) => !viewedProfiles.includes(p._id));
         
         const tutorialCompleted = typeof window !== 'undefined' ? 
           localStorage.getItem('tutorialCompleted') === 'true' : false;
         
         let profilesToShow: Profile[] = [];
         if (!tutorialCompleted) {
-          // Mostrar todos los perfiles demo (50) para probar el filtro
-          profilesToShow = [...demoProfiles, ...realProfiles];
+          // Mostrar todos los perfiles demo + reales no vistos
+          profilesToShow = [...demoProfilesFromDB, ...unseenRealProfiles];
         } else {
-          profilesToShow = realProfiles;
+          // Mezclar perfiles demo con reales (ya vienen mezclados del backend)
+          profilesToShow = [...demoProfilesFromDB, ...unseenRealProfiles];
         }
         
         setProfiles(profilesToShow);

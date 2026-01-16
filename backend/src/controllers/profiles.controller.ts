@@ -37,13 +37,46 @@ const upload = multer({
   },
 });
 
+// Función para mezclar aleatoriamente un array (Fisher-Yates shuffle)
+const shuffleArray = <T>(array: T[]): T[] => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
+
 export const getAllProfiles = async (_req: any, res: Response): Promise<void> => {
   try {
+    // Obtener todos los perfiles activos (reales y demo)
     const profiles = await Profile.find({ isActive: true })
-      .populate('userId', 'username')
-      .sort({ createdAt: -1 });
+      .populate({
+        path: 'userId',
+        select: 'username',
+        options: { lean: true },
+      })
+      .lean(); // Usar lean() para mejor rendimiento
 
-    res.json({ profiles });
+    // Procesar perfiles para manejar el caso de userId demo (null o no encontrado)
+    const processedProfiles = profiles.map((profile: any) => {
+      // Si el userId es null o no se pudo poblar (perfil demo), usar un objeto por defecto
+      if (!profile.userId || profile.userId.toString() === '000000000000000000000000') {
+        return {
+          ...profile,
+          userId: {
+            _id: '000000000000000000000000',
+            username: 'demo',
+          },
+        };
+      }
+      return profile;
+    });
+
+    // Mezclar aleatoriamente los perfiles
+    const shuffledProfiles = shuffleArray(processedProfiles);
+
+    res.json({ profiles: shuffledProfiles });
   } catch (error: any) {
     console.error('Error obteniendo perfiles:', error);
     res.status(500).json({ error: 'Error al obtener perfiles' });

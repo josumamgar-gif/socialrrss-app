@@ -9,6 +9,7 @@
     "start": "node dist/server.js",
     "fix-indexes": "node scripts/fix-indexes.js",
     "check-paypal": "node scripts/check-paypal-config.js",
+    "seed-demo": "ts-node scripts/seed-demo-profiles.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": ["api", "express", "mongodb", "payments"],
