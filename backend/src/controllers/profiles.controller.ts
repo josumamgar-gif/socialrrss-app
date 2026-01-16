@@ -252,8 +252,29 @@ export const createProfile = async (req: AuthRequest, res: Response): Promise<vo
     }
     // Si profileData está vacío o es undefined, parsedProfileData será un objeto vacío {}
 
+    // Verificar que los archivos se hayan subido correctamente
+    console.log('📁 Archivos recibidos:', {
+      filesCount: files ? files.length : 0,
+      files: files ? files.map(f => ({
+        originalname: f.originalname,
+        filename: f.filename,
+        mimetype: f.mimetype,
+        size: f.size,
+        path: f.path
+      })) : []
+    });
+
     const images = files && Array.isArray(files) && files.length > 0
-      ? files.map((file) => `/uploads/${file.filename}`)
+      ? files.map((file) => {
+          const imagePath = `/uploads/${file.filename}`;
+          console.log('💾 Guardando imagen:', {
+            originalname: file.originalname,
+            filename: file.filename,
+            path: imagePath,
+            exists: fs.existsSync(file.path)
+          });
+          return imagePath;
+        })
       : [];
 
     console.log('📦 Datos a guardar:', {
@@ -262,6 +283,7 @@ export const createProfile = async (req: AuthRequest, res: Response): Promise<vo
       profileDataKeys: Object.keys(parsedProfileData),
       link: link.trim(),
       imagesCount: images.length,
+      images: images
     });
 
     const profile = new Profile({

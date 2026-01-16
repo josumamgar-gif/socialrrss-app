@@ -33,11 +33,17 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
     loadPlans();
     // Si tenemos profile como prop, usarlo directamente
     if (profile) {
-      console.log('📸 Perfil recibido como prop:', profile);
-      console.log('🖼️ Imágenes del perfil recibido:', profile.images);
+      console.log('📸 PlanSelector - Perfil recibido como prop:', {
+        id: profile._id,
+        images: profile.images,
+        imagesCount: profile.images?.length || 0,
+        imagesArray: profile.images,
+        fullProfile: JSON.stringify(profile, null, 2)
+      });
       setProfileData(profile);
     } else if (profileId) {
       // Si no, cargar desde el servidor
+      console.log('🔍 PlanSelector - Cargando perfil desde servidor:', profileId);
       loadProfile();
     }
   }, [profileId, profile]);
@@ -75,19 +81,28 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
 
   const loadProfile = async () => {
     try {
-      console.log('🔍 Cargando perfil con ID:', profileId);
+      console.log('🔍 PlanSelector - Cargando perfil con ID:', profileId);
       const response = await profilesAPI.getMyProfiles();
-      console.log('📋 Perfiles recibidos:', response.profiles);
+      console.log('📋 PlanSelector - Perfiles recibidos:', {
+        count: response.profiles?.length || 0,
+        profiles: response.profiles
+      });
       const foundProfile = response.profiles.find((p: Profile) => p._id === profileId);
       if (foundProfile) {
-        console.log('✅ Perfil encontrado:', foundProfile);
-        console.log('🖼️ Imágenes del perfil:', foundProfile.images);
+        console.log('✅ PlanSelector - Perfil encontrado:', {
+          id: foundProfile._id,
+          images: foundProfile.images,
+          imagesCount: foundProfile.images?.length || 0,
+          imagesArray: foundProfile.images,
+          fullProfile: JSON.stringify(foundProfile, null, 2)
+        });
         setProfileData(foundProfile);
       } else {
-        console.error('❌ Perfil no encontrado con ID:', profileId);
+        console.error('❌ PlanSelector - Perfil no encontrado con ID:', profileId);
+        console.error('   Perfiles disponibles:', response.profiles.map((p: Profile) => p._id));
       }
     } catch (error) {
-      console.error('❌ Error cargando perfil:', error);
+      console.error('❌ PlanSelector - Error cargando perfil:', error);
     }
   };
 

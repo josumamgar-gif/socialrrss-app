@@ -271,13 +271,25 @@ export default function PromocionPage() {
               profile={(() => {
                 const foundProfile = profiles.find(p => p._id === selectedProfile);
                 if (foundProfile) {
-                  console.log('✅ Perfil encontrado para preview:', {
+                  console.log('✅ PromocionPage - Perfil encontrado para preview:', {
                     id: foundProfile._id,
                     images: foundProfile.images,
-                    imagesCount: foundProfile.images?.length || 0
+                    imagesCount: foundProfile.images?.length || 0,
+                    imagesArray: foundProfile.images,
+                    fullProfile: JSON.stringify(foundProfile, null, 2)
                   });
                 } else {
-                  console.warn('⚠️ Perfil no encontrado en lista para preview:', selectedProfile);
+                  console.warn('⚠️ PromocionPage - Perfil no encontrado en lista para preview:', selectedProfile);
+                  console.warn('   Perfiles disponibles:', profiles.map(p => ({ id: p._id, images: p.images })));
+                  // Intentar usar profileData si está disponible
+                  if (profileData && profileData._id === selectedProfile) {
+                    console.log('✅ PromocionPage - Usando profileData como fallback:', {
+                      id: profileData._id,
+                      images: profileData.images,
+                      imagesCount: profileData.images?.length || 0
+                    });
+                    return profileData;
+                  }
                 }
                 return foundProfile;
               })()}
