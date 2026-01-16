@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { profilesAPI } from '@/lib/api';
-import { Profile } from '@/types';
+import { Profile, SocialNetwork } from '@/types';
 import ProfileCard from '@/components/principal/ProfileCard';
 import ProfileDetail from '@/components/principal/ProfileDetail';
 import { demoProfiles } from '@/data/demoProfiles';
@@ -17,6 +17,7 @@ export default function PrincipalPage() {
   const [demoInteractions, setDemoInteractions] = useState(0);
   const [hasCompletedDemo, setHasCompletedDemo] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
+  const [selectedNetworkFilter, setSelectedNetworkFilter] = useState<'all' | SocialNetwork>('all');
 
   // Cargar perfiles
   useEffect(() => {
@@ -95,9 +96,22 @@ export default function PrincipalPage() {
     }
   };
 
+  // Opciones del filtro
+  const networkOptions: { value: 'all' | SocialNetwork; label: string }[] = [
+    { value: 'all', label: 'Todas' },
+    { value: 'instagram', label: 'Instagram' },
+    { value: 'linkedin', label: 'LinkedIn' },
+    { value: 'tiktok', label: 'TikTok' },
+    { value: 'youtube', label: 'YouTube' },
+    { value: 'facebook', label: 'Facebook' },
+    { value: 'x', label: 'X (Twitter)' },
+    { value: 'twitch', label: 'Twitch' },
+    { value: 'otros', label: 'Otras Redes' },
+  ];
+
   // Handlers simples
   const handleSwipeLeft = () => {
-    const currentProfile = profiles[currentIndex];
+    const currentProfile = filteredProfiles[currentIndex];
     if (!currentProfile) return;
     
     markProfileAsViewed(currentProfile._id);
@@ -113,7 +127,7 @@ export default function PrincipalPage() {
       }
     }
     
-    if (currentIndex < profiles.length - 1) {
+    if (currentIndex < filteredProfiles.length - 1) {
       setHistory([...history, currentIndex]);
       setCurrentIndex(currentIndex + 1);
     } else {
@@ -123,7 +137,7 @@ export default function PrincipalPage() {
   };
 
   const handleSwipeRight = () => {
-    const currentProfile = profiles[currentIndex];
+    const currentProfile = filteredProfiles[currentIndex];
     if (!currentProfile) return;
     
     markProfileAsViewed(currentProfile._id);
@@ -139,7 +153,7 @@ export default function PrincipalPage() {
       }
     }
     
-    if (currentIndex < profiles.length - 1) {
+    if (currentIndex < filteredProfiles.length - 1) {
       setHistory([...history, currentIndex]);
       setCurrentIndex(currentIndex + 1);
     } else {
@@ -149,7 +163,7 @@ export default function PrincipalPage() {
   };
 
   const handleSwipeUp = () => {
-    const currentProfile = profiles[currentIndex];
+    const currentProfile = filteredProfiles[currentIndex];
     if (!currentProfile) return;
     
     markProfileAsViewed(currentProfile._id);
@@ -174,13 +188,41 @@ export default function PrincipalPage() {
     }
   };
 
+  // Filtrar perfiles por red social
+  const filteredProfiles = useMemo(() => {
+    if (selectedNetworkFilter === 'all') {
+      return profiles;
+    }
+    return profiles.filter((p) => p.socialNetwork === selectedNetworkFilter);
+  }, [profiles, selectedNetworkFilter]);
+
+  // Resetear índice cuando cambia el filtro
+  useEffect(() => {
+    setCurrentIndex(0);
+    setHistory([]);
+  }, [selectedNetworkFilter]);
+
+  // Filtrar perfiles por red social
+  const filteredProfiles = useMemo(() => {
+    if (selectedNetworkFilter === 'all') {
+      return profiles;
+    }
+    return profiles.filter((p) => p.socialNetwork === selectedNetworkFilter);
+  }, [profiles, selectedNetworkFilter]);
+
+  // Resetear índice cuando cambia el filtro
+  useEffect(() => {
+    setCurrentIndex(0);
+    setHistory([]);
+  }, [selectedNetworkFilter]);
+
   // Ajustar índice si es necesario
   useEffect(() => {
-    if (profiles.length > 0 && currentIndex >= profiles.length) {
+    if (filteredProfiles.length > 0 && currentIndex >= filteredProfiles.length) {
       setCurrentIndex(0);
       setHistory([]);
     }
-  }, [profiles.length, currentIndex]);
+  }, [filteredProfiles.length, currentIndex]);
 
   if (loading) {
     return (
@@ -193,13 +235,35 @@ export default function PrincipalPage() {
     );
   }
 
+  // Filtrar perfiles por red social
+  const filteredProfiles = useMemo(() => {
+    if (selectedNetworkFilter === 'all') {
+      return profiles;
+    }
+    return profiles.filter((p) => p.socialNetwork === selectedNetworkFilter);
+  }, [profiles, selectedNetworkFilter]);
+
+  if (!loading && filteredProfiles.length === 0 && profiles.length > 0) {
+    return (
+      <div className="w-full bg-white flex items-center justify-center" style={{ 
+        height: 'calc(100vh - 4rem)', 
+        minHeight: 'calc(100vh - 4rem)'
+      }}>
+        <div className="text-center px-4">
+          <p className="text-gray-600 text-lg mb-2">No hay perfiles disponibles para esta red social</p>
+          <p className="text-gray-500 text-sm">Intenta seleccionar otra red social o recargar la página</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!loading && profiles.length === 0) {
     return (
       <div className="w-full bg-white flex items-center justify-center" style={{ 
         height: 'calc(100vh - 4rem)', 
         minHeight: 'calc(100vh - 4rem)'
       }}>
-        <div className="text-center">
+        <div className="text-center px-4">
           <p className="text-gray-600 text-lg mb-2">No hay perfiles disponibles por el momento</p>
           <p className="text-gray-500 text-sm">Intenta recargar la página o contacta al administrador</p>
         </div>
@@ -209,8 +273,8 @@ export default function PrincipalPage() {
 
   const tutorialCompleted = typeof window !== 'undefined' ? 
     localStorage.getItem('tutorialCompleted') === 'true' : false;
-  const needsDemoInteraction = !tutorialCompleted && !hasCompletedDemo && profiles.length > 0 && currentIndex < demoProfiles.length;
-  const currentProfile = profiles[currentIndex];
+  const needsDemoInteraction = !tutorialCompleted && !hasCompletedDemo && filteredProfiles.length > 0 && currentIndex < demoProfiles.length;
+  const currentProfile = filteredProfiles[currentIndex];
 
   return (
     <div className="w-full bg-white flex items-center justify-center px-4 overflow-hidden relative" style={{ 
@@ -220,9 +284,30 @@ export default function PrincipalPage() {
       alignItems: 'center',
       justifyContent: 'center'
     }}>
-      <div className="flex flex-col items-center justify-center w-full max-w-md mx-auto">
+      {/* Filtro de redes sociales - Parte superior central con margen para móvil */}
+      <div className="absolute top-4 sm:top-6 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-xs px-4">
+        <select
+          value={selectedNetworkFilter}
+          onChange={(e) => setSelectedNetworkFilter(e.target.value as 'all' | SocialNetwork)}
+          className="w-full px-4 py-2.5 text-sm sm:text-base border-2 border-gray-300 rounded-lg bg-white text-gray-900 shadow-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 font-medium appearance-none cursor-pointer"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23374151' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'right 1rem center',
+            paddingRight: '2.5rem'
+          }}
+        >
+          {networkOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="flex flex-col items-center justify-center w-full max-w-md mx-auto pt-16 sm:pt-20">
         {needsDemoInteraction && (
-          <div className="mb-4 max-w-md w-full mx-auto bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4 z-50">
+          <div className="mb-4 max-w-md w-full mx-auto bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4 z-40">
             <div className="flex items-start">
               <span className="text-2xl mr-3">🎯</span>
               <div>
@@ -241,9 +326,9 @@ export default function PrincipalPage() {
           </div>
         )}
 
-        {profiles.length > 0 && currentProfile && (
+        {filteredProfiles.length > 0 && currentProfile && (
           <div className="relative w-full max-w-md mx-auto profile-card-container" style={{ overflow: 'hidden' }}>
-            {profiles.slice(currentIndex, currentIndex + 3).map((profile, idx) => (
+            {filteredProfiles.slice(currentIndex, currentIndex + 3).map((profile, idx) => (
               <div
                 key={profile._id}
                 className={idx === 0 ? 'relative z-10' : 'absolute top-0 left-0 right-0 opacity-50 scale-95'}
