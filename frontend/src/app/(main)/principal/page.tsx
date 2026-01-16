@@ -19,6 +19,27 @@ export default function PrincipalPage() {
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
   const [selectedNetworkFilter, setSelectedNetworkFilter] = useState<'all' | SocialNetwork>('all');
 
+  // Opciones del filtro
+  const networkOptions: { value: 'all' | SocialNetwork; label: string }[] = [
+    { value: 'all', label: 'Todas' },
+    { value: 'instagram', label: 'Instagram' },
+    { value: 'linkedin', label: 'LinkedIn' },
+    { value: 'tiktok', label: 'TikTok' },
+    { value: 'youtube', label: 'YouTube' },
+    { value: 'facebook', label: 'Facebook' },
+    { value: 'x', label: 'X (Twitter)' },
+    { value: 'twitch', label: 'Twitch' },
+    { value: 'otros', label: 'Otras Redes' },
+  ];
+
+  // Filtrar perfiles por red social
+  const filteredProfiles = useMemo(() => {
+    if (selectedNetworkFilter === 'all') {
+      return profiles;
+    }
+    return profiles.filter((p) => p.socialNetwork === selectedNetworkFilter);
+  }, [profiles, selectedNetworkFilter]);
+
   // Cargar perfiles
   useEffect(() => {
     let mounted = true;
@@ -80,6 +101,20 @@ export default function PrincipalPage() {
     };
   }, [user?.id]);
 
+  // Resetear índice cuando cambia el filtro
+  useEffect(() => {
+    setCurrentIndex(0);
+    setHistory([]);
+  }, [selectedNetworkFilter]);
+
+  // Ajustar índice si es necesario
+  useEffect(() => {
+    if (filteredProfiles.length > 0 && currentIndex >= filteredProfiles.length) {
+      setCurrentIndex(0);
+      setHistory([]);
+    }
+  }, [filteredProfiles.length, currentIndex]);
+
   // Marcar perfil como visto
   const markProfileAsViewed = (profileId: string) => {
     if (typeof window === 'undefined') return;
@@ -95,19 +130,6 @@ export default function PrincipalPage() {
       localStorage.setItem(key, JSON.stringify(viewed));
     }
   };
-
-  // Opciones del filtro
-  const networkOptions: { value: 'all' | SocialNetwork; label: string }[] = [
-    { value: 'all', label: 'Todas' },
-    { value: 'instagram', label: 'Instagram' },
-    { value: 'linkedin', label: 'LinkedIn' },
-    { value: 'tiktok', label: 'TikTok' },
-    { value: 'youtube', label: 'YouTube' },
-    { value: 'facebook', label: 'Facebook' },
-    { value: 'x', label: 'X (Twitter)' },
-    { value: 'twitch', label: 'Twitch' },
-    { value: 'otros', label: 'Otras Redes' },
-  ];
 
   // Handlers simples
   const handleSwipeLeft = () => {
@@ -188,42 +210,6 @@ export default function PrincipalPage() {
     }
   };
 
-  // Filtrar perfiles por red social
-  const filteredProfiles = useMemo(() => {
-    if (selectedNetworkFilter === 'all') {
-      return profiles;
-    }
-    return profiles.filter((p) => p.socialNetwork === selectedNetworkFilter);
-  }, [profiles, selectedNetworkFilter]);
-
-  // Resetear índice cuando cambia el filtro
-  useEffect(() => {
-    setCurrentIndex(0);
-    setHistory([]);
-  }, [selectedNetworkFilter]);
-
-  // Filtrar perfiles por red social
-  const filteredProfiles = useMemo(() => {
-    if (selectedNetworkFilter === 'all') {
-      return profiles;
-    }
-    return profiles.filter((p) => p.socialNetwork === selectedNetworkFilter);
-  }, [profiles, selectedNetworkFilter]);
-
-  // Resetear índice cuando cambia el filtro
-  useEffect(() => {
-    setCurrentIndex(0);
-    setHistory([]);
-  }, [selectedNetworkFilter]);
-
-  // Ajustar índice si es necesario
-  useEffect(() => {
-    if (filteredProfiles.length > 0 && currentIndex >= filteredProfiles.length) {
-      setCurrentIndex(0);
-      setHistory([]);
-    }
-  }, [filteredProfiles.length, currentIndex]);
-
   if (loading) {
     return (
       <div className="w-full bg-white flex items-center justify-center" style={{ 
@@ -234,14 +220,6 @@ export default function PrincipalPage() {
       </div>
     );
   }
-
-  // Filtrar perfiles por red social
-  const filteredProfiles = useMemo(() => {
-    if (selectedNetworkFilter === 'all') {
-      return profiles;
-    }
-    return profiles.filter((p) => p.socialNetwork === selectedNetworkFilter);
-  }, [profiles, selectedNetworkFilter]);
 
   if (!loading && filteredProfiles.length === 0 && profiles.length > 0) {
     return (
