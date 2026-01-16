@@ -138,6 +138,21 @@ export default function ProfileSection() {
 
   return (
     <div className="space-y-6 max-w-4xl w-full mx-auto">
+      {/* Botón para ver perfiles contratados - Parte superior */}
+      <div className="bg-white rounded-none sm:rounded-lg shadow p-4 sm:p-6">
+        <button
+          onClick={() => setShowMyProfiles(!showMyProfiles)}
+          className="w-full bg-gradient-to-r from-primary-600 to-primary-700 text-white py-4 px-6 rounded-xl hover:from-primary-700 hover:to-primary-800 transition-all font-bold text-lg shadow-lg hover:shadow-xl"
+        >
+          {showMyProfiles ? 'Ocultar Mis Perfiles' : '📋 Comprueba tus Perfiles'}
+        </button>
+        {showMyProfiles && (
+          <div className="mt-6">
+            <MyProfilesGallery />
+          </div>
+        )}
+      </div>
+
       {/* Información de Cuenta */}
       <div className="bg-white rounded-none sm:rounded-lg shadow p-4 sm:p-6 space-y-4 sm:space-y-6">
         <div className="flex justify-between items-center">
@@ -477,23 +492,6 @@ export default function ProfileSection() {
           Cerrar Sesión
         </button>
       </div>
-      </div>
-
-      {/* Botón para ver perfiles contratados */}
-      <div className="bg-white rounded-none sm:rounded-lg shadow p-4 sm:p-6">
-        <div className="text-center">
-          <button
-            onClick={() => setShowMyProfiles(!showMyProfiles)}
-            className="w-full bg-gradient-to-r from-primary-600 to-primary-700 text-white py-4 px-6 rounded-xl hover:from-primary-700 hover:to-primary-800 transition-all font-bold text-lg shadow-lg hover:shadow-xl"
-          >
-            {showMyProfiles ? 'Ocultar Mis Perfiles' : '📋 Comprueba tus Perfiles'}
-          </button>
-          {showMyProfiles && (
-            <div className="mt-6">
-              <MyProfilesGallery />
-            </div>
-          )}
-        </div>
       </div>
     </div>
   );

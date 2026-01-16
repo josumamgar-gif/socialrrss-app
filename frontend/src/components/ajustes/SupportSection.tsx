@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { PaperAirplaneIcon } from '@heroicons/react/24/outline';
+import { supportAPI } from '@/lib/api';
 
 export default function SupportSection() {
   const [formData, setFormData] = useState({
@@ -11,31 +12,34 @@ export default function SupportSection() {
   });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.subject.trim() || !formData.message.trim()) {
-      alert('Por favor, completa todos los campos');
+      setError('Por favor, completa todos los campos requeridos');
       return;
     }
 
     setLoading(true);
     setSuccess(false);
+    setError(null);
 
     try {
-      // Aquí implementarías el envío del formulario a tu backend
-      // Por ahora, simulamos el envío
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await supportAPI.sendMessage({
+        subject: formData.subject.trim(),
+        message: formData.message.trim(),
+        email: formData.email.trim() || undefined,
+      });
       
-      console.log('Formulario de soporte:', formData);
       setSuccess(true);
       setFormData({ subject: '', message: '', email: '' });
       
-      // Mostrar mensaje de éxito
+      // Ocultar mensaje de éxito después de 5 segundos
       setTimeout(() => setSuccess(false), 5000);
-    } catch (error) {
-      alert('Error al enviar el formulario. Por favor, intenta de nuevo.');
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Error al enviar el mensaje. Por favor, intenta de nuevo.');
     } finally {
       setLoading(false);
     }
@@ -55,6 +59,12 @@ export default function SupportSection() {
       {success && (
         <div className="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
           ✅ Mensaje enviado exitosamente. Nos pondremos en contacto contigo pronto.
+        </div>
+      )}
+
+      {error && (
+        <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+          ❌ {error}
         </div>
       )}
 

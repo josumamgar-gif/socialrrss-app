@@ -254,30 +254,30 @@ export default function PrincipalPage() {
   }, [displayedProfiles, currentIndex]);
 
   return (
-    <div className="w-full bg-white flex items-center justify-center px-4 overflow-hidden" style={{ 
+    <div className="w-full bg-white flex items-center justify-center px-4 overflow-hidden relative" style={{ 
       height: '100%',
       minHeight: '100%',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center'
     }}>
+      {/* Menú desplegable en la parte superior izquierda */}
+      <div className="absolute top-4 left-4 z-50">
+        <select
+          value={selectedNetworkFilter}
+          onChange={(e) => setSelectedNetworkFilter(e.target.value as 'all' | SocialNetwork)}
+          className="px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white text-gray-900 shadow-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 font-medium"
+          style={{ minWidth: '140px' }}
+        >
+          {networkOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
       <div className="flex flex-col items-center justify-center w-full max-w-md mx-auto">
-        <div className="w-full mb-4">
-          <label className="block text-xs font-medium text-gray-600 mb-2 text-center">
-            Filtrar por red social
-          </label>
-          <select
-            value={selectedNetworkFilter}
-            onChange={(e) => setSelectedNetworkFilter(e.target.value as 'all' | SocialNetwork)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-primary-500"
-          >
-            {networkOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
         {needsDemoInteraction && (
           <div className="mb-4 max-w-md w-full mx-auto bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4 z-50">
             <div className="flex items-start">

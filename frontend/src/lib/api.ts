@@ -103,6 +103,18 @@ export const authAPI = {
   },
 };
 
+// API de soporte
+export const supportAPI = {
+  sendMessage: async (data: {
+    subject: string;
+    message: string;
+    email?: string;
+  }): Promise<{ message: string }> => {
+    const response = await api.post<{ message: string }>('/support', data);
+    return response.data;
+  },
+};
+
 // API de perfiles
 export const profilesAPI = {
   getAll: async (): Promise<{ profiles: Profile[] }> => {
