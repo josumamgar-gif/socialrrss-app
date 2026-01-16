@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Profile } from '@/types';
 import { XMarkIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import SocialNetworkLogo from '@/components/shared/SocialNetworkLogo';
+import { getImageUrl, placeholderImage } from '@/lib/imageUtils';
 
 interface ProfileDetailProps {
   profile: Profile;
@@ -11,19 +12,6 @@ interface ProfileDetailProps {
 }
 
 export default function ProfileDetail({ profile, onClose }: ProfileDetailProps) {
-  const placeholderImage =
-    "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='600' viewBox='0 0 400 600'%3E%3Crect width='400' height='600' fill='%23f3f4f6'/%3E%3Ctext x='200' y='300' text-anchor='middle' fill='%239ca3af' font-family='Arial' font-size='20'%3EImagen no disponible%3C/text%3E%3C/svg%3E";
-
-  const getImageUrl = (imagePath: string) => {
-    if (!imagePath) return '';
-    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-      return imagePath;
-    }
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-    const baseUrl = apiUrl.replace('/api', '');
-    const cleanPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
-    return `${baseUrl}${cleanPath}`;
-  };
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const getNetworkColor = (network: string) => {

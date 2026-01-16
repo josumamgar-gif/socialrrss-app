@@ -3,13 +3,11 @@
  */
 export const getImageUrl = (imagePath: string | null | undefined): string => {
   if (!imagePath) {
-    console.warn('⚠️ getImageUrl: imagePath es null o undefined');
     return '';
   }
   
   // Si ya es una URL completa, usarla directamente
   if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-    console.log('✅ getImageUrl: URL completa detectada:', imagePath);
     return imagePath;
   }
   
@@ -23,14 +21,6 @@ export const getImageUrl = (imagePath: string | null | undefined): string => {
   // Asegurar que la ruta empiece con /
   const cleanPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
   const fullUrl = `${baseUrl}${cleanPath}`;
-  
-  console.log('🔗 getImageUrl construida:', {
-    imagePath,
-    apiUrl,
-    baseUrl,
-    cleanPath,
-    fullUrl
-  });
   
   return fullUrl;
 };

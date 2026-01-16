@@ -6,7 +6,7 @@ import { profilesAPI } from '@/lib/api';
 import { Profile, SocialNetwork } from '@/types';
 import SocialNetworkLogo from '@/components/shared/SocialNetworkLogo';
 import { PencilIcon, XMarkIcon, CheckIcon } from '@heroicons/react/24/outline';
-import { compressImages } from '@/lib/imageUtils';
+import { compressImages, getImageUrl } from '@/lib/imageUtils';
 
 export default function MyProfilesGallery() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -171,16 +171,6 @@ export default function MyProfilesGallery() {
     return colors[network] || 'bg-gray-600';
   };
 
-  const getImageUrl = (imagePath: string) => {
-    if (!imagePath) return '';
-    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-      return imagePath;
-    }
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-    const baseUrl = apiUrl.replace('/api', '');
-    const cleanPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
-    return `${baseUrl}${cleanPath}`;
-  };
 
   if (loading) {
     return (

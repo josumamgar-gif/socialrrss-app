@@ -54,54 +54,28 @@ export default function ProfilePreview({ profile }: ProfilePreviewProps) {
 
         {/* Imagen */}
         <div className="relative h-64 bg-gray-200">
-          {(() => {
-            console.log('🖼️ ProfilePreview - Renderizando imagen:', {
-              hasImages: !!profile.images,
-              imagesLength: profile.images?.length || 0,
-              firstImage: profile.images?.[0],
-              fullProfile: profile
-            });
-            
-            if (profile.images && profile.images.length > 0 && profile.images[0]) {
-              const imageUrl = getImageUrl(profile.images[0]);
-              console.log('🔗 URL de imagen construida:', imageUrl);
-              
-              return (
-                <img
-                  key={profile.images[0]} // Forzar re-render cuando cambie la imagen
-                  src={imageUrl}
-                  alt="Preview"
-                  className="w-full h-full object-cover"
-                  onLoad={() => {
-                    console.log('✅ Imagen cargada exitosamente:', imageUrl);
-                  }}
-                  onError={(e) => {
-                    console.error('❌ Error cargando imagen');
-                    console.error('  - URL intentada:', imageUrl);
-                    console.error('  - Ruta original:', profile.images[0]);
-                    console.error('  - Perfil completo:', JSON.stringify(profile, null, 2));
-                    console.error('  - API URL env:', process.env.NEXT_PUBLIC_API_URL);
-                    console.error('  - Window location:', typeof window !== 'undefined' ? window.location.href : 'N/A');
-                    (e.target as HTMLImageElement).src = placeholderImage;
-                  }}
-                />
-              );
-            } else {
-              return (
-                <div className="w-full h-full flex flex-col items-center justify-center text-gray-400">
-                  <span className="text-4xl mb-2">📷</span>
-                  <p className="text-xs text-gray-500">No hay imágenes disponibles</p>
-                  {profile.images && profile.images.length === 0 && (
-                    <p className="text-xs text-gray-400 mt-1">Añade imágenes al crear el perfil</p>
-                  )}
-                  {!profile.images && (
-                    <p className="text-xs text-gray-400 mt-1">No se encontraron imágenes en el perfil</p>
-                  )}
-                  <p className="text-xs text-red-400 mt-2">Debug: images = {JSON.stringify(profile.images)}</p>
-                </div>
-              );
-            }
-          })()}
+          {profile.images && profile.images.length > 0 && profile.images[0] ? (
+            <img
+              key={profile.images[0]} // Forzar re-render cuando cambie la imagen
+              src={getImageUrl(profile.images[0])}
+              alt="Preview"
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = placeholderImage;
+              }}
+            />
+          ) : (
+            <div className="w-full h-full flex flex-col items-center justify-center text-gray-400">
+              <span className="text-4xl mb-2">📷</span>
+              <p className="text-xs text-gray-500">No hay imágenes disponibles</p>
+              {profile.images && profile.images.length === 0 && (
+                <p className="text-xs text-gray-400 mt-1">Añade imágenes al crear el perfil</p>
+              )}
+              {!profile.images && (
+                <p className="text-xs text-gray-400 mt-1">No se encontraron imágenes en el perfil</p>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Información */}
