@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { profilesAPI } from '@/lib/api';
 import { Profile, SocialNetwork } from '@/types';
@@ -117,89 +117,108 @@ export default function PrincipalPage() {
       : profiles.filter((p) => p.socialNetwork === selectedNetworkFilter);
   }, [profiles, selectedNetworkFilter]);
 
+  // Ref para acceder al array más reciente sin incluirlo en dependencias
+  const displayedProfilesRef = useRef(displayedProfiles);
+  useEffect(() => {
+    displayedProfilesRef.current = displayedProfiles;
+  }, [displayedProfiles]);
+
   useEffect(() => {
     loadProfiles();
     checkDemoCompletion();
   }, [loadProfiles, checkDemoCompletion]);
 
   const handleSwipeLeft = useCallback(() => {
-    const currentProfile = displayedProfiles[currentIndex];
+    const profiles = displayedProfilesRef.current;
+    const currentProfile = profiles[currentIndex];
     if (!currentProfile) return;
     
     // Marcar perfil como visto
     markProfileAsViewed(currentProfile._id);
     
     if (currentProfile._id.startsWith('demo-')) {
-      const newInteractions = demoInteractions + 1;
-      setDemoInteractions(newInteractions);
-      
-      if (newInteractions >= 3 && !hasCompletedDemo) {
-        localStorage.setItem('demoCompleted', 'true');
-        setHasCompletedDemo(true);
-      }
+      setDemoInteractions((prev) => {
+        const newInteractions = prev + 1;
+        if (newInteractions >= 3) {
+          const completed = localStorage.getItem('demoCompleted');
+          if (completed !== 'true') {
+            localStorage.setItem('demoCompleted', 'true');
+            setHasCompletedDemo(true);
+          }
+        }
+        return newInteractions;
+      });
     }
     
-    if (currentIndex < displayedProfiles.length - 1) {
+    if (currentIndex < profiles.length - 1) {
       setHistory((prev) => [...prev, currentIndex]);
-      setCurrentIndex((prev) => prev + 1);
+      setCurrentIndex(currentIndex + 1);
     } else {
       // Si no hay más perfiles, recargar para obtener nuevos (sin los vistos)
       loadProfiles().then(() => {
-        // Resetear índice después de recargar para mostrar nuevos perfiles
         setCurrentIndex(0);
         setHistory([]);
       });
     }
-  }, [displayedProfiles, currentIndex, markProfileAsViewed, demoInteractions, hasCompletedDemo, loadProfiles]);
+  }, [currentIndex, markProfileAsViewed, loadProfiles]);
 
   const handleSwipeRight = useCallback(() => {
-    const currentProfile = displayedProfiles[currentIndex];
+    const profiles = displayedProfilesRef.current;
+    const currentProfile = profiles[currentIndex];
     if (!currentProfile) return;
     
     // Marcar perfil como visto
     markProfileAsViewed(currentProfile._id);
     
     if (currentProfile._id.startsWith('demo-')) {
-      const newInteractions = demoInteractions + 1;
-      setDemoInteractions(newInteractions);
-      
-      if (newInteractions >= 3 && !hasCompletedDemo) {
-        localStorage.setItem('demoCompleted', 'true');
-        setHasCompletedDemo(true);
-      }
+      setDemoInteractions((prev) => {
+        const newInteractions = prev + 1;
+        if (newInteractions >= 3) {
+          const completed = localStorage.getItem('demoCompleted');
+          if (completed !== 'true') {
+            localStorage.setItem('demoCompleted', 'true');
+            setHasCompletedDemo(true);
+          }
+        }
+        return newInteractions;
+      });
     }
     
-    if (currentIndex < displayedProfiles.length - 1) {
+    if (currentIndex < profiles.length - 1) {
       setHistory((prev) => [...prev, currentIndex]);
-      setCurrentIndex((prev) => prev + 1);
+      setCurrentIndex(currentIndex + 1);
     } else {
       // Si no hay más perfiles, recargar para obtener nuevos (sin los vistos)
       loadProfiles().then(() => {
-        // Resetear índice después de recargar para mostrar nuevos perfiles
         setCurrentIndex(0);
         setHistory([]);
       });
     }
-  }, [displayedProfiles, currentIndex, markProfileAsViewed, demoInteractions, hasCompletedDemo, loadProfiles]);
+  }, [currentIndex, markProfileAsViewed, loadProfiles]);
 
   const handleSwipeUp = useCallback(() => {
-    const currentProfile = displayedProfiles[currentIndex];
+    const profiles = displayedProfilesRef.current;
+    const currentProfile = profiles[currentIndex];
     if (!currentProfile) return;
     
     // Marcar perfil como visto cuando se ven los detalles
     markProfileAsViewed(currentProfile._id);
     
     if (currentProfile._id.startsWith('demo-')) {
-      const newInteractions = demoInteractions + 1;
-      setDemoInteractions(newInteractions);
-      
-      if (newInteractions >= 3 && !hasCompletedDemo) {
-        localStorage.setItem('demoCompleted', 'true');
-        setHasCompletedDemo(true);
-      }
+      setDemoInteractions((prev) => {
+        const newInteractions = prev + 1;
+        if (newInteractions >= 3) {
+          const completed = localStorage.getItem('demoCompleted');
+          if (completed !== 'true') {
+            localStorage.setItem('demoCompleted', 'true');
+            setHasCompletedDemo(true);
+          }
+        }
+        return newInteractions;
+      });
     }
     // Los detalles se manejan dentro del ProfileCard
-  }, [displayedProfiles, currentIndex, markProfileAsViewed, demoInteractions, hasCompletedDemo]);
+  }, [currentIndex, markProfileAsViewed]);
 
   const handleGoBack = useCallback(() => {
     setHistory((prev) => {
