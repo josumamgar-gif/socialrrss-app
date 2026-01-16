@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { profilesAPI } from '@/lib/api';
-import { Profile, SocialNetwork } from '@/types';
+import { Profile } from '@/types';
 import ProfileCard from '@/components/principal/ProfileCard';
 import ProfileDetail from '@/components/principal/ProfileDetail';
 import { demoProfiles } from '@/data/demoProfiles';
@@ -18,24 +18,73 @@ export default function PrincipalPage() {
   const [hasCompletedDemo, setHasCompletedDemo] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
 
-  // Ref para el userId actual
-  const userIdRef = useRef<string | undefined>(user?.id);
+  // Cargar perfiles
   useEffect(() => {
-    userIdRef.current = user?.id;
+    let mounted = true;
+
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        const response = await profilesAPI.getAll();
+        
+        if (!mounted) return;
+
+        const userId = user?.id || 'anonymous';
+        const key = `viewedProfiles_${userId}`;
+        const viewedData = typeof window !== 'undefined' ? localStorage.getItem(key) : null;
+        const viewedProfiles = viewedData ? JSON.parse(viewedData) : [];
+        
+        const realProfiles = (response.profiles || [])
+          .filter((p: Profile) => !p._id.startsWith('demo-') && !viewedProfiles.includes(p._id));
+        
+        const tutorialCompleted = typeof window !== 'undefined' ? 
+          localStorage.getItem('tutorialCompleted') === 'true' : false;
+        
+        let profilesToShow: Profile[] = [];
+        if (!tutorialCompleted) {
+          profilesToShow = [...demoProfiles.slice(0, 4), ...realProfiles];
+        } else {
+          profilesToShow = realProfiles;
+        }
+        
+        setProfiles(profilesToShow);
+
+        // Verificar demo completado
+        const completed = typeof window !== 'undefined' ? 
+          localStorage.getItem('demoCompleted') : null;
+        setHasCompletedDemo(completed === 'true');
+      } catch (error) {
+        console.error('Error cargando perfiles:', error);
+        if (mounted) {
+          const tutorialCompleted = typeof window !== 'undefined' ? 
+            localStorage.getItem('tutorialCompleted') === 'true' : false;
+          
+          if (!tutorialCompleted) {
+            setProfiles(demoProfiles.slice(0, 4));
+          } else {
+            setProfiles([]);
+          }
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadData();
+
+    return () => {
+      mounted = false;
+    };
   }, [user?.id]);
 
-  // Ref para perfiles
-  const profilesRef = useRef<Profile[]>(profiles);
-  useEffect(() => {
-    profilesRef.current = profiles;
-  }, [profiles]);
-
-  // Función estable para marcar perfiles como vistos
-  const markProfileAsViewed = useCallback((profileId: string) => {
+  // Marcar perfil como visto
+  const markProfileAsViewed = (profileId: string) => {
     if (typeof window === 'undefined') return;
     if (profileId.startsWith('demo-')) return;
     
-    const userId = userIdRef.current || 'anonymous';
+    const userId = user?.id || 'anonymous';
     const key = `viewedProfiles_${userId}`;
     const viewedData = localStorage.getItem(key);
     const viewed = viewedData ? JSON.parse(viewedData) : [];
@@ -44,180 +93,94 @@ export default function PrincipalPage() {
       viewed.push(profileId);
       localStorage.setItem(key, JSON.stringify(viewed));
     }
-  }, []);
+  };
 
-  // Función estable para cargar perfiles
-  const loadProfiles = useCallback(async () => {
-    try {
-      setLoading(true);
-      const response = await profilesAPI.getAll();
-      
-      const userId = userIdRef.current || 'anonymous';
-      const key = `viewedProfiles_${userId}`;
-      const viewedData = typeof window !== 'undefined' ? localStorage.getItem(key) : null;
-      const viewedProfiles = viewedData ? JSON.parse(viewedData) : [];
-      
-      const realProfiles = (response.profiles || [])
-        .filter((p: Profile) => !p._id.startsWith('demo-') && !viewedProfiles.includes(p._id));
-      
-      const tutorialCompleted = typeof window !== 'undefined' ? 
-        localStorage.getItem('tutorialCompleted') === 'true' : false;
-      
-      let profilesToShow: Profile[] = [];
-      if (!tutorialCompleted) {
-        profilesToShow = [...demoProfiles.slice(0, 4), ...realProfiles];
-      } else {
-        profilesToShow = realProfiles;
-      }
-      
-      setProfiles(profilesToShow);
-    } catch (error) {
-      console.error('Error cargando perfiles:', error);
-      const tutorialCompleted = typeof window !== 'undefined' ? 
-        localStorage.getItem('tutorialCompleted') === 'true' : false;
-      
-      if (!tutorialCompleted) {
-        setProfiles(demoProfiles.slice(0, 4));
-      } else {
-        setProfiles([]);
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  // Ref para displayedProfiles (ahora es igual a profiles sin filtro)
-  const displayedProfilesRef = useRef<Profile[]>(profiles);
-  useEffect(() => {
-    displayedProfilesRef.current = profiles;
-  }, [profiles]);
-
-  // Refs para callbacks
-  const markProfileAsViewedRef = useRef(markProfileAsViewed);
-  const loadProfilesRef = useRef(loadProfiles);
-  useEffect(() => {
-    markProfileAsViewedRef.current = markProfileAsViewed;
-  }, [markProfileAsViewed]);
-  useEffect(() => {
-    loadProfilesRef.current = loadProfiles;
-  }, [loadProfiles]);
-
-  // Ref para currentIndex
-  const currentIndexRef = useRef(currentIndex);
-  useEffect(() => {
-    currentIndexRef.current = currentIndex;
-  }, [currentIndex]);
-
-  // Cargar perfiles solo una vez al montar
-  useEffect(() => {
-    const checkDemoCompletion = () => {
-      if (typeof window !== 'undefined') {
-        const completed = localStorage.getItem('demoCompleted');
-        setHasCompletedDemo(completed === 'true');
-      }
-    };
-    
-    loadProfiles();
-    checkDemoCompletion();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Solo al montar - loadProfiles es estable
-
-  const handleSwipeLeft = useCallback(() => {
-    const profiles = displayedProfilesRef.current;
-    const idx = currentIndexRef.current;
-    const currentProfile = profiles[idx];
+  // Handlers simples
+  const handleSwipeLeft = () => {
+    const currentProfile = profiles[currentIndex];
     if (!currentProfile) return;
     
-    markProfileAsViewedRef.current(currentProfile._id);
+    markProfileAsViewed(currentProfile._id);
     
     if (currentProfile._id.startsWith('demo-')) {
-      setDemoInteractions((prev) => {
-        const newInteractions = prev + 1;
-        if (newInteractions >= 3) {
-          if (typeof window !== 'undefined') {
-            localStorage.setItem('demoCompleted', 'true');
-          }
-          setHasCompletedDemo(true);
+      const newInteractions = demoInteractions + 1;
+      setDemoInteractions(newInteractions);
+      if (newInteractions >= 3) {
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('demoCompleted', 'true');
         }
-        return newInteractions;
-      });
+        setHasCompletedDemo(true);
+      }
     }
     
-    if (idx < profiles.length - 1) {
-      setHistory((prev) => [...prev, idx]);
-      setCurrentIndex(idx + 1);
+    if (currentIndex < profiles.length - 1) {
+      setHistory([...history, currentIndex]);
+      setCurrentIndex(currentIndex + 1);
     } else {
-      loadProfilesRef.current().then(() => {
-        setCurrentIndex(0);
-        setHistory([]);
-      });
+      // Recargar perfiles
+      window.location.reload();
     }
-  }, []);
+  };
 
-  const handleSwipeRight = useCallback(() => {
-    const profiles = displayedProfilesRef.current;
-    const idx = currentIndexRef.current;
-    const currentProfile = profiles[idx];
+  const handleSwipeRight = () => {
+    const currentProfile = profiles[currentIndex];
     if (!currentProfile) return;
     
-    markProfileAsViewedRef.current(currentProfile._id);
+    markProfileAsViewed(currentProfile._id);
     
     if (currentProfile._id.startsWith('demo-')) {
-      setDemoInteractions((prev) => {
-        const newInteractions = prev + 1;
-        if (newInteractions >= 3) {
-          if (typeof window !== 'undefined') {
-            localStorage.setItem('demoCompleted', 'true');
-          }
-          setHasCompletedDemo(true);
+      const newInteractions = demoInteractions + 1;
+      setDemoInteractions(newInteractions);
+      if (newInteractions >= 3) {
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('demoCompleted', 'true');
         }
-        return newInteractions;
-      });
-    }
-    
-    if (idx < profiles.length - 1) {
-      setHistory((prev) => [...prev, idx]);
-      setCurrentIndex(idx + 1);
-    } else {
-      loadProfilesRef.current().then(() => {
-        setCurrentIndex(0);
-        setHistory([]);
-      });
-    }
-  }, []);
-
-  const handleSwipeUp = useCallback(() => {
-    const profiles = displayedProfilesRef.current;
-    const idx = currentIndexRef.current;
-    const currentProfile = profiles[idx];
-    if (!currentProfile) return;
-    
-    markProfileAsViewedRef.current(currentProfile._id);
-    
-    if (currentProfile._id.startsWith('demo-')) {
-      setDemoInteractions((prev) => {
-        const newInteractions = prev + 1;
-        if (newInteractions >= 3) {
-          if (typeof window !== 'undefined') {
-            localStorage.setItem('demoCompleted', 'true');
-          }
-          setHasCompletedDemo(true);
-        }
-        return newInteractions;
-      });
-    }
-  }, []);
-
-  const handleGoBack = useCallback(() => {
-    setHistory((prev) => {
-      if (prev.length > 0) {
-        const previousIndex = prev[prev.length - 1];
-        setCurrentIndex(previousIndex);
-        return prev.slice(0, -1);
+        setHasCompletedDemo(true);
       }
-      return prev;
-    });
-  }, []);
+    }
+    
+    if (currentIndex < profiles.length - 1) {
+      setHistory([...history, currentIndex]);
+      setCurrentIndex(currentIndex + 1);
+    } else {
+      // Recargar perfiles
+      window.location.reload();
+    }
+  };
+
+  const handleSwipeUp = () => {
+    const currentProfile = profiles[currentIndex];
+    if (!currentProfile) return;
+    
+    markProfileAsViewed(currentProfile._id);
+    
+    if (currentProfile._id.startsWith('demo-')) {
+      const newInteractions = demoInteractions + 1;
+      setDemoInteractions(newInteractions);
+      if (newInteractions >= 3) {
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('demoCompleted', 'true');
+        }
+        setHasCompletedDemo(true);
+      }
+    }
+  };
+
+  const handleGoBack = () => {
+    if (history.length > 0) {
+      const previousIndex = history[history.length - 1];
+      setCurrentIndex(previousIndex);
+      setHistory(history.slice(0, -1));
+    }
+  };
+
+  // Ajustar índice si es necesario
+  useEffect(() => {
+    if (profiles.length > 0 && currentIndex >= profiles.length) {
+      setCurrentIndex(0);
+      setHistory([]);
+    }
+  }, [profiles.length, currentIndex]);
 
   if (loading) {
     return (
@@ -230,7 +193,6 @@ export default function PrincipalPage() {
     );
   }
 
-  // Mostrar mensaje si no hay perfiles después de cargar
   if (!loading && profiles.length === 0) {
     return (
       <div className="w-full bg-white flex items-center justify-center" style={{ 
@@ -245,20 +207,10 @@ export default function PrincipalPage() {
     );
   }
 
-  // Verificar si el usuario ha completado los demos
   const tutorialCompleted = typeof window !== 'undefined' ? 
     localStorage.getItem('tutorialCompleted') === 'true' : false;
   const needsDemoInteraction = !tutorialCompleted && !hasCompletedDemo && profiles.length > 0 && currentIndex < demoProfiles.length;
   const currentProfile = profiles[currentIndex];
-  const isDemoProfile = currentProfile?._id.startsWith('demo-');
-
-  // Ajustar índice si es necesario
-  useEffect(() => {
-    if (profiles.length > 0 && currentIndex >= profiles.length) {
-      setCurrentIndex(0);
-      setHistory([]);
-    }
-  }, [profiles.length, currentIndex]);
 
   return (
     <div className="w-full bg-white flex items-center justify-center px-4 overflow-hidden relative" style={{ 
@@ -289,9 +241,9 @@ export default function PrincipalPage() {
           </div>
         )}
 
-      {profiles.length > 0 && currentProfile && (
+        {profiles.length > 0 && currentProfile && (
           <div className="relative w-full max-w-md mx-auto profile-card-container" style={{ overflow: 'hidden' }}>
-          {profiles.slice(currentIndex, currentIndex + 3).map((profile, idx) => (
+            {profiles.slice(currentIndex, currentIndex + 3).map((profile, idx) => (
               <div
                 key={profile._id}
                 className={idx === 0 ? 'relative z-10' : 'absolute top-0 left-0 right-0 opacity-50 scale-95'}
@@ -318,7 +270,6 @@ export default function PrincipalPage() {
         )}
       </div>
 
-      {/* Modal de detalles - renderizado fuera del contenedor para z-index correcto */}
       {selectedProfile && (
         <ProfileDetail
           profile={selectedProfile}
@@ -328,4 +279,3 @@ export default function PrincipalPage() {
     </div>
   );
 }
-
