@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import PaymentReceipt from '@/components/promocion/PaymentReceipt';
+import { paymentsAPI } from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
 import { profilesAPI } from '@/lib/api';
 import { Profile, SocialNetwork } from '@/types';
