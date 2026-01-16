@@ -8,6 +8,7 @@ import {
 } from '../utils/stripe';
 import Profile from '../models/Profile';
 import Payment from '../models/Payment';
+import { Types } from 'mongoose';
 import { getPlan, calculateExpirationDate, PlanType } from '../constants/pricing';
 
 export const createPaymentOrder = async (req: AuthRequest, res: Response): Promise<void> => {
@@ -175,13 +176,20 @@ export const capturePaymentOrder = async (req: AuthRequest, res: Response): Prom
       return;
     }
 
-    // Buscar pago en la base de datos
+    // Buscar pago en la base de datos evitando cast inválido de ObjectId
+    const orConditions: Record<string, any>[] = [];
+    if (orderId) {
+      orConditions.push({ paypalOrderId: orderId });
+    }
+    if (paymentId) {
+      orConditions.push({ stripePaymentId: paymentId });
+      if (Types.ObjectId.isValid(paymentId)) {
+        orConditions.push({ _id: paymentId });
+      }
+    }
+
     const payment = await Payment.findOne({
-      $or: [
-        { paypalOrderId: orderId },
-        { stripePaymentId: paymentId },
-        { _id: paymentId },
-      ],
+      $or: orConditions,
       userId: req.user.userId,
       status: 'pending',
     });
@@ -266,11 +274,16 @@ export const checkPaymentStatus = async (req: AuthRequest, res: Response): Promi
 
     const { paymentId } = req.params;
 
+    const statusOrConditions: Record<string, any>[] = [];
+    if (paymentId) {
+      statusOrConditions.push({ stripePaymentId: paymentId });
+      if (Types.ObjectId.isValid(paymentId)) {
+        statusOrConditions.push({ _id: paymentId });
+      }
+    }
+
     const payment = await Payment.findOne({
-      $or: [
-        { stripePaymentId: paymentId },
-        { _id: paymentId },
-      ],
+      $or: statusOrConditions,
       userId: req.user.userId,
     });
 
