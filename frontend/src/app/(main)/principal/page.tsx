@@ -20,15 +20,15 @@ export default function PrincipalPage() {
 
   // Ref para el userId actual
   const userIdRef = useRef<string | undefined>(user?.id);
-  if (user?.id !== userIdRef.current) {
+  useEffect(() => {
     userIdRef.current = user?.id;
-  }
+  }, [user?.id]);
 
   // Ref para perfiles
   const profilesRef = useRef<Profile[]>(profiles);
-  if (profiles !== profilesRef.current) {
+  useEffect(() => {
     profilesRef.current = profiles;
-  }
+  }, [profiles]);
 
   // Función estable para marcar perfiles como vistos
   const markProfileAsViewed = useCallback((profileId: string) => {
@@ -88,7 +88,25 @@ export default function PrincipalPage() {
 
   // Ref para displayedProfiles (ahora es igual a profiles sin filtro)
   const displayedProfilesRef = useRef<Profile[]>(profiles);
-  displayedProfilesRef.current = profiles;
+  useEffect(() => {
+    displayedProfilesRef.current = profiles;
+  }, [profiles]);
+
+  // Refs para callbacks
+  const markProfileAsViewedRef = useRef(markProfileAsViewed);
+  const loadProfilesRef = useRef(loadProfiles);
+  useEffect(() => {
+    markProfileAsViewedRef.current = markProfileAsViewed;
+  }, [markProfileAsViewed]);
+  useEffect(() => {
+    loadProfilesRef.current = loadProfiles;
+  }, [loadProfiles]);
+
+  // Ref para currentIndex
+  const currentIndexRef = useRef(currentIndex);
+  useEffect(() => {
+    currentIndexRef.current = currentIndex;
+  }, [currentIndex]);
 
   // Cargar perfiles solo una vez al montar
   useEffect(() => {
@@ -101,17 +119,8 @@ export default function PrincipalPage() {
     
     loadProfiles();
     checkDemoCompletion();
-  }, []); // Solo al montar
-
-  // Refs para callbacks
-  const markProfileAsViewedRef = useRef(markProfileAsViewed);
-  const loadProfilesRef = useRef(loadProfiles);
-  markProfileAsViewedRef.current = markProfileAsViewed;
-  loadProfilesRef.current = loadProfiles;
-
-  // Ref para currentIndex
-  const currentIndexRef = useRef(currentIndex);
-  currentIndexRef.current = currentIndex;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Solo al montar - loadProfiles es estable
 
   const handleSwipeLeft = useCallback(() => {
     const profiles = displayedProfilesRef.current;

@@ -84,18 +84,32 @@ export default function ProfileCard({
   const onSwipeUpRef = useRef(onSwipeUp);
   const onShowDetailRef = useRef(onShowDetail);
   
-  // Actualizar refs directamente sin useEffect
-  positionRef.current = position;
-  startPosRef.current = startPos;
-  dragActionRef.current = dragAction;
-  isDraggingRef.current = isDragging;
-  isAnimatingRef.current = isAnimating;
-  profileLinkRef.current = profile.link;
-  profileRef.current = profile;
-  onSwipeLeftRef.current = onSwipeLeft;
-  onSwipeRightRef.current = onSwipeRight;
-  onSwipeUpRef.current = onSwipeUp;
-  onShowDetailRef.current = onShowDetail;
+  // Actualizar refs en useEffect para evitar problemas con React
+  useEffect(() => {
+    positionRef.current = position;
+  }, [position]);
+  useEffect(() => {
+    startPosRef.current = startPos;
+  }, [startPos]);
+  useEffect(() => {
+    dragActionRef.current = dragAction;
+  }, [dragAction]);
+  useEffect(() => {
+    isDraggingRef.current = isDragging;
+  }, [isDragging]);
+  useEffect(() => {
+    isAnimatingRef.current = isAnimating;
+  }, [isAnimating]);
+  useEffect(() => {
+    profileLinkRef.current = profile.link;
+    profileRef.current = profile;
+  }, [profile.link, profile._id]);
+  useEffect(() => {
+    onSwipeLeftRef.current = onSwipeLeft;
+    onSwipeRightRef.current = onSwipeRight;
+    onSwipeUpRef.current = onSwipeUp;
+    onShowDetailRef.current = onShowDetail;
+  }, [onSwipeLeft, onSwipeRight, onSwipeUp, onShowDetail]);
 
   const getActionForPosition = (x: number, y: number, width: number, height: number): DragAction => {
     const threshold = 40; // Reducir threshold para mayor sensibilidad
