@@ -84,32 +84,18 @@ export default function ProfileCard({
   const onSwipeUpRef = useRef(onSwipeUp);
   const onShowDetailRef = useRef(onShowDetail);
   
-  // Actualizar refs cuando cambian los estados/props
-  useEffect(() => {
-    positionRef.current = position;
-  }, [position]);
-  useEffect(() => {
-    startPosRef.current = startPos;
-  }, [startPos]);
-  useEffect(() => {
-    dragActionRef.current = dragAction;
-  }, [dragAction]);
-  useEffect(() => {
-    isDraggingRef.current = isDragging;
-  }, [isDragging]);
-  useEffect(() => {
-    isAnimatingRef.current = isAnimating;
-  }, [isAnimating]);
-  useEffect(() => {
-    profileLinkRef.current = profile.link;
-    profileRef.current = profile;
-  }, [profile.link, profile._id]);
-  useEffect(() => {
-    onSwipeLeftRef.current = onSwipeLeft;
-    onSwipeRightRef.current = onSwipeRight;
-    onSwipeUpRef.current = onSwipeUp;
-    onShowDetailRef.current = onShowDetail;
-  }, [onSwipeLeft, onSwipeRight, onSwipeUp, onShowDetail]);
+  // Actualizar refs directamente sin useEffect
+  positionRef.current = position;
+  startPosRef.current = startPos;
+  dragActionRef.current = dragAction;
+  isDraggingRef.current = isDragging;
+  isAnimatingRef.current = isAnimating;
+  profileLinkRef.current = profile.link;
+  profileRef.current = profile;
+  onSwipeLeftRef.current = onSwipeLeft;
+  onSwipeRightRef.current = onSwipeRight;
+  onSwipeUpRef.current = onSwipeUp;
+  onShowDetailRef.current = onShowDetail;
 
   const getActionForPosition = (x: number, y: number, width: number, height: number): DragAction => {
     const threshold = 40; // Reducir threshold para mayor sensibilidad
@@ -312,8 +298,7 @@ export default function ProfileCard({
   }, [triggerSwipeAnimation, resetPosition]); // Solo dependencias estables
 
   useEffect(() => {
-    // Usar ref para verificar isDragging sin dependencia
-    if (!isDraggingRef.current) return;
+    if (!isDragging) return;
 
     const handleMouseMove = (e: MouseEvent) => {
       if (!isDraggingRef.current || isAnimatingRef.current) return;
@@ -327,10 +312,9 @@ export default function ProfileCard({
     
     const handleTouchMove = (e: TouchEvent) => {
       if (!isDraggingRef.current || isAnimatingRef.current) return;
-      // Solo prevenir scroll si realmente estamos arrastrando (no es un botón)
       const target = e.target as HTMLElement;
       if (!target.closest('button')) {
-        e.preventDefault(); // Solo prevenir scroll durante el arrastre real
+        e.preventDefault();
         e.stopPropagation();
       }
       if (e.touches[0]) handleMove(e.touches[0].clientX, e.touches[0].clientY);
@@ -338,7 +322,6 @@ export default function ProfileCard({
     
     const handleTouchEnd = (e: TouchEvent) => {
       if (!isDraggingRef.current) return;
-      // NO prevenir aquí para permitir clicks en botones
       const target = e.target as HTMLElement;
       if (!target.closest('button')) {
         e.stopPropagation();
@@ -357,7 +340,7 @@ export default function ProfileCard({
       window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [isDragging, handleMove, handleEnd]); // handleMove y handleEnd son estables ahora
+  }, [isDragging]); // Solo isDragging como dependencia
 
   // Resetear backUsed cada vez que cambia el perfil actual visible
   // Se resetea cuando cambias de perfil (avanzar o retroceder)
