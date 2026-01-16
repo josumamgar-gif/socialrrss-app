@@ -15,7 +15,10 @@ export const getImageUrl = (imagePath: string | null | undefined): string => {
   
   // Construir URL completa desde el backend
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-  const baseUrl = apiUrl.replace('/api', '');
+  
+  // Remover /api del final de la URL si existe
+  // Usar replace con regex para reemplazar solo al final
+  const baseUrl = apiUrl.replace(/\/api$/, '');
   
   // Asegurar que la ruta empiece con /
   const cleanPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
