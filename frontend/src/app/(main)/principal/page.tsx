@@ -49,18 +49,32 @@ export default function PrincipalPage() {
     // Si hay usuario, usar su ID, sino usar 'anonymous'
     const userId = user?.id || 'anonymous';
     const key = `viewedProfiles_${userId}`;
-    const viewed = getViewedProfiles();
+    
+    // Obtener perfiles vistos directamente aquí para evitar dependencias
+    const viewed = (() => {
+      const viewedData = localStorage.getItem(key);
+      return viewedData ? JSON.parse(viewedData) : [];
+    })();
+    
     if (!viewed.includes(profileId)) {
       viewed.push(profileId);
       localStorage.setItem(key, JSON.stringify(viewed));
     }
-  }, [user, getViewedProfiles]);
+  }, [user?.id]); // Solo depender del ID del usuario
 
   const loadProfiles = useCallback(async () => {
     try {
       setLoading(true);
       const response = await profilesAPI.getAll();
-      const viewedProfiles = getViewedProfiles();
+      
+      // Obtener perfiles vistos directamente aquí para evitar dependencias
+      const viewedProfiles = (() => {
+        if (typeof window === 'undefined') return [];
+        const userId = user?.id || 'anonymous';
+        const key = `viewedProfiles_${userId}`;
+        const viewed = localStorage.getItem(key);
+        return viewed ? JSON.parse(viewed) : [];
+      })();
       
       // Filtrar perfiles reales que no han sido vistos
       const realProfiles = (response.profiles || [])
@@ -97,7 +111,7 @@ export default function PrincipalPage() {
     } finally {
       setLoading(false);
     }
-  }, [getViewedProfiles]);
+  }, [user?.id]); // Solo depender del ID del usuario, no de la función completa
 
   const networkOptions: { value: 'all' | SocialNetwork; label: string }[] = [
     { value: 'all', label: 'Todas' },
@@ -126,7 +140,8 @@ export default function PrincipalPage() {
   useEffect(() => {
     loadProfiles();
     checkDemoCompletion();
-  }, [loadProfiles, checkDemoCompletion]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Solo ejecutar una vez al montar
 
   const handleSwipeLeft = useCallback(() => {
     const profiles = displayedProfilesRef.current;
