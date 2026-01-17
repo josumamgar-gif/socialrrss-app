@@ -41,11 +41,25 @@ api.interceptors.request.use((config) => {
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      // Log para debugging (solo en desarrollo)
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔑 Token añadido a la petición:', config.url, 'Token:', token.substring(0, 20) + '...');
+      }
+    } else {
+      // Log de advertencia si no hay token
+      console.warn('⚠️ No se encontró token en localStorage para la petición:', config.url);
     }
   }
   // Si es FormData, eliminar Content-Type para que axios lo establezca automáticamente con el boundary
   if (config.data instanceof FormData) {
     delete config.headers['Content-Type'];
+    // Asegurar que el header Authorization se mantenga incluso con FormData
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      if (token && !config.headers.Authorization) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    }
   }
   return config;
 });

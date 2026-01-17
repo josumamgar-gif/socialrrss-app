@@ -556,9 +556,7 @@ export const sendReceipt = async (req: AuthRequest, res: Response): Promise<void
       `,
     };
 
-    await transporter.sendMail(mailOptions);
-
-    res.json({ message: 'Recibo enviado exitosamente a tu correo electrónico' });
+    await transporter.sendMail(mailOptions);    res.json({ message: 'Recibo enviado exitosamente a tu correo electrónico' });
   } catch (error: any) {
     console.error('Error enviando recibo:', error);
     res.status(500).json({ error: 'Error al enviar el recibo por email' });

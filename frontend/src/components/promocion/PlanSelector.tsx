@@ -243,7 +243,7 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
   }
 
   return (
-    <div className="w-full flex flex-col max-w-6xl mx-auto px-4 sm:px-6 pb-6">
+    <div className="w-full flex flex-col max-w-6xl mx-auto px-4 sm:px-6 pb-24">
       <div className="text-center flex-shrink-0 py-3">
         <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Elige tu Plan de Promoción</h2>
         <p className="text-sm sm:text-base text-gray-600">Selecciona el plan que mejor se adapte a tus necesidades</p>
@@ -388,7 +388,7 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
       )}
 
       {!paymentCreated && (
-        <div className="max-w-md mx-auto flex-shrink-0 py-4">
+        <div className="max-w-md mx-auto flex-shrink-0 py-4 sticky bottom-0 bg-white pt-6 border-t border-gray-200 mt-4">
           <button
             onClick={handlePayment}
             disabled={loading || !selectedPlan}

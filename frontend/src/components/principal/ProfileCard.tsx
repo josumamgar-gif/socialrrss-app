@@ -121,14 +121,14 @@ export default function ProfileCard({
   }, [onSwipeLeft, onSwipeRight, onSwipeUp, onGoBack, onShowDetail, canGoBack, backUsed]);
 
   const getActionForPosition = (x: number, y: number, width: number, height: number): DragAction => {
-    const threshold = 40; // Reducir threshold para mayor sensibilidad
+    const threshold = 30; // Threshold reducido para mayor sensibilidad
     
     // Calcular distancia desde el centro
     const distanceFromCenter = Math.sqrt(x * x + y * y);
     const intensity = Math.min(1, distanceFromCenter / threshold);
     
     // Si no ha alcanzado el umbral mínimo, no hay acción (reducido para mayor sensibilidad)
-    if (intensity < 0.1) {
+    if (intensity < 0.05) {
       return { type: null, intensity: 0 };
     }
     
@@ -136,7 +136,8 @@ export default function ProfileCard({
     const absY = Math.abs(y);
     
     // Determinar dirección principal - priorizar horizontal sobre vertical
-    if (absX > absY * 1.1) {
+    // Reducir el factor de comparación para que sea más fácil activar gestos horizontales
+    if (absX > absY * 0.8) {
       // Movimiento horizontal dominante
       if (x < 0) {
         return { type: 'left', intensity };
@@ -144,7 +145,7 @@ export default function ProfileCard({
         // Derecha - siempre abrir enlace si existe
         return { type: 'right', intensity };
       }
-    } else if (absY > absX * 1.1) {
+    } else if (absY > absX * 0.8) {
       // Movimiento vertical dominante
       if (y < 0) {
         // Hacia arriba
@@ -281,7 +282,7 @@ export default function ProfileCard({
     
     const currentPosition = positionRef.current;
     const currentDragAction = dragActionRef.current;
-    const threshold = 40; // Mismo threshold que getActionForPosition
+    const threshold = 30; // Mismo threshold que getActionForPosition (reducido)
     const absX = Math.abs(currentPosition.x);
     const absY = Math.abs(currentPosition.y);
 
@@ -293,8 +294,11 @@ export default function ProfileCard({
     const currentOnSwipeUp = onSwipeUpRef.current;
     const currentOnShowDetail = onShowDetailRef.current;
 
+    console.log('🔄 handleEnd - dragAction:', currentDragAction, 'position:', currentPosition);
+
     // Prioridad: usar dragAction si existe y tiene suficiente intensidad (reducido para mayor sensibilidad)
-    if (currentDragAction.type && currentDragAction.intensity > 0.1) {
+    if (currentDragAction.type && currentDragAction.intensity > 0.05) {
+      console.log('✅ Usando dragAction:', currentDragAction.type);
       if (currentDragAction.type === 'left' && currentOnSwipeLeft) {
         // Resetear efectos antes de ejecutar acción
         setCornerEffects({ left: 0, right: 0, top: 0, bottom: 0 });
@@ -304,6 +308,7 @@ export default function ProfileCard({
         triggerSwipeAnimation('left', currentOnSwipeLeft);
         return;
       } else if (currentDragAction.type === 'right') {
+        console.log('➡️ Ejecutando gesto derecha');
         // Resetear efectos antes de ejecutar acción
         setCornerEffects({ left: 0, right: 0, top: 0, bottom: 0 });
         if (onCornerEffectsChange) {
@@ -312,6 +317,7 @@ export default function ProfileCard({
         // Para el gesto a la derecha: SIEMPRE ejecutar la misma acción que el botón azul
         // PASO 1: Abrir el enlace (igual que el botón azul)
         if (currentProfileLink) {
+          console.log('🔗 Abriendo enlace:', currentProfileLink);
           const linkWindow = window.open(currentProfileLink, '_blank', 'noopener,noreferrer');
           // Si el popup fue bloqueado, intentar nuevamente
           if (!linkWindow || linkWindow.closed || typeof linkWindow.closed === 'undefined') {
@@ -322,9 +328,11 @@ export default function ProfileCard({
         }
         // PASO 2: Ejecutar onSwipeRight para avanzar al siguiente perfil (IGUAL QUE EL BOTÓN AZUL)
         if (currentOnSwipeRight) {
+          console.log('✅ Ejecutando onSwipeRight');
           // Usar triggerSwipeAnimation para la animación visual
           triggerSwipeAnimation('right', currentOnSwipeRight);
         } else {
+          console.warn('⚠️ onSwipeRight no está definido');
           // Si no hay callback, al menos resetear la posición
           resetPosition();
         }
@@ -362,10 +370,12 @@ export default function ProfileCard({
     }
     
     // Fallback al sistema basado en posición absoluta (para mayor compatibilidad)
+    // Reducir el factor de comparación para que sea más fácil activar gestos horizontales
     if (absX > threshold || absY > threshold) {
-      if (absX > absY * 1.1) {
+      if (absX > absY * 0.8) {
         // Movimiento horizontal dominante
         if (currentPosition.x > threshold) {
+          console.log('➡️ Fallback: Ejecutando gesto derecha (posición absoluta)');
           // Derecha - Resetear efectos, abrir enlace y ejecutar callback
           setCornerEffects({ left: 0, right: 0, top: 0, bottom: 0 });
           if (onCornerEffectsChange) {
@@ -373,6 +383,7 @@ export default function ProfileCard({
           }
           // PRIMERO: Abrir el enlace inmediatamente
           if (currentProfileLink) {
+            console.log('🔗 Abriendo enlace (fallback):', currentProfileLink);
             const linkWindow = window.open(currentProfileLink, '_blank', 'noopener,noreferrer');
             // Si el popup fue bloqueado, intentar nuevamente después de un pequeño delay
             if (!linkWindow || linkWindow.closed || typeof linkWindow.closed === 'undefined') {
@@ -383,8 +394,10 @@ export default function ProfileCard({
           }
           // SEGUNDO: Ejecutar el callback para avanzar al siguiente perfil
           if (currentOnSwipeRight) {
+            console.log('✅ Ejecutando onSwipeRight (fallback)');
             triggerSwipeAnimation('right', currentOnSwipeRight);
           } else {
+            console.warn('⚠️ onSwipeRight no está definido (fallback)');
             resetPosition();
           }
           return;
@@ -397,7 +410,7 @@ export default function ProfileCard({
           triggerSwipeAnimation('left', currentOnSwipeLeft);
           return;
         }
-      } else if (absY > absX * 1.1) {
+      } else if (absY > absX * 0.8) {
         // Movimiento vertical dominante
         if (currentPosition.y < -threshold) {
           // Hacia arriba - Resetear efectos
@@ -432,8 +445,9 @@ export default function ProfileCard({
     }
     
     // Si no se ejecutó ninguna acción, resetear
+    console.log('🔄 Reseteando posición - no se cumplió ningún threshold');
     resetPosition();
-  }, [triggerSwipeAnimation, resetPosition]); // Solo dependencias estables
+  }, [triggerSwipeAnimation, resetPosition, onCornerEffectsChange]); // Solo dependencias estables
 
   useEffect(() => {
     if (!isDragging) return;

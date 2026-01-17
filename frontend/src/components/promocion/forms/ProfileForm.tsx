@@ -183,6 +183,17 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork, onNet
         });
       }
 
+      // Verificar que el token esté disponible antes de enviar
+      if (typeof window !== 'undefined') {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          setError('No estás autenticado. Por favor, inicia sesión nuevamente.');
+          setLoading(false);
+          return;
+        }
+        console.log('🔑 Token disponible:', token.substring(0, 20) + '...');
+      }
+      
       console.log('📤 Enviando perfil:', { socialNetwork, link, profileData: cleanedProfileData, imagesCount: images.length });
       
       const response = await profilesAPI.create(formData);
@@ -787,18 +798,18 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork, onNet
         </div>
       )}
 
-      <div className="flex space-x-4">
+      <div className="flex space-x-4 pt-4">
         <button
           type="button"
           onClick={onCancel}
-          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors"
         >
           Cancelar
         </button>
         <button
           type="submit"
           disabled={loading || !link || compressing}
-          className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
         >
           {compressing ? 'Comprimiendo...' : loading ? 'Subiendo...' : 'Crear Perfil'}
         </button>

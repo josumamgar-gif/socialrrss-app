@@ -240,20 +240,31 @@ export default function PromocionPage() {
   const [paymentReceipt, setPaymentReceipt] = useState<{ payment: any; profile: Profile } | null>(null);
 
   const handlePaymentSuccess = (paymentData: any) => {
+    console.log('✅ Pago exitoso, datos:', paymentData);
     // Obtener el perfil actual para mostrar en el recibo
     const paidProfile = profiles.find(p => p._id === selectedProfile) || profileData;
+    console.log('📋 Perfil encontrado para recibo:', paidProfile);
+    
     if (paidProfile) {
       // Guardar en localStorage por si es PayPal redirect
-      localStorage.setItem('lastPayment', JSON.stringify({
+      const receiptData = {
         ...paymentData,
         profileId: selectedProfile,
-      }));
+      };
+      localStorage.setItem('lastPayment', JSON.stringify(receiptData));
+      
+      console.log('💾 Guardando recibo en estado y localStorage');
       setPaymentReceipt({
-        payment: paymentData,
+        payment: receiptData,
         profile: paidProfile,
       });
+    } else {
+      console.warn('⚠️ No se encontró el perfil para mostrar el recibo');
     }
+    
+    // Cerrar el selector de planes pero mantener el recibo visible
     setShowPlanSelector(false);
+    setSelectedProfile(null);
     loadProfiles();
   };
 
@@ -271,43 +282,60 @@ export default function PromocionPage() {
   // Vista de selección de planes
   if (showPlanSelector && selectedProfile) {
     return (
-      <div 
-        className="fixed inset-0 bg-white px-0 sm:px-4" 
-        style={{ 
-          height: '-webkit-fill-available', // Para Safari iOS
-          width: '100vw', 
-          touchAction: 'none', 
-          overflow: 'hidden',
-          paddingTop: 'env(safe-area-inset-top)',
-          paddingBottom: 'env(safe-area-inset-bottom)',
-          paddingLeft: 'env(safe-area-inset-left)',
-          paddingRight: 'env(safe-area-inset-right)'
-        }}
-      >
-        <div className="max-w-4xl mx-auto w-full h-full flex flex-col overflow-hidden">
-          <div className="text-center py-3 flex-shrink-0">
-            <button
-              onClick={handleBack}
-              className="text-primary-600 hover:text-primary-700 font-medium"
-            >
-              ← Volver a mis perfiles
-            </button>
-          </div>
-          <div className="flex-1">
-            <PlanSelector 
-              profileId={selectedProfile} 
-              profile={(() => {
-                const foundProfile = profiles.find(p => p._id === selectedProfile);
-                if (!foundProfile && profileData && profileData._id === selectedProfile) {
-                  return profileData;
-                }
-                return foundProfile;
-              })()}
-              onPaymentSuccess={handlePaymentSuccess} 
-            />
+      <>
+        <div 
+          className="fixed inset-0 bg-white px-0 sm:px-4" 
+          style={{ 
+            height: '-webkit-fill-available', // Para Safari iOS
+            width: '100vw', 
+            touchAction: 'none', 
+            overflow: 'hidden',
+            paddingTop: 'env(safe-area-inset-top)',
+            paddingBottom: 'env(safe-area-inset-bottom)',
+            paddingLeft: 'env(safe-area-inset-left)',
+            paddingRight: 'env(safe-area-inset-right)'
+          }}
+        >
+          <div className="max-w-4xl mx-auto w-full h-full flex flex-col overflow-hidden">
+            <div className="text-center py-3 flex-shrink-0">
+              <button
+                onClick={handleBack}
+                className="text-primary-600 hover:text-primary-700 font-medium"
+              >
+                ← Volver a mis perfiles
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              <PlanSelector 
+                profileId={selectedProfile} 
+                profile={(() => {
+                  const foundProfile = profiles.find(p => p._id === selectedProfile);
+                  if (!foundProfile && profileData && profileData._id === selectedProfile) {
+                    return profileData;
+                  }
+                  return foundProfile;
+                })()}
+                onPaymentSuccess={handlePaymentSuccess} 
+              />
+            </div>
           </div>
         </div>
-      </div>
+        {/* Recibo de pago - Mostrar incluso sobre el selector de planes */}
+        {paymentReceipt && (
+          <PaymentReceipt
+            payment={paymentReceipt.payment}
+            profile={paymentReceipt.profile}
+            onClose={() => {
+              setPaymentReceipt(null);
+              setSelectedProfile(null);
+              setShowPlanSelector(false);
+            }}
+            onViewProfile={() => {
+              // El componente PaymentReceipt maneja esto internamente
+            }}
+          />
+        )}
+      </>
     );
   }
 
@@ -317,12 +345,13 @@ export default function PromocionPage() {
     const displayNetwork = currentNetwork || selectedNetwork;
     
     return (
+      <>
       <div 
-        className="fixed inset-0 bg-white overflow-hidden px-0 sm:px-4" 
+        className="fixed inset-0 bg-white overflow-y-auto px-0 sm:px-4" 
         style={{ 
           height: '-webkit-fill-available', // Para Safari iOS
           width: '100vw', 
-          touchAction: 'none', 
+          touchAction: 'pan-y', 
           position: 'fixed', 
           top: 0, 
           left: 0, 
@@ -334,7 +363,7 @@ export default function PromocionPage() {
           paddingRight: 'env(safe-area-inset-right)'
         }}
       >
-        <div className="max-w-2xl mx-auto w-full h-full flex flex-col">
+        <div className="max-w-2xl mx-auto w-full min-h-full flex flex-col py-4">
           <div className="text-center py-4 flex-shrink-0 px-4 sm:px-0">
             <button
               onClick={handleBack}
@@ -343,7 +372,7 @@ export default function PromocionPage() {
               ← Volver a redes sociales
             </button>
           </div>
-          <div className="bg-white rounded-none sm:rounded-lg shadow-lg p-4 sm:p-6 flex-1 overflow-hidden">
+          <div className="bg-white rounded-none sm:rounded-lg shadow-lg p-4 sm:p-6 flex-shrink-0">
             <div className="mb-6">
               {(() => {
                 const network = socialNetworks.find(n => n.id === displayNetwork);
@@ -369,6 +398,22 @@ export default function PromocionPage() {
           </div>
         </div>
       </div>
+        {/* Recibo de pago - Mostrar incluso sobre el formulario si existe */}
+        {paymentReceipt && (
+          <PaymentReceipt
+            payment={paymentReceipt.payment}
+            profile={paymentReceipt.profile}
+            onClose={() => {
+              setPaymentReceipt(null);
+              setSelectedProfile(null);
+              setSelectedNetwork(null);
+            }}
+            onViewProfile={() => {
+              // El componente PaymentReceipt maneja esto internamente
+            }}
+          />
+        )}
+      </>
     );
   }
 
@@ -497,7 +542,7 @@ export default function PromocionPage() {
         )}
       </div>
 
-      {/* Recibo de pago */}
+      {/* Recibo de pago - Mostrar siempre que exista, incluso si no estamos en la vista principal */}
       {paymentReceipt && (
         <PaymentReceipt
           payment={paymentReceipt.payment}
@@ -505,6 +550,9 @@ export default function PromocionPage() {
           onClose={() => {
             setPaymentReceipt(null);
             setSelectedProfile(null);
+            // Asegurar que volvemos a la vista principal
+            setShowPlanSelector(false);
+            setSelectedNetwork(null);
           }}
           onViewProfile={() => {
             // El componente PaymentReceipt maneja esto internamente
