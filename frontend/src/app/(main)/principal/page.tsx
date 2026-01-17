@@ -380,8 +380,7 @@ export default function PrincipalPage() {
   return (
     <div 
       className="w-full bg-white flex items-center justify-center px-4 overflow-hidden relative fixed inset-0"
-      style={{ 
-        height: '100vh',
+      style={{
         height: '-webkit-fill-available', // Para Safari iOS
         width: '100vw',
         display: 'flex',

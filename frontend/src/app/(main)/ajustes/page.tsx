@@ -54,8 +54,7 @@ export default function AjustesPage() {
     <div 
       className="fixed inset-0 bg-white px-0 sm:px-4" 
       style={{ 
-        height: '100vh',
-        height: '-webkit-fill-available', // Para Safari iOS
+        height: '-webkit-fill-available', // Para Safari iOS, fallback a 100vh si no está disponible
         width: '100vw', 
         touchAction: 'none', 
         overflow: 'hidden', 
@@ -68,7 +67,7 @@ export default function AjustesPage() {
         paddingBottom: 'env(safe-area-inset-bottom)',
         paddingLeft: 'env(safe-area-inset-left)',
         paddingRight: 'env(safe-area-inset-right)'
-      }}
+      } as React.CSSProperties}
     >
       {/* Tutorial - se muestra cuando showTutorial es true */}
       {showTutorial && (

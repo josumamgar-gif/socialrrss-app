@@ -106,7 +106,7 @@ export default function MainLayout({
   const isActive = (href: string) => pathname === href;
 
   return (
-    <div className="min-h-screen bg-white flex flex-col" style={{ minHeight: '100vh', minHeight: '-webkit-fill-available' }}>
+    <div className="min-h-screen bg-white flex flex-col" style={{ minHeight: '-webkit-fill-available' } as React.CSSProperties}>
       <WelcomeTutorial />
       
       {/* Banner superior - Solo en Principal */}
@@ -159,9 +159,8 @@ export default function MainLayout({
       <div 
         className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40" 
         style={{ 
-          paddingBottom: 'env(safe-area-inset-bottom)',
-          paddingBottom: 'constant(safe-area-inset-bottom)' // Fallback iOS < 11.2
-        }}
+          paddingBottom: 'env(safe-area-inset-bottom)'
+        } as React.CSSProperties}
       >
         <div className="flex justify-around items-center h-24">
           {/* Promoción - Izquierda */}

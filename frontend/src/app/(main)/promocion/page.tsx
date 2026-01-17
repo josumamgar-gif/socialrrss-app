@@ -278,7 +278,6 @@ export default function PromocionPage() {
       <div 
         className="fixed inset-0 bg-white px-0 sm:px-4" 
         style={{ 
-          height: '100vh',
           height: '-webkit-fill-available', // Para Safari iOS
           width: '100vw', 
           touchAction: 'none', 
@@ -325,7 +324,6 @@ export default function PromocionPage() {
       <div 
         className="fixed inset-0 bg-white overflow-hidden px-0 sm:px-4" 
         style={{ 
-          height: '100vh',
           height: '-webkit-fill-available', // Para Safari iOS
           width: '100vw', 
           touchAction: 'none', 
