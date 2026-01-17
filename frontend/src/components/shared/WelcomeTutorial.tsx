@@ -22,7 +22,7 @@ interface WelcomeTutorialProps {
 interface StepData {
   title: string;
   content: string[];
-  icon: string;
+  icon: 'home' | 'gestures' | 'promote' | 'ready';
   highlight: 'principal' | 'promocion' | 'ajustes' | null;
   gestures?: Array<{
     icon: React.ComponentType<{ className?: string }>;
@@ -51,13 +51,13 @@ export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange 
         return;
       }
       
-      // Si forceOpen es false explícitamente, ocultar
+      // Si forceOpen es false expl?citamente, ocultar
       if (forceOpen === false) {
         setIsVisible(false);
         return;
       }
       
-      // Si forceOpen es undefined, verificar si debe mostrarse automáticamente (comportamiento por defecto)
+      // Si forceOpen es undefined, verificar si debe mostrarse autom?ticamente (comportamiento por defecto)
       if (forceOpen === undefined) {
         const tutorialCompleted = localStorage.getItem('tutorialCompleted');
         if (!tutorialCompleted) {
@@ -69,26 +69,26 @@ export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange 
 
   const steps: StepData[] = [
     {
-      title: '¡Bienvenido! 🎉',
+      title: 'Bienvenido a Explora',
       content: [
-        'Explora perfiles y promociona los tuyos. Arrastra las tarjetas en cualquier dirección para interactuar.',
+        'Explora perfiles y promociona los tuyos. Arrastra las tarjetas en cualquier direcci?n para interactuar.',
       ],
-      icon: '👋',
+      icon: 'home',
       highlight: null,
     },
     {
-      title: '🎯 Gestos Rápidos',
+      title: 'Gestos R?pidos',
       content: [
         'Usa los botones inferiores o arrastra las tarjetas:',
       ],
-      icon: '🎯',
+      icon: 'gestures',
       highlight: null,
       gestures: [
         {
           icon: ArrowLeftIcon,
           color: 'red',
           title: 'Siguiente',
-          text: 'Izquierda / Botón rojo',
+          text: 'Izquierda / Bot?n rojo',
           description: 'Pasa al siguiente perfil',
           action: '',
         },
@@ -96,15 +96,15 @@ export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange 
           icon: ArrowUpIcon,
           color: 'yellow',
           title: 'Detalles',
-          text: 'Arriba / Botón amarillo',
-          description: 'Ver información completa',
+          text: 'Arriba / Bot?n amarillo',
+          description: 'Ver informaci?n completa',
           action: '',
         },
         {
           icon: ArrowRightIcon,
           color: 'blue',
           title: 'Enlace',
-          text: 'Derecha / Botón azul',
+          text: 'Derecha / Bot?n azul',
           description: 'Visitar perfil en su red social',
           action: '',
         },
@@ -112,26 +112,26 @@ export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange 
           icon: ArrowUturnLeftIcon,
           color: 'green',
           title: 'Retroceder',
-          text: 'Botón verde',
+          text: 'Bot?n verde',
           description: 'Volver al perfil anterior',
           action: '',
         },
       ],
     },
     {
-      title: '🔥 Promociona tu Perfil',
+      title: 'Promociona tu Perfil',
       content: [
         'Crea y gestiona tus perfiles promocionados. Elige una red social, completa el formulario y selecciona un plan.',
       ],
-      icon: '🔥',
+      icon: 'promote',
       highlight: 'promocion',
     },
     {
-      title: '✅ ¡Todo listo!',
+      title: 'Todo listo',
       content: [
-        'Empieza explorando los perfiles demo y luego crea el tuyo en Promoción.',
+        'Empieza explorando los perfiles demo y luego crea el tuyo en Promoci?n.',
       ],
-      icon: '🚀',
+      icon: 'ready',
       highlight: null,
     },
   ];
@@ -166,7 +166,7 @@ export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange 
     }
   };
 
-  // Prevenir scroll del body cuando el tutorial está abierto
+  // Prevenir scroll del body cuando el tutorial est? abierto
   useEffect(() => {
     if (isVisible) {
       document.body.style.overflow = 'hidden';
@@ -218,7 +218,12 @@ export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange 
         {/* Header - Fixed */}
         <div className="bg-gradient-to-r from-primary-600 via-primary-500 to-primary-700 text-white px-4 py-3 sm:px-6 sm:py-5 flex items-center justify-between flex-shrink-0 shadow-xl">
           <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
-            <div className="text-3xl sm:text-4xl flex-shrink-0 drop-shadow-lg">{currentStepData.icon}</div>
+            <div className="flex-shrink-0 drop-shadow-lg">
+              {currentStepData.icon === 'home' && <HomeIcon className="h-8 w-8 sm:h-10 sm:w-10 text-white" />}
+              {currentStepData.icon === 'gestures' && <InformationCircleIcon className="h-8 w-8 sm:h-10 sm:w-10 text-white" />}
+              {currentStepData.icon === 'promote' && <FireIcon className="h-8 w-8 sm:h-10 sm:w-10 text-white" />}
+              {currentStepData.icon === 'ready' && <Cog6ToothIcon className="h-8 w-8 sm:h-10 sm:w-10 text-white" />}
+            </div>
             <h2 className="text-lg sm:text-xl md:text-2xl font-extrabold break-words drop-shadow-md leading-tight">{currentStepData.title}</h2>
           </div>
           <button
@@ -232,7 +237,7 @@ export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange 
 
         {/* Content - Scrollable */}
         <div className="px-4 py-3 sm:px-6 sm:py-6 flex-1 overflow-y-auto overscroll-contain scroll-smooth">
-          {/* Información principal */}
+          {/* Informaci?n principal */}
           <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
             {currentStepData.content.map((text, idx) => (
               <p key={idx} className="text-sm sm:text-base md:text-lg text-gray-700 leading-relaxed text-justify sm:text-left">
@@ -241,15 +246,15 @@ export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange 
             ))}
           </div>
 
-          {/* Indicador de sección */}
+          {/* Indicador de secci?n */}
           {currentStepData.highlight !== null && currentStepData.highlight !== undefined && (
             <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
               <div className="flex items-center gap-2 text-blue-800">
                 <InformationCircleIcon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
                 <p className="font-semibold text-xs sm:text-sm md:text-base">
-                  {currentStepData.highlight === 'principal' && '📍 Encontrarás esto en la pestaña "Principal"'}
-                  {currentStepData.highlight === 'promocion' && '📍 Encontrarás esto en la pestaña "Promoción"'}
-                  {currentStepData.highlight === 'ajustes' && '📍 Encontrarás esto en la pestaña "Ajustes"'}
+                  {currentStepData.highlight === 'principal' && '?? Encontrar?s esto en la pesta?a "Principal"'}
+                  {currentStepData.highlight === 'promocion' && '?? Encontrar?s esto en la pesta?a "Promoci?n"'}
+                  {currentStepData.highlight === 'ajustes' && '?? Encontrar?s esto en la pesta?a "Ajustes"'}
                 </p>
               </div>
             </div>
@@ -274,7 +279,7 @@ export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange 
                         <p className="text-xs sm:text-sm text-gray-600 mb-2">{gesture.description}</p>
                         {gesture.action && (
                           <div className="mt-2 p-2 bg-white/50 rounded-lg">
-                            <p className="text-xs font-semibold text-gray-700">✨ {gesture.action}</p>
+                            <p className="text-xs font-semibold text-gray-700">? {gesture.action}</p>
                           </div>
                         )}
                       </div>

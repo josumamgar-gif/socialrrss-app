@@ -373,29 +373,33 @@ export default function PromocionPage() {
               ← Volver a redes sociales
             </button>
           </div>
-          <div className="bg-white rounded-none sm:rounded-lg shadow-lg p-4 sm:p-6 flex-1 overflow-y-auto">
-            <div className="mb-6">
-              {(() => {
-                const network = socialNetworks.find(n => n.id === displayNetwork);
-                return network ? (
-                  <div className="flex items-center space-x-3 mb-2">
-                    <div className={`w-12 h-12 ${network.color} rounded-lg flex items-center justify-center`}>
-                      <SocialNetworkLogo network={network.id} className="w-7 h-7 text-white" />
+          <div className="bg-white rounded-none sm:rounded-lg shadow-lg flex-1 flex flex-col overflow-hidden">
+            <div className="p-4 sm:p-6 flex-shrink-0">
+              <div className="mb-6">
+                {(() => {
+                  const network = socialNetworks.find(n => n.id === displayNetwork);
+                  return network ? (
+                    <div className="flex items-center space-x-3 mb-2">
+                      <div className={`w-12 h-12 ${network.color} rounded-lg flex items-center justify-center`}>
+                        <SocialNetworkLogo network={network.id} className="w-7 h-7 text-white" />
+                      </div>
+                      <div>
+                        <h2 className="text-2xl font-bold text-gray-900">{network.name}</h2>
+                        <p className="text-gray-600">{network.description}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h2 className="text-2xl font-bold text-gray-900">{network.name}</h2>
-                      <p className="text-gray-600">{network.description}</p>
-                    </div>
-                  </div>
-                ) : null;
-              })()}
+                  ) : null;
+                })()}
+              </div>
             </div>
-            <ProfileForm 
-              defaultNetwork={selectedNetwork}
-              onSuccess={(profileId, profile) => handleProfileCreated(profileId, profile)} 
-              onCancel={handleBack}
-              onNetworkChange={setCurrentNetwork}
-            />
+            <div className="flex-1 overflow-y-auto px-4 sm:px-6 pb-4 sm:pb-6">
+              <ProfileForm 
+                defaultNetwork={selectedNetwork}
+                onSuccess={(profileId, profile) => handleProfileCreated(profileId, profile)} 
+                onCancel={handleBack}
+                onNetworkChange={setCurrentNetwork}
+              />
+            </div>
           </div>
         </div>
       </div>

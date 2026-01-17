@@ -29,9 +29,21 @@ export default function PrincipalPage() {
   const [lastSwipeDirection, setLastSwipeDirection] = useState<'left' | 'right' | 'up' | 'down' | 'back' | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const [backUsed, setBackUsed] = useState(false);
-  const [selectedNetwork, setSelectedNetwork] = useState<'all' | SocialNetwork>('all');
+  // Cargar última red social seleccionada desde localStorage
+  const [selectedNetwork, setSelectedNetwork] = useState<'all' | SocialNetwork>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('lastSelectedNetwork');
+      return (saved as 'all' | SocialNetwork) || 'all';
+    }
+    return 'all';
+  });
   const [showNetworkSelector, setShowNetworkSelector] = useState(false);
-  const [hasSelectedNetwork, setHasSelectedNetwork] = useState(false);
+  const [hasSelectedNetwork, setHasSelectedNetwork] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('lastSelectedNetwork') !== null;
+    }
+    return false;
+  });
 
   // Cargar perfiles
   useEffect(() => {
@@ -130,12 +142,7 @@ export default function PrincipalPage() {
     }
   }, [filteredProfiles.length, currentIndex]);
 
-  // Mostrar selector la primera vez si no se ha seleccionado una red
-  useEffect(() => {
-    if (!loading && profiles.length > 0 && !hasSelectedNetwork) {
-      setShowNetworkSelector(true);
-    }
-  }, [loading, profiles.length, hasSelectedNetwork]);
+  // No mostrar selector automáticamente - solo cuando el usuario haga click en el botón
 
   // Marcar perfil como visto
   const markProfileAsViewed = (profileId: string) => {
@@ -158,6 +165,10 @@ export default function PrincipalPage() {
     setSelectedNetwork(network);
     setHasSelectedNetwork(true);
     setShowNetworkSelector(false);
+    // Guardar en localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('lastSelectedNetwork', network);
+    }
   };
 
   // Handlers simples
@@ -327,6 +338,17 @@ export default function PrincipalPage() {
   const needsDemoInteraction = !tutorialCompleted && !hasCompletedDemo && filteredProfiles.length > 0 && currentIndex < demoProfiles.length;
   const currentProfile = filteredProfiles[currentIndex];
 
+  // Mostrar selector después del tutorial si no se ha seleccionado una red
+  useEffect(() => {
+    if (!loading && profiles.length > 0 && tutorialCompleted && !hasSelectedNetwork && !showNetworkSelector) {
+      // Esperar un momento para que el tutorial se cierre completamente
+      const timer = setTimeout(() => {
+        setShowNetworkSelector(true);
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+  }, [loading, profiles.length, tutorialCompleted, hasSelectedNetwork, showNetworkSelector]);
+
   // Mostrar selector si está activo
   if (showNetworkSelector) {
     return (
@@ -368,18 +390,20 @@ export default function PrincipalPage() {
       }}
     >
       {/* Efectos de gradiente en las esquinas - colores según gesto */}
-      <div 
-        className="fixed inset-0 pointer-events-none z-30"
-        style={{
-          background: `
-            radial-gradient(circle at 0% 50%, rgba(239, 68, 68, ${cornerEffects.left * 0.4}) 0%, transparent 40%),
-            radial-gradient(circle at 100% 50%, rgba(59, 130, 246, ${cornerEffects.right * 0.4}) 0%, transparent 40%),
-            radial-gradient(circle at 50% 0%, rgba(234, 179, 8, ${cornerEffects.top * 0.4}) 0%, transparent 40%),
-            radial-gradient(circle at 50% 100%, rgba(34, 197, 94, ${cornerEffects.bottom * 0.4}) 0%, transparent 40%)
-          `,
-          transition: 'opacity 0.15s ease',
-        }}
-      />
+      {cornerEffects.left > 0 || cornerEffects.right > 0 || cornerEffects.top > 0 || cornerEffects.bottom > 0 ? (
+        <div 
+          className="fixed inset-0 pointer-events-none z-30"
+          style={{
+            background: `
+              radial-gradient(circle at 0% 50%, rgba(239, 68, 68, ${cornerEffects.left * 0.3}) 0%, transparent 35%),
+              radial-gradient(circle at 100% 50%, rgba(59, 130, 246, ${cornerEffects.right * 0.3}) 0%, transparent 35%),
+              radial-gradient(circle at 50% 0%, rgba(234, 179, 8, ${cornerEffects.top * 0.3}) 0%, transparent 35%),
+              radial-gradient(circle at 50% 100%, rgba(34, 197, 94, ${cornerEffects.bottom * 0.3}) 0%, transparent 35%)
+            `,
+            transition: 'opacity 0.2s ease-out',
+          }}
+        />
+      ) : null}
       <div className="flex flex-col items-center justify-center w-full" style={{ 
         position: 'absolute',
         top: '50%',

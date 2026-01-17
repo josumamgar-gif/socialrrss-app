@@ -260,15 +260,23 @@ export default function ProfileCard({
       const distanceToBottom = viewportHeight - cardRect.bottom;
       
       // Actualizar estado para efectos de esquina (se usará en el render)
-      const cornerEffect = {
-        left: Math.max(0, 1 - distanceToLeft / 150),
-        right: Math.max(0, 1 - distanceToRight / 150),
-        top: Math.max(0, 1 - distanceToTop / 150),
-        bottom: Math.max(0, 1 - distanceToBottom / 150),
-      };
-      setCornerEffects(cornerEffect);
-      if (onCornerEffectsChange) {
-        onCornerEffectsChange(cornerEffect);
+      // Solo mostrar efectos si hay movimiento significativo
+      if (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10) {
+        const cornerEffect = {
+          left: Math.max(0, 1 - distanceToLeft / 200),
+          right: Math.max(0, 1 - distanceToRight / 200),
+          top: Math.max(0, 1 - distanceToTop / 200),
+          bottom: Math.max(0, 1 - distanceToBottom / 200),
+        };
+        setCornerEffects(cornerEffect);
+        if (onCornerEffectsChange) {
+          onCornerEffectsChange(cornerEffect);
+        }
+      } else {
+        setCornerEffects({ left: 0, right: 0, top: 0, bottom: 0 });
+        if (onCornerEffectsChange) {
+          onCornerEffectsChange({ left: 0, right: 0, top: 0, bottom: 0 });
+        }
       }
     }
   }, []); // Sin dependencias - usa refs
