@@ -742,8 +742,9 @@ export default function ProfileCard({
                 0 20px 40px rgba(0, 0, 0, 0.2)
               `,
               height: '100%',
-              minHeight: '500px',
-              maxHeight: 'calc(100vh - 14rem)',
+              width: '100%',
+              minHeight: 'calc(100vh - 12rem)',
+              maxHeight: 'calc(100vh - 12rem)',
             transform: buttonAction.type 
               ? undefined // La transformación de botones se maneja con style inline
               : `translate(${position.x}px, ${position.y}px) rotate(${rotation}deg)`,
@@ -771,7 +772,7 @@ export default function ProfileCard({
           }}
         >
           {/* Imagen principal - Ocupa todo el espacio disponible estilo Tinder */}
-          <div className="relative w-full h-full bg-gray-200" style={{ height: '100%', minHeight: '500px' }}>
+          <div className="relative w-full h-full bg-gray-200" style={{ height: '100%', minHeight: 'calc(100vh - 12rem)' }}>
             {profile.images && profile.images.length > 0 ? (
               <img
                 src={getImageUrl(profile.images[0])}
@@ -844,13 +845,13 @@ export default function ProfileCard({
               )}
             </div>
 
-            {/* Descripción estilo Tinder - Overlay oscuro grande en la parte inferior */}
+            {/* Descripción estilo Tinder - Overlay oscuro grande en la parte inferior, más arriba para que no quede debajo de los botones */}
             <div 
               className="absolute bottom-0 left-0 right-0 z-20"
               style={{
-                background: 'linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.7) 40%, rgba(0, 0, 0, 0.4) 70%, transparent 100%)',
-                paddingTop: '2rem',
-                paddingBottom: '1.5rem',
+                background: 'linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.85) 25%, rgba(0, 0, 0, 0.6) 50%, rgba(0, 0, 0, 0.3) 75%, transparent 100%)',
+                paddingTop: '4rem',
+                paddingBottom: '7rem', // Más espacio abajo para que no quede debajo de los botones
                 paddingLeft: '1.5rem',
                 paddingRight: '1.5rem',
               }}
@@ -873,9 +874,9 @@ export default function ProfileCard({
                 </div>
               </div>
 
-              {/* Descripción - Más grande y visible */}
+              {/* Descripción - Más grande y visible, sin límite de líneas para que se vea todo */}
               {profile.profileData.description && (
-                <p className="text-white text-base sm:text-lg font-normal leading-relaxed drop-shadow-lg line-clamp-3">
+                <p className="text-white text-base sm:text-lg font-normal leading-relaxed drop-shadow-lg">
                   {profile.profileData.description}
                 </p>
               )}

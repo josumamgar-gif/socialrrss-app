@@ -6,12 +6,14 @@ import { profilesAPI } from '@/lib/api';
 import { Profile, SocialNetwork } from '@/types';
 import ProfileCard from '@/components/principal/ProfileCard';
 import ProfileDetail from '@/components/principal/ProfileDetail';
+import SocialNetworkSelector from '@/components/principal/SocialNetworkSelector';
 import { demoProfiles } from '@/data/demoProfiles';
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
   ArrowUpIcon,
   ArrowUturnLeftIcon,
+  Squares2X2Icon,
 } from '@heroicons/react/24/outline';
 
 export default function PrincipalPage() {
@@ -23,32 +25,13 @@ export default function PrincipalPage() {
   const [demoInteractions, setDemoInteractions] = useState(0);
   const [hasCompletedDemo, setHasCompletedDemo] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
-  const [selectedNetworkFilter, setSelectedNetworkFilter] = useState<'all' | SocialNetwork>('all');
   const [cornerEffects, setCornerEffects] = useState({ left: 0, right: 0, top: 0, bottom: 0 });
   const [lastSwipeDirection, setLastSwipeDirection] = useState<'left' | 'right' | 'up' | 'down' | 'back' | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const [backUsed, setBackUsed] = useState(false);
-
-  // Opciones del filtro
-  const networkOptions: { value: 'all' | SocialNetwork; label: string }[] = [
-    { value: 'all', label: 'Todas' },
-    { value: 'instagram', label: 'Instagram' },
-    { value: 'linkedin', label: 'LinkedIn' },
-    { value: 'tiktok', label: 'TikTok' },
-    { value: 'youtube', label: 'YouTube' },
-    { value: 'facebook', label: 'Facebook' },
-    { value: 'x', label: 'X (Twitter)' },
-    { value: 'twitch', label: 'Twitch' },
-    { value: 'otros', label: 'Otras Redes' },
-  ];
-
-  // Filtrar perfiles por red social
-  const filteredProfiles = useMemo(() => {
-    if (selectedNetworkFilter === 'all') {
-      return profiles;
-    }
-    return profiles.filter((p) => p.socialNetwork === selectedNetworkFilter);
-  }, [profiles, selectedNetworkFilter]);
+  const [selectedNetwork, setSelectedNetwork] = useState<'all' | SocialNetwork>('all');
+  const [showNetworkSelector, setShowNetworkSelector] = useState(false);
+  const [hasSelectedNetwork, setHasSelectedNetwork] = useState(false);
 
   // Cargar perfiles
   useEffect(() => {
@@ -125,11 +108,19 @@ export default function PrincipalPage() {
     };
   }, [user?.id]);
 
+  // Filtrar perfiles por red social seleccionada
+  const filteredProfiles = useMemo(() => {
+    if (selectedNetwork === 'all') {
+      return profiles;
+    }
+    return profiles.filter((p) => p.socialNetwork === selectedNetwork);
+  }, [profiles, selectedNetwork]);
+
   // Resetear índice cuando cambia el filtro
   useEffect(() => {
     setCurrentIndex(0);
     setHistory([]);
-  }, [selectedNetworkFilter]);
+  }, [selectedNetwork]);
 
   // Ajustar índice si es necesario
   useEffect(() => {
@@ -138,6 +129,13 @@ export default function PrincipalPage() {
       setHistory([]);
     }
   }, [filteredProfiles.length, currentIndex]);
+
+  // Mostrar selector la primera vez si no se ha seleccionado una red
+  useEffect(() => {
+    if (!loading && profiles.length > 0 && !hasSelectedNetwork) {
+      setShowNetworkSelector(true);
+    }
+  }, [loading, profiles.length, hasSelectedNetwork]);
 
   // Marcar perfil como visto
   const markProfileAsViewed = (profileId: string) => {
@@ -153,6 +151,13 @@ export default function PrincipalPage() {
       viewed.push(profileId);
       localStorage.setItem(key, JSON.stringify(viewed));
     }
+  };
+
+  // Handler para seleccionar red social
+  const handleNetworkSelect = (network: 'all' | SocialNetwork) => {
+    setSelectedNetwork(network);
+    setHasSelectedNetwork(true);
+    setShowNetworkSelector(false);
   };
 
   // Handlers simples
@@ -254,65 +259,6 @@ export default function PrincipalPage() {
     );
   }
 
-  if (!loading && filteredProfiles.length === 0 && profiles.length > 0) {
-    return (
-      <div className="w-full bg-white flex items-center justify-center px-4 overflow-hidden relative" style={{ 
-        height: '100%',
-        minHeight: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}>
-        {/* Filtro siempre visible incluso sin perfiles */}
-        <div className="absolute top-4 sm:top-6 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-xs px-4">
-          <select
-            value={selectedNetworkFilter}
-            onChange={(e) => setSelectedNetworkFilter(e.target.value as 'all' | SocialNetwork)}
-            className="w-full px-5 py-3 text-sm sm:text-base text-gray-900 font-semibold appearance-none cursor-pointer"
-            style={{
-              background: 'rgba(255, 255, 255, 0.7)',
-              backdropFilter: 'blur(20px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-              borderRadius: '9999px',
-              border: '1px solid rgba(255, 255, 255, 0.3)',
-              boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15), inset 0 1px 0 0 rgba(255, 255, 255, 0.4)',
-              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 12 12'%3E%3Cpath fill='%23374151' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: 'right 1.25rem center',
-              paddingRight: '2.75rem',
-              transition: 'all 0.3s ease',
-            }}
-            onFocus={(e) => {
-              e.target.style.background = 'rgba(255, 255, 255, 0.85)';
-              e.target.style.boxShadow = '0 8px 32px 0 rgba(31, 38, 135, 0.25), inset 0 1px 0 0 rgba(255, 255, 255, 0.5)';
-            }}
-            onBlur={(e) => {
-              e.target.style.background = 'rgba(255, 255, 255, 0.7)';
-              e.target.style.boxShadow = '0 8px 32px 0 rgba(31, 38, 135, 0.15), inset 0 1px 0 0 rgba(255, 255, 255, 0.4)';
-            }}
-          >
-            {networkOptions.map((option) => (
-              <option key={option.value} value={option.value} style={{ background: 'white' }}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="text-center px-4" style={{ 
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          paddingTop: '4rem'
-        }}>
-          <p className="text-gray-600 text-lg mb-2">No hay perfiles disponibles para esta red social</p>
-          <p className="text-gray-500 text-sm">Intenta seleccionar otra red social o recargar la página</p>
-        </div>
-      </div>
-    );
-  }
-
   if (!loading && profiles.length === 0) {
     return (
       <div className="w-full bg-white flex items-center justify-center px-4 overflow-hidden relative" style={{ 
@@ -322,52 +268,56 @@ export default function PrincipalPage() {
         alignItems: 'center',
         justifyContent: 'center'
       }}>
-        {/* Filtro siempre visible incluso sin perfiles */}
-        <div className="absolute top-4 sm:top-6 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-xs px-4">
-          <select
-            value={selectedNetworkFilter}
-            onChange={(e) => setSelectedNetworkFilter(e.target.value as 'all' | SocialNetwork)}
-            className="w-full px-5 py-3 text-sm sm:text-base text-gray-900 font-semibold appearance-none cursor-pointer"
-            style={{
-              background: 'rgba(255, 255, 255, 0.7)',
-              backdropFilter: 'blur(20px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-              borderRadius: '9999px',
-              border: '1px solid rgba(255, 255, 255, 0.3)',
-              boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15), inset 0 1px 0 0 rgba(255, 255, 255, 0.4)',
-              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 12 12'%3E%3Cpath fill='%23374151' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: 'right 1.25rem center',
-              paddingRight: '2.75rem',
-              transition: 'all 0.3s ease',
+        {showNetworkSelector ? (
+          <SocialNetworkSelector
+            selectedNetwork={selectedNetwork}
+            onSelect={handleNetworkSelect}
+            onClose={() => {
+              if (hasSelectedNetwork) {
+                setShowNetworkSelector(false);
+              }
             }}
-            onFocus={(e) => {
-              e.target.style.background = 'rgba(255, 255, 255, 0.85)';
-              e.target.style.boxShadow = '0 8px 32px 0 rgba(31, 38, 135, 0.25), inset 0 1px 0 0 rgba(255, 255, 255, 0.5)';
-            }}
-            onBlur={(e) => {
-              e.target.style.background = 'rgba(255, 255, 255, 0.7)';
-              e.target.style.boxShadow = '0 8px 32px 0 rgba(31, 38, 135, 0.15), inset 0 1px 0 0 rgba(255, 255, 255, 0.4)';
-            }}
-          >
-            {networkOptions.map((option) => (
-              <option key={option.value} value={option.value} style={{ background: 'white' }}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
+          />
+        ) : (
+          <div className="text-center px-4">
+            <p className="text-gray-600 text-lg mb-2">No hay perfiles disponibles por el momento</p>
+            <p className="text-gray-500 text-sm">Intenta recargar la página o contacta al administrador</p>
+          </div>
+        )}
+      </div>
+    );
+  }
 
-        <div className="text-center px-4" style={{ 
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          paddingTop: '4rem'
-        }}>
-          <p className="text-gray-600 text-lg mb-2">No hay perfiles disponibles por el momento</p>
-          <p className="text-gray-500 text-sm">Intenta recargar la página o contacta al administrador</p>
-        </div>
+  if (!loading && filteredProfiles.length === 0 && profiles.length > 0) {
+    return (
+      <div className="w-full bg-white flex items-center justify-center px-4 overflow-hidden relative" style={{ 
+        height: '100%',
+        minHeight: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        {showNetworkSelector ? (
+          <SocialNetworkSelector
+            selectedNetwork={selectedNetwork}
+            onSelect={handleNetworkSelect}
+            onClose={() => {
+              if (hasSelectedNetwork) {
+                setShowNetworkSelector(false);
+              }
+            }}
+          />
+        ) : (
+          <div className="text-center px-4">
+            <p className="text-gray-600 text-lg mb-2">No hay perfiles disponibles para esta red social</p>
+            <button
+              onClick={() => setShowNetworkSelector(true)}
+              className="mt-4 px-6 py-3 bg-gray-700 hover:bg-gray-800 text-white rounded-full font-medium transition-all duration-200"
+            >
+              Cambiar Red Social
+            </button>
+          </div>
+        )}
       </div>
     );
   }
@@ -376,6 +326,21 @@ export default function PrincipalPage() {
     localStorage.getItem('tutorialCompleted') === 'true' : false;
   const needsDemoInteraction = !tutorialCompleted && !hasCompletedDemo && filteredProfiles.length > 0 && currentIndex < demoProfiles.length;
   const currentProfile = filteredProfiles[currentIndex];
+
+  // Mostrar selector si está activo
+  if (showNetworkSelector) {
+    return (
+      <SocialNetworkSelector
+        selectedNetwork={selectedNetwork}
+        onSelect={handleNetworkSelect}
+        onClose={() => {
+          if (hasSelectedNetwork) {
+            setShowNetworkSelector(false);
+          }
+        }}
+      />
+    );
+  }
 
   return (
     <div 
@@ -415,42 +380,6 @@ export default function PrincipalPage() {
           transition: 'opacity 0.15s ease',
         }}
       />
-      {/* Filtro de redes sociales - Parte superior central con efecto liquid glass */}
-      <div className="absolute top-2 sm:top-2 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-xs px-4">
-        <select
-          value={selectedNetworkFilter}
-          onChange={(e) => setSelectedNetworkFilter(e.target.value as 'all' | SocialNetwork)}
-          className="w-full px-5 py-3 text-sm sm:text-base text-gray-900 font-semibold appearance-none cursor-pointer"
-          style={{
-            background: 'rgba(255, 255, 255, 0.7)',
-            backdropFilter: 'blur(20px) saturate(180%)',
-            WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-            borderRadius: '9999px',
-            border: '1px solid rgba(255, 255, 255, 0.3)',
-            boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15), inset 0 1px 0 0 rgba(255, 255, 255, 0.4)',
-            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 12 12'%3E%3Cpath fill='%23374151' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
-            backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'right 1.25rem center',
-            paddingRight: '2.75rem',
-            transition: 'all 0.3s ease',
-          }}
-          onFocus={(e) => {
-            e.target.style.background = 'rgba(255, 255, 255, 0.85)';
-            e.target.style.boxShadow = '0 8px 32px 0 rgba(31, 38, 135, 0.25), inset 0 1px 0 0 rgba(255, 255, 255, 0.5)';
-          }}
-          onBlur={(e) => {
-            e.target.style.background = 'rgba(255, 255, 255, 0.7)';
-            e.target.style.boxShadow = '0 8px 32px 0 rgba(31, 38, 135, 0.15), inset 0 1px 0 0 rgba(255, 255, 255, 0.4)';
-          }}
-        >
-          {networkOptions.map((option) => (
-            <option key={option.value} value={option.value} style={{ background: 'white' }}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
       <div className="flex flex-col items-center justify-center w-full" style={{ 
         position: 'absolute',
         top: '50%',
@@ -458,10 +387,13 @@ export default function PrincipalPage() {
         transform: 'translate(-50%, -50%)',
         width: '100%',
         maxWidth: '28rem',
-        height: 'calc(100% - 12rem)', // Maximizar espacio: altura total menos espacio para filtro y botones
+        height: 'calc(100vh - 10rem)', // Maximizar espacio: altura total menos espacio para botones
+        minHeight: 'calc(100vh - 10rem)',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        paddingTop: 'env(safe-area-inset-top)',
+        paddingBottom: '0'
       }}>
         {needsDemoInteraction && (
           <div className="mb-4 max-w-md w-full mx-auto bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4 z-40">
@@ -537,6 +469,23 @@ export default function PrincipalPage() {
       {/* Botones de acción independientes - Estilo Tinder, grandes y visibles */}
       {filteredProfiles.length > 0 && currentProfile && (
         <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50 flex justify-center items-center space-x-3 sm:space-x-4 px-4">
+          {/* Botón Selector de RRSS */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              setShowNetworkSelector(true);
+            }}
+            className="bg-gray-700 hover:bg-gray-800 text-white rounded-full transition-all duration-200 focus:outline-none w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center transform hover:scale-110 active:scale-95"
+            style={{
+              boxShadow: '0 8px 16px rgba(55, 65, 81, 0.5), 0 4px 8px rgba(55, 65, 81, 0.4)'
+            }}
+            aria-label="Seleccionar Red Social"
+          >
+            <Squares2X2Icon className="h-7 w-7 sm:h-8 sm:w-8" />
+          </button>
+
           {/* Botón Retroceder */}
           <button
             type="button"
@@ -552,9 +501,14 @@ export default function PrincipalPage() {
             disabled={isAnimating || backUsed || history.length === 0}
             className={`${
               backUsed || history.length === 0
-                ? 'bg-gradient-to-br from-gray-400 to-gray-500 cursor-not-allowed'
-                : 'bg-gradient-to-br from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600'
-            } text-white rounded-full shadow-2xl hover:shadow-3xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-yellow-400 focus:ring-offset-2 w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center transform hover:scale-110 active:scale-95`}
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-green-500 hover:bg-green-600'
+            } text-white rounded-full transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center transform hover:scale-110 active:scale-95`}
+            style={{
+              boxShadow: backUsed || history.length === 0 
+                ? '0 8px 16px rgba(156, 163, 175, 0.4), 0 4px 8px rgba(156, 163, 175, 0.3)'
+                : '0 8px 16px rgba(34, 197, 94, 0.5), 0 4px 8px rgba(34, 197, 94, 0.4)'
+            }}
             aria-label="Retroceder"
           >
             <ArrowUturnLeftIcon className="h-7 w-7 sm:h-8 sm:w-8" />
@@ -573,7 +527,10 @@ export default function PrincipalPage() {
               }
             }}
             disabled={isAnimating}
-            className="bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-full shadow-2xl hover:shadow-3xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-red-500 focus:ring-offset-2 w-16 h-16 sm:w-18 sm:h-18 flex items-center justify-center transform hover:scale-110 active:scale-95 text-3xl font-bold"
+            className="bg-red-500 hover:bg-red-600 text-white rounded-full transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none w-16 h-16 sm:w-18 sm:h-18 flex items-center justify-center transform hover:scale-110 active:scale-95 text-3xl font-bold"
+            style={{
+              boxShadow: '0 8px 16px rgba(239, 68, 68, 0.5), 0 4px 8px rgba(239, 68, 68, 0.4)'
+            }}
             aria-label="Siguiente Perfil"
           >
             ✕
@@ -592,7 +549,10 @@ export default function PrincipalPage() {
               }
             }}
             disabled={isAnimating}
-            className="bg-gradient-to-br from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white rounded-full shadow-2xl hover:shadow-3xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-yellow-500 focus:ring-offset-2 w-16 h-16 sm:w-18 sm:h-18 flex items-center justify-center transform hover:scale-110 active:scale-95"
+            className="bg-yellow-500 hover:bg-yellow-600 text-white rounded-full transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none w-16 h-16 sm:w-18 sm:h-18 flex items-center justify-center transform hover:scale-110 active:scale-95"
+            style={{
+              boxShadow: '0 8px 16px rgba(234, 179, 8, 0.5), 0 4px 8px rgba(234, 179, 8, 0.4)'
+            }}
             aria-label="Ver Detalles"
           >
             <ArrowUpIcon className="h-7 w-7 sm:h-8 sm:w-8" />
@@ -620,7 +580,10 @@ export default function PrincipalPage() {
               }
             }}
             disabled={isAnimating}
-            className="bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-full shadow-2xl hover:shadow-3xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 w-16 h-16 sm:w-18 sm:h-18 flex items-center justify-center transform hover:scale-110 active:scale-95"
+            className="bg-blue-500 hover:bg-blue-600 text-white rounded-full transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none w-16 h-16 sm:w-18 sm:h-18 flex items-center justify-center transform hover:scale-110 active:scale-95"
+            style={{
+              boxShadow: '0 8px 16px rgba(59, 130, 246, 0.5), 0 4px 8px rgba(59, 130, 246, 0.4)'
+            }}
             aria-label="Ir al Enlace"
           >
             <ArrowRightIcon className="h-7 w-7 sm:h-8 sm:w-8" />
