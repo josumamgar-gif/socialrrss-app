@@ -109,13 +109,15 @@ export default function MainLayout({
     <div className="min-h-screen bg-white flex flex-col">
       <WelcomeTutorial />
       
-      {/* Banner superior */}
-      <div className="fixed top-0 left-0 right-0 z-50">
-        <AppBanner />
-      </div>
+      {/* Banner superior - Solo en Principal */}
+      {pathname === '/principal' && (
+        <div className="fixed top-0 left-0 right-0 z-50">
+          <AppBanner />
+        </div>
+      )}
       
       {/* Pestañas de navegación - Parte superior FIJAS (solo desktop) */}
-      <nav className="hidden md:flex fixed top-16 left-0 right-0 bg-white border-b border-gray-200 z-40">
+      <nav className={`hidden md:flex fixed ${pathname === '/principal' ? 'top-16' : 'top-0'} left-0 right-0 bg-white border-b border-gray-200 z-40`}>
         <div className="max-w-7xl mx-auto px-4 w-full">
           <div className="flex justify-center space-x-1 md:space-x-2">
             {tabs.map((tab) => {
@@ -149,7 +151,7 @@ export default function MainLayout({
       </nav>
 
       {/* Contenido principal */}
-      <main className="flex-1 pt-16 md:pt-28 pb-24 md:pb-20 flex items-center justify-center overflow-hidden" style={{ minHeight: 'calc(100vh - 4rem)' }}>
+      <main className={`flex-1 ${pathname === '/principal' ? 'pt-16 md:pt-28' : 'pt-0 md:pt-0'} pb-24 md:pb-20 flex items-center justify-center overflow-hidden`} style={{ minHeight: 'calc(100vh - 4rem)' }}>
         {children}
       </main>
 
