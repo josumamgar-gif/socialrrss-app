@@ -12,7 +12,6 @@ import {
   FireIcon as FireIconSolid 
 } from '@heroicons/react/24/solid';
 import WelcomeTutorial from '@/components/shared/WelcomeTutorial';
-import AppBanner from '@/components/shared/AppBanner';
 import { useAuthStore } from '@/store/authStore';
 import { getAuthToken } from '@/lib/auth';
 import { authAPI } from '@/lib/api';
@@ -109,15 +108,8 @@ export default function MainLayout({
     <div className="min-h-screen bg-white flex flex-col" style={{ minHeight: '-webkit-fill-available' } as React.CSSProperties}>
       <WelcomeTutorial />
       
-      {/* Banner superior - Solo en Principal */}
-      {pathname === '/principal' && (
-        <div className="fixed top-0 left-0 right-0 z-50 safe-area-inset-top" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
-          <AppBanner />
-        </div>
-      )}
-      
       {/* Pestañas de navegación - Parte superior FIJAS (solo desktop) */}
-      <nav className={`hidden md:flex fixed ${pathname === '/principal' ? 'top-16' : 'top-0'} left-0 right-0 bg-white border-b border-gray-200 z-40`}>
+      <nav className={`hidden md:flex fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-40`}>
         <div className="max-w-7xl mx-auto px-4 w-full">
           <div className="flex justify-center space-x-1 md:space-x-2">
             {tabs.map((tab) => {
@@ -151,7 +143,7 @@ export default function MainLayout({
       </nav>
 
       {/* Contenido principal */}
-      <main className={`flex-1 ${pathname === '/principal' ? 'pt-16 md:pt-28' : 'pt-0 md:pt-0'} pb-24 md:pb-20 flex items-center justify-center overflow-hidden`} style={{ minHeight: 'calc(100vh - 4rem)' }}>
+      <main className={`flex-1 pt-0 md:pt-0 pb-24 md:pb-20 flex items-center justify-center overflow-hidden`} style={{ minHeight: 'calc(100vh - 4rem)' }}>
         {children}
       </main>
 
@@ -162,7 +154,7 @@ export default function MainLayout({
           paddingBottom: 'env(safe-area-inset-bottom)'
         } as React.CSSProperties}
       >
-        <div className="flex justify-around items-center h-24">
+        <div className="flex justify-around items-center h-16">
           {/* Promoción - Izquierda */}
           <Link
             href="/promocion"
@@ -174,15 +166,15 @@ export default function MainLayout({
               }
             }}
             className={`
-              flex flex-col items-center justify-center flex-1 h-full transition-colors py-3 cursor-pointer
+              flex flex-col items-center justify-center flex-1 h-full transition-colors py-1.5 cursor-pointer
               ${isActive('/promocion')
                 ? 'text-primary-600'
                 : 'text-gray-600'
               }
             `}
           >
-            <FireIcon className={`h-10 w-10 ${isActive('/promocion') ? 'text-primary-600' : 'text-gray-600'}`} />
-            <span className="text-base font-medium mt-1.5">Promoción</span>
+            <FireIcon className={`h-6 w-6 ${isActive('/promocion') ? 'text-primary-600' : 'text-gray-600'}`} />
+            <span className="text-xs font-medium mt-1">Promoción</span>
           </Link>
 
           {/* Principal - Centro con radar */}
@@ -196,7 +188,7 @@ export default function MainLayout({
               }
             }}
             className={`
-              flex flex-col items-center justify-center flex-1 h-full transition-colors py-3 cursor-pointer
+              flex flex-col items-center justify-center flex-1 h-full transition-colors py-1.5 cursor-pointer
               ${isActive('/principal')
                 ? 'text-primary-600'
                 : 'text-gray-600'
@@ -204,11 +196,11 @@ export default function MainLayout({
             `}
           >
             {isActive('/principal') ? (
-              <RadarIconSolid className="h-10 w-10 text-primary-600" />
+              <RadarIconSolid className="h-6 w-6 text-primary-600" />
             ) : (
-              <RadarIcon className="h-10 w-10 text-gray-600" />
+              <RadarIcon className="h-6 w-6 text-gray-600" />
             )}
-            <span className="text-base font-medium mt-1.5">Principal</span>
+            <span className="text-xs font-medium mt-1">Principal</span>
           </Link>
 
           {/* Ajustes - Derecha con martillo y llave */}
@@ -222,7 +214,7 @@ export default function MainLayout({
               }
             }}
             className={`
-              flex flex-col items-center justify-center flex-1 h-full transition-colors py-3 cursor-pointer
+              flex flex-col items-center justify-center flex-1 h-full transition-colors py-1.5 cursor-pointer
               ${isActive('/ajustes')
                 ? 'text-primary-600'
                 : 'text-gray-600'
@@ -230,11 +222,11 @@ export default function MainLayout({
             `}
           >
             {isActive('/ajustes') ? (
-              <CogIconSolid className="h-10 w-10 text-primary-600" />
+              <CogIconSolid className="h-6 w-6 text-primary-600" />
             ) : (
-              <CogIcon className="h-10 w-10 text-gray-600" />
+              <CogIcon className="h-6 w-6 text-gray-600" />
             )}
-            <span className="text-base font-medium mt-1.5">Ajustes</span>
+            <span className="text-xs font-medium mt-1">Ajustes</span>
           </Link>
         </div>
       </div>

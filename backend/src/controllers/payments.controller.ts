@@ -564,4 +564,3 @@ export const sendReceipt = async (req: AuthRequest, res: Response): Promise<void
     res.status(500).json({ error: 'Error al enviar el recibo por email' });
   }
 };
-

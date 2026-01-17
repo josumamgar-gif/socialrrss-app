@@ -159,9 +159,7 @@ div[role="textbox"] {
 .safe-area-inset-right {
   padding-right: env(safe-area-inset-right);
   padding-right: constant(safe-area-inset-right); /* Fallback iOS < 11.2 */
-}
-
-/* Mejorar visibilidad de títulos */
+}/* Mejorar visibilidad de títulos */
 .scroll-smooth {
   scroll-behavior: smooth;
 }.overscroll-contain {

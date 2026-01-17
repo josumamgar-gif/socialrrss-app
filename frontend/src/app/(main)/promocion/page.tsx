@@ -87,23 +87,19 @@ export default function PromocionPage() {
   const [loading, setLoading] = useState(true);
   const [profileData, setProfileData] = useState<Profile | null>(null);
 
-  // Ocultar controles del navegador (fullscreen)
+  // Ocultar controles del navegador (fullscreen) - Solo una vez al montar
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      // Forzar fullscreen en móvil
-      const hideNavBar = () => {
-        setTimeout(() => {
-          window.scrollTo(0, 1);
-        }, 100);
-      };
-      hideNavBar();
-      window.addEventListener('resize', hideNavBar);
-      window.addEventListener('orientationchange', hideNavBar);
+      // Forzar fullscreen en móvil solo al montar el componente
+      // No hacerlo en resize para no interrumpir el scroll del usuario
+      const scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
       
-      return () => {
-        window.removeEventListener('resize', hideNavBar);
-        window.removeEventListener('orientationchange', hideNavBar);
-      };
+      setTimeout(() => {
+        // Solo hacer scroll si estamos en la parte superior de la página
+        if (scrollPosition <= 1) {
+          window.scrollTo(0, 1);
+        }
+      }, 100);
     }
   }, []);
 

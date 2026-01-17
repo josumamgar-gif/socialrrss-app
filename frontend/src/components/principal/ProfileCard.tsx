@@ -774,7 +774,7 @@ export default function ProfileCard({
           </div>
 
           {/* Imagen con descripción y datos superpuestos */}
-          <div className="relative h-[500px] bg-gray-200">
+          <div className="relative h-[380px] bg-gray-200">
             {profile.images && profile.images.length > 0 ? (
               <img
                 src={getImageUrl(profile.images[0])}

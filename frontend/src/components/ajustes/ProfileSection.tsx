@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { authAPI } from '@/lib/api';
 import { CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import MyProfilesGallery from './MyProfilesGallery';
 
 const INTERESTS_OPTIONS = [
   'Gaming', 'Música', 'Fitness', 'Moda', 'Cocina', 'Viajes',
@@ -24,14 +23,9 @@ const SOCIAL_NETWORKS = [
   { value: 'otros', label: 'Otros' },
 ];
 
-interface ProfileSectionProps {
-  setActiveTab?: (tab: 'profile' | 'payments' | 'statistics' | 'settings' | 'support') => void;
-}
-
-export default function ProfileSection({ setActiveTab }: ProfileSectionProps = {}) {
+export default function ProfileSection() {
   const user = useAuthStore((state) => state.user);
   const setUser = useAuthStore((state) => state.setUser);
-  const logout = useAuthStore((state) => state.logout);
 
   const [username, setUsername] = useState(user?.username || '');
   const [email, setEmail] = useState(user?.email || '');
@@ -47,7 +41,6 @@ export default function ProfileSection({ setActiveTab }: ProfileSectionProps = {
 
   const [editingProfile, setEditingProfile] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
-  const [showMyProfiles, setShowMyProfiles] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -133,55 +126,8 @@ export default function ProfileSection({ setActiveTab }: ProfileSectionProps = {
     }
   };
 
-  const handleLogout = () => {
-    logout();
-    if (typeof window !== 'undefined') {
-      window.location.href = '/login';
-    }
-  };
-
-  const navigationButtons = [
-    { id: 'profile' as const, name: 'Mi Perfil', icon: '👤' },
-    { id: 'payments' as const, name: 'Pagos', icon: '💳' },
-    { id: 'statistics' as const, name: 'Estadísticas', icon: '📊' },
-    { id: 'settings' as const, name: 'Configuración', icon: '⚙️' },
-    { id: 'support' as const, name: 'Soporte', icon: '💬' },
-  ];
-
   return (
     <div className="space-y-6 max-w-4xl w-full mx-auto">
-      {/* Botones de navegación rápida - Justo encima de Comprueba tus Perfiles */}
-      {setActiveTab && (
-        <div className="bg-white rounded-none sm:rounded-lg shadow p-4 sm:p-6">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-            {navigationButtons.map((btn) => (
-              <button
-                key={btn.id}
-                onClick={() => setActiveTab(btn.id)}
-                className="flex flex-col items-center justify-center gap-2 p-4 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-primary-50 hover:to-primary-100 border border-gray-200 hover:border-primary-300 rounded-xl transition-all transform hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
-              >
-                <span className="text-3xl sm:text-4xl">{btn.icon}</span>
-                <span className="text-xs sm:text-sm font-medium text-gray-700">{btn.name}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Botón para ver perfiles contratados - Parte superior */}
-      <div className="bg-white rounded-none sm:rounded-lg shadow p-4 sm:p-6">
-        <button
-          onClick={() => setShowMyProfiles(!showMyProfiles)}
-          className="w-full bg-gradient-to-r from-primary-600 to-primary-700 text-white py-4 px-6 rounded-xl hover:from-primary-700 hover:to-primary-800 transition-all font-bold text-lg shadow-lg hover:shadow-xl"
-        >
-          {showMyProfiles ? 'Ocultar Mis Perfiles' : '📋 Comprueba tus Perfiles'}
-        </button>
-        {showMyProfiles && (
-          <div className="mt-6">
-            <MyProfilesGallery />
-          </div>
-        )}
-      </div>
 
       {/* Información de Cuenta */}
       <div className="bg-white rounded-none sm:rounded-lg shadow p-4 sm:p-6 space-y-4 sm:space-y-6">
@@ -513,15 +459,6 @@ export default function ProfileSection({ setActiveTab }: ProfileSectionProps = {
         )}
       </div>
 
-      {/* Cerrar sesión */}
-      <div className="border-t border-gray-200 pt-6">
-        <button
-          onClick={handleLogout}
-          className="w-full bg-red-600 text-white py-3 px-4 rounded-lg hover:bg-red-700 transition-colors font-semibold"
-        >
-          Cerrar Sesión
-        </button>
-      </div>
       </div>
     </div>
   );
