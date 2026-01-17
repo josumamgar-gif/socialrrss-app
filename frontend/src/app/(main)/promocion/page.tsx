@@ -347,7 +347,7 @@ export default function PromocionPage() {
     return (
       <>
       <div 
-        className="fixed inset-0 bg-white overflow-y-auto px-0 sm:px-4" 
+        className="fixed inset-0 bg-white px-0 sm:px-4" 
         style={{ 
           height: '-webkit-fill-available', // Para Safari iOS
           width: '100vw', 
@@ -360,10 +360,11 @@ export default function PromocionPage() {
           paddingTop: 'env(safe-area-inset-top)',
           paddingBottom: 'env(safe-area-inset-bottom)',
           paddingLeft: 'env(safe-area-inset-left)',
-          paddingRight: 'env(safe-area-inset-right)'
+          paddingRight: 'env(safe-area-inset-right)',
+          overflow: 'hidden'
         }}
       >
-        <div className="max-w-2xl mx-auto w-full min-h-full flex flex-col py-4">
+        <div className="max-w-2xl mx-auto w-full h-full flex flex-col overflow-hidden">
           <div className="text-center py-4 flex-shrink-0 px-4 sm:px-0">
             <button
               onClick={handleBack}
@@ -372,7 +373,7 @@ export default function PromocionPage() {
               ← Volver a redes sociales
             </button>
           </div>
-          <div className="bg-white rounded-none sm:rounded-lg shadow-lg p-4 sm:p-6 flex-shrink-0">
+          <div className="bg-white rounded-none sm:rounded-lg shadow-lg p-4 sm:p-6 flex-1 overflow-y-auto">
             <div className="mb-6">
               {(() => {
                 const network = socialNetworks.find(n => n.id === displayNetwork);

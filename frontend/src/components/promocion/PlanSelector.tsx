@@ -370,13 +370,13 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg max-w-2xl mx-auto">
           {error}
         </div>
       )}
 
       {paymentCreated && clientSecret && (selectedPaymentMethod === 'card' || selectedPaymentMethod === 'sepa') && (
-        <div className="bg-white rounded-none sm:rounded-xl p-4 sm:p-6 border-2 border-primary-200">
+        <div className="bg-white rounded-none sm:rounded-xl p-4 sm:p-6 border-2 border-primary-200 max-w-2xl mx-auto">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Completa tu Pago</h3>
           <StripePayment
             clientSecret={clientSecret}
@@ -388,7 +388,7 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
       )}
 
       {!paymentCreated && (
-        <div className="max-w-md mx-auto flex-shrink-0 py-4 sticky bottom-0 bg-white pt-6 border-t border-gray-200 mt-4">
+        <div className="max-w-md mx-auto flex-shrink-0 py-4 pt-6">
           <button
             onClick={handlePayment}
             disabled={loading || !selectedPlan}

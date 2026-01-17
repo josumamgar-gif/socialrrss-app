@@ -12,22 +12,16 @@ export default function AjustesPage() {
   const router = useRouter();
   const [showTutorial, setShowTutorial] = useState(false);
 
-  // Ocultar controles del navegador (fullscreen)
+  // Ocultar controles del navegador (fullscreen) - Solo una vez al montar
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const hideNavBar = () => {
+      // Solo hacer scroll inicial si estamos en la parte superior
+      const scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+      if (scrollPosition <= 1) {
         setTimeout(() => {
           window.scrollTo(0, 1);
         }, 100);
-      };
-      hideNavBar();
-      window.addEventListener('resize', hideNavBar);
-      window.addEventListener('orientationchange', hideNavBar);
-      
-      return () => {
-        window.removeEventListener('resize', hideNavBar);
-        window.removeEventListener('orientationchange', hideNavBar);
-      };
+      }
     }
   }, []);
 
