@@ -19,6 +19,26 @@ interface WelcomeTutorialProps {
   onForceOpenChange?: (open: boolean) => void; // Callback cuando se cierra manualmente
 }
 
+interface StepData {
+  title: string;
+  content: string[];
+  icon: string;
+  highlight: 'principal' | 'promocion' | 'ajustes' | null;
+  gestures?: Array<{
+    icon: React.ComponentType<{ className?: string }>;
+    color: string;
+    title: string;
+    text: string;
+    description: string;
+    action: string;
+  }>;
+  features?: Array<{
+    title: string;
+    description: string;
+    icon: string;
+  }>;
+}
+
 export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange }: WelcomeTutorialProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
@@ -47,7 +67,7 @@ export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange 
     }
   }, [forceOpen]);
 
-  const steps = [
+  const steps: StepData[] = [
     {
       title: '¡Bienvenido! 🎉',
       content: [
@@ -222,7 +242,7 @@ export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange 
           </div>
 
           {/* Indicador de sección */}
-          {currentStepData.highlight && (
+          {currentStepData.highlight !== null && currentStepData.highlight !== undefined && (
             <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
               <div className="flex items-center gap-2 text-blue-800">
                 <InformationCircleIcon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
@@ -252,9 +272,11 @@ export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange 
                         <h4 className={`${colors.text} font-bold text-base sm:text-lg mb-1`}>{gesture.title}</h4>
                         <p className="text-sm sm:text-base text-gray-700 mb-2">{gesture.text}</p>
                         <p className="text-xs sm:text-sm text-gray-600 mb-2">{gesture.description}</p>
-                        <div className="mt-2 p-2 bg-white/50 rounded-lg">
-                          <p className="text-xs font-semibold text-gray-700">✨ {gesture.action}</p>
-                        </div>
+                        {gesture.action && (
+                          <div className="mt-2 p-2 bg-white/50 rounded-lg">
+                            <p className="text-xs font-semibold text-gray-700">✨ {gesture.action}</p>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -263,7 +285,7 @@ export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange 
             </div>
           )}
 
-          {/* Features */}
+          {/* Features - Solo se muestra si existe */}
           {currentStepData.features && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
               {currentStepData.features.map((feature, idx) => (
