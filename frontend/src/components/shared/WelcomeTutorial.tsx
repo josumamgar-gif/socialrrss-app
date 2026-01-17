@@ -191,35 +191,6 @@ export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange 
     return colors[color] || { bg: 'bg-gray-50', border: 'border-gray-300', text: 'text-gray-700', icon: 'text-gray-600' };
   };
 
-  const getInstallInstructions = (platform: 'android' | 'ios') => {
-    if (platform === 'android') {
-      return {
-        platform: 'Android',
-        steps: [
-          'Abre la app en tu navegador Chrome (es necesario usar Chrome)',
-          'Toca el menú de opciones (tres puntos ⋮) en la esquina superior derecha',
-          'Busca y selecciona "Añadir a la pantalla de inicio" o "Instalar app"',
-          'Si ves "Instalar", tócalo. Si ves "Añadir", también funciona igual',
-          'Confirma tocando "Instalar" o "Añadir" en el diálogo que aparece',
-          '¡Listo! La app aparecerá en tu escritorio como una aplicación normal',
-          'Abre la app desde tu escritorio para una experiencia nativa completa',
-        ],
-      };
-    } else {
-      return {
-        platform: 'iOS',
-        steps: [
-          'Abre la app en Safari (es necesario usar Safari, no Chrome)',
-          'Toca el botón "Compartir" (cuadrado con flecha hacia arriba) en la parte inferior',
-          'Desplázate hacia abajo en el menú de compartir',
-          'Busca y toca "Añadir a la pantalla de inicio"',
-          'Personaliza el nombre si quieres (opcional)',
-          'Toca "Añadir" en la esquina superior derecha',
-          '¡Listo! La app aparecerá en tu escritorio con un icono personalizado',
-        ],
-      };
-    }
-  };
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-0 sm:p-4 overflow-hidden">
@@ -249,31 +220,6 @@ export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange 
               </p>
             ))}
           </div>
-
-          {/* Instrucciones de instalación PWA */}
-          {currentStepData.installInstructions && typeof window !== 'undefined' && (currentStepData.installInstructions === 'android' || currentStepData.installInstructions === 'ios') && (
-            <div className="mb-4 sm:mb-6 p-4 sm:p-5 bg-gradient-to-br from-primary-50 to-blue-50 border-2 border-primary-200 rounded-lg">
-              <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4 flex items-center gap-2">
-                <span className="text-xl sm:text-2xl">{currentStepData.installInstructions === 'android' ? '🤖' : '🍎'}</span>
-                Instrucciones paso a paso para {getInstallInstructions(currentStepData.installInstructions as 'android' | 'ios').platform}
-              </h3>
-              <ol className="space-y-2.5 sm:space-y-3 ml-2 sm:ml-4">
-                {getInstallInstructions(currentStepData.installInstructions as 'android' | 'ios').steps.map((step, idx) => (
-                  <li key={idx} className="text-sm sm:text-base text-gray-700 leading-relaxed flex items-start gap-3">
-                    <span className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary-600 text-white flex items-center justify-center font-bold text-xs sm:text-sm shadow-md">
-                      {idx + 1}
-                    </span>
-                    <span className="flex-1 pt-0.5">{step}</span>
-                  </li>
-                ))}
-              </ol>
-              <div className="mt-4 sm:mt-5 p-3 sm:p-4 bg-white/70 rounded-lg border border-primary-200 shadow-sm">
-                <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
-                  <span className="font-semibold text-primary-700">💡 Consejo:</span> Una vez instalada, podrás acceder a la app desde tu escritorio como si fuera una aplicación nativa. ¡Mucho más rápido y cómodo! La app se abrirá en pantalla completa sin la barra del navegador.
-                </p>
-              </div>
-            </div>
-          )}
 
           {/* Indicador de sección */}
           {currentStepData.highlight && (
