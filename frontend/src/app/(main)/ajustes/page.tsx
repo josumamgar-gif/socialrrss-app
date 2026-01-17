@@ -2,23 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/authStore';
-import Link from 'next/link';
-import ProfileSection from '@/components/ajustes/ProfileSection';
-import PaymentHistorySection from '@/components/ajustes/PaymentHistorySection';
-import PendingPaymentsSection from '@/components/ajustes/PendingPaymentsSection';
-import StatisticsSection from '@/components/ajustes/StatisticsSection';
-import AutoRenewalSection from '@/components/ajustes/AutoRenewalSection';
-import SupportSection from '@/components/ajustes/SupportSection';
-import MyProfilesGallery from '@/components/ajustes/MyProfilesGallery';
+import { useRouter } from 'next/navigation';
 import WelcomeTutorial from '@/components/shared/WelcomeTutorial';
-import { InformationCircleIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
-
-type MenuType = 'profile' | 'payments' | 'statistics' | 'settings' | 'support' | 'myProfiles' | null;
+import { InformationCircleIcon } from '@heroicons/react/24/outline';
 
 export default function AjustesPage() {
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
-  const [activeMenu, setActiveMenu] = useState<MenuType>(null);
+  const router = useRouter();
   const [showTutorial, setShowTutorial] = useState(false);
 
   // Ocultar controles del navegador (fullscreen)
@@ -52,41 +43,16 @@ export default function AjustesPage() {
   };
 
   const menuItems = [
-    { id: 'profile' as MenuType, name: 'Mi Perfil', icon: '👤' },
-    { id: 'payments' as MenuType, name: 'Pagos', icon: '💳' },
-    { id: 'statistics' as MenuType, name: 'Estadísticas', icon: '📊' },
-    { id: 'settings' as MenuType, name: 'Configuración', icon: '⚙️' },
-    { id: 'support' as MenuType, name: 'Soporte', icon: '💬' },
-    { id: 'myProfiles' as MenuType, name: 'Comprueba tus Perfiles', icon: '📋' },
+    { path: '/ajustes/perfil', name: 'Mi Perfil', icon: '👤' },
+    { path: '/ajustes/pagos', name: 'Pagos', icon: '💳' },
+    { path: '/ajustes/estadisticas', name: 'Estadísticas', icon: '📊' },
+    { path: '/ajustes/configuracion', name: 'Configuración', icon: '⚙️' },
+    { path: '/ajustes/soporte', name: 'Soporte', icon: '💬' },
+    { path: '/ajustes/perfiles', name: 'Comprueba tus Perfiles', icon: '📋' },
   ];
 
-  const renderMenuContent = () => {
-    switch (activeMenu) {
-      case 'profile':
-        return <ProfileSection />;
-      case 'payments':
-        return (
-          <>
-            <PendingPaymentsSection />
-            <PaymentHistorySection />
-          </>
-        );
-      case 'statistics':
-        return <StatisticsSection />;
-      case 'settings':
-        return <AutoRenewalSection />;
-      case 'support':
-        return <SupportSection />;
-      case 'myProfiles':
-        return (
-          <div className="bg-white rounded-none sm:rounded-lg shadow p-4 sm:p-6 max-w-4xl w-full mx-auto">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Mis Perfiles Contratados</h2>
-            <MyProfilesGallery />
-          </div>
-        );
-      default:
-        return null;
-    }
+  const handleNavigate = (path: string) => {
+    router.push(path);
   };
 
   return (
@@ -125,33 +91,28 @@ export default function AjustesPage() {
           <p className="text-gray-600 mb-4">Gestiona tu cuenta, pagos y configuración</p>
         </div>
 
-        {/* Contenedor principal con lista y contenido */}
-        <div className="flex-1 flex flex-col sm:flex-row gap-4 px-2 sm:px-4">
-          
-          {/* Lista de botones - Lateral izquierdo (desktop) o arriba (móvil) */}
-          <div className="flex-shrink-0 w-full sm:w-64 mb-4 sm:mb-0">
+        {/* Lista de botones */}
+        <div className="flex-1 flex justify-center items-start px-2 sm:px-4">
+          <div className="w-full max-w-md">
             <div className="bg-white rounded-none sm:rounded-lg shadow space-y-2 p-2">
               {menuItems.map((item) => (
                 <button
-                  key={item.id || 'item'}
-                  onClick={() => setActiveMenu(activeMenu === item.id ? null : item.id)}
-                  className={`
-                    w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-200 text-left
-                    ${activeMenu === item.id
-                      ? 'bg-primary-100 text-primary-700 font-semibold'
-                      : 'bg-gray-50 hover:bg-gray-100 text-gray-700'
-                    }
-                  `}
+                  key={item.path}
+                  onClick={() => handleNavigate(item.path)}
+                  className="w-full flex items-center justify-between px-4 py-3 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-700 transition-all duration-200 text-left group"
                 >
                   <div className="flex items-center gap-3">
                     <span className="text-2xl">{item.icon}</span>
                     <span className="text-sm sm:text-base font-medium">{item.name}</span>
                   </div>
-                  <ArrowRightIcon 
-                    className={`h-5 w-5 transition-transform duration-200 ${
-                      activeMenu === item.id ? 'rotate-90' : ''
-                    }`} 
-                  />
+                  <svg 
+                    className="h-5 w-5 text-gray-400 group-hover:text-gray-600 transition-colors" 
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
                 </button>
               ))}
 
@@ -177,27 +138,7 @@ export default function AjustesPage() {
               </button>
             </div>
           </div>
-
-          {/* Contenido del menú seleccionado - Lado derecho */}
-          <div className="flex-1 overflow-y-auto">
-            {activeMenu ? (
-              <div className="space-y-4 sm:space-y-6">
-                {renderMenuContent()}
-              </div>
-            ) : (
-              <div className="bg-white rounded-none sm:rounded-lg shadow p-6 sm:p-8 text-center">
-                <div className="max-w-md mx-auto">
-                  <div className="text-6xl mb-4">⚙️</div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">Selecciona una opción</h2>
-                  <p className="text-gray-600">
-                    Elige una opción del menú lateral para gestionar tu cuenta, ver tus pagos, estadísticas y más.
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
         </div>
-
       </div>
     </div>
   );

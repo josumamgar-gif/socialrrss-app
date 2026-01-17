@@ -213,8 +213,8 @@ export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange 
 
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-0 sm:p-4 overflow-hidden">
-      <div className="bg-white rounded-none sm:rounded-lg max-w-3xl w-full h-full sm:h-auto sm:max-h-[90vh] shadow-lg border-0 sm:border border-gray-200 animate-fadeIn flex flex-col overflow-hidden">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[9999] flex items-center justify-center p-4 sm:p-4 overflow-y-auto">
+      <div className="bg-white rounded-lg max-w-3xl w-full h-auto max-h-[95vh] shadow-lg border border-gray-200 animate-fadeIn flex flex-col overflow-hidden my-auto">
         {/* Header - Fixed */}
         <div className="bg-gradient-to-r from-primary-600 via-primary-500 to-primary-700 text-white px-4 py-3 sm:px-6 sm:py-5 flex items-center justify-between flex-shrink-0 shadow-xl">
           <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
