@@ -137,12 +137,12 @@ export default function ProfileSection() {
   };
 
   return (
-    <div className="space-y-6 max-w-4xl w-full mx-auto">
-      {/* Botón para ver perfiles contratados - Parte superior */}
-      <div className="bg-white rounded-none sm:rounded-lg shadow p-4 sm:p-6">
+    <div className="space-y-4 sm:space-y-6 max-w-4xl w-full mx-auto px-2 sm:px-0">
+      {/* Botón para ver perfiles contratados - Parte superior - Optimizado para móvil */}
+      <div className="bg-white rounded-lg shadow p-4 sm:p-6">
         <button
           onClick={() => setShowMyProfiles(!showMyProfiles)}
-          className="w-full bg-gradient-to-r from-primary-600 to-primary-700 text-white py-4 px-6 rounded-xl hover:from-primary-700 hover:to-primary-800 transition-all font-bold text-lg shadow-lg hover:shadow-xl"
+          className="w-full bg-gradient-to-r from-primary-600 to-primary-700 text-white py-3.5 sm:py-4 px-4 sm:px-6 rounded-xl hover:from-primary-700 hover:to-primary-800 transition-all font-bold text-base sm:text-lg shadow-lg hover:shadow-xl active:scale-95"
         >
           {showMyProfiles ? 'Ocultar Mis Perfiles' : '📋 Comprueba tus Perfiles'}
         </button>
@@ -153,14 +153,14 @@ export default function ProfileSection() {
         )}
       </div>
 
-      {/* Información de Cuenta */}
-      <div className="bg-white rounded-none sm:rounded-lg shadow p-4 sm:p-6 space-y-4 sm:space-y-6">
+      {/* Información de Cuenta - Optimizado para móvil */}
+      <div className="bg-white rounded-lg shadow p-4 sm:p-6 space-y-4 sm:space-y-6">
         <div className="flex justify-between items-center">
-          <h2 className="text-xl font-semibold text-gray-900">Información de Cuenta</h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Información de Cuenta</h2>
           {!editingProfile && (
             <button
               onClick={() => setEditingProfile(true)}
-              className="text-primary-600 hover:text-primary-700 font-medium text-sm"
+              className="text-primary-600 hover:text-primary-700 active:text-primary-800 font-medium text-sm sm:text-base py-2 px-2 rounded-lg hover:bg-primary-50 transition-colors"
             >
               Editar
             </button>
@@ -190,7 +190,7 @@ export default function ProfileSection() {
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 placeholder:text-gray-400"
+                className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-base sm:text-sm text-gray-900 placeholder:text-gray-400"
                 disabled={loading}
                 required
               />
@@ -208,7 +208,7 @@ export default function ProfileSection() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 placeholder:text-gray-400"
+                className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-base sm:text-sm text-gray-900 placeholder:text-gray-400"
                 disabled={loading}
                 required
               />
@@ -227,7 +227,7 @@ export default function ProfileSection() {
               type="text"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 placeholder:text-gray-400"
+              className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-base sm:text-sm text-gray-900 placeholder:text-gray-400"
               disabled={loading}
               placeholder="Tu nombre completo"
             />
@@ -265,7 +265,7 @@ export default function ProfileSection() {
                 type="number"
                 value={age}
                 onChange={(e) => setAge(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 placeholder:text-gray-400"
+                className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-base sm:text-sm text-gray-900 placeholder:text-gray-400"
                 disabled={loading}
                 min="13"
                 max="120"
@@ -285,7 +285,7 @@ export default function ProfileSection() {
                 type="text"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 placeholder:text-gray-400"
+                className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-base sm:text-sm text-gray-900 placeholder:text-gray-400"
                 disabled={loading}
                 placeholder="Ciudad, País"
               />
@@ -364,11 +364,11 @@ export default function ProfileSection() {
         </div>
 
         {editingProfile && (
-          <div className="flex space-x-3 pt-2">
+          <div className="flex flex-col sm:flex-row gap-3 pt-2">
             <button
               onClick={handleUpdateProfile}
               disabled={loading}
-              className="flex items-center space-x-2 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 disabled:opacity-50 font-medium"
+              className="flex items-center justify-center space-x-2 bg-primary-600 text-white px-6 py-3 sm:py-2 rounded-lg hover:bg-primary-700 disabled:opacity-50 font-medium transition-colors active:scale-95 text-base sm:text-sm"
             >
               <CheckIcon className="h-5 w-5" />
               <span>Guardar</span>
@@ -390,7 +390,7 @@ export default function ProfileSection() {
                 }
               }}
               disabled={loading}
-              className="flex items-center space-x-2 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 disabled:opacity-50 font-medium"
+              className="flex items-center justify-center space-x-2 bg-gray-200 text-gray-700 px-6 py-3 sm:py-2 rounded-lg hover:bg-gray-300 disabled:opacity-50 font-medium transition-colors active:scale-95 text-base sm:text-sm"
             >
               <XMarkIcon className="h-5 w-5" />
               <span>Cancelar</span>
@@ -423,7 +423,7 @@ export default function ProfileSection() {
                 type="password"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 placeholder:text-gray-400"
+                className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-base sm:text-sm text-gray-900 placeholder:text-gray-400"
                 disabled={loading}
               />
             </div>
@@ -436,7 +436,7 @@ export default function ProfileSection() {
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 placeholder:text-gray-400"
+                className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-base sm:text-sm text-gray-900 placeholder:text-gray-400"
                 disabled={loading}
               />
             </div>
@@ -449,16 +449,16 @@ export default function ProfileSection() {
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 placeholder:text-gray-400"
+                className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-base sm:text-sm text-gray-900 placeholder:text-gray-400"
                 disabled={loading}
               />
             </div>
 
-            <div className="flex space-x-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={handleChangePassword}
                 disabled={loading}
-                className="flex items-center space-x-2 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 disabled:opacity-50 font-medium"
+                className="flex items-center justify-center space-x-2 bg-primary-600 text-white px-6 py-3 sm:py-2 rounded-lg hover:bg-primary-700 disabled:opacity-50 font-medium transition-colors active:scale-95 text-base sm:text-sm"
               >
                 <CheckIcon className="h-5 w-5" />
                 <span>Cambiar Contraseña</span>
@@ -473,7 +473,7 @@ export default function ProfileSection() {
                   setSuccess(null);
                 }}
                 disabled={loading}
-                className="flex items-center space-x-2 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 disabled:opacity-50 font-medium"
+                className="flex items-center justify-center space-x-2 bg-gray-200 text-gray-700 px-6 py-3 sm:py-2 rounded-lg hover:bg-gray-300 disabled:opacity-50 font-medium transition-colors active:scale-95 text-base sm:text-sm"
               >
                 <XMarkIcon className="h-5 w-5" />
                 <span>Cancelar</span>
@@ -483,11 +483,11 @@ export default function ProfileSection() {
         )}
       </div>
 
-      {/* Cerrar sesión */}
-      <div className="border-t border-gray-200 pt-6">
+      {/* Cerrar sesión - Optimizado para móvil */}
+      <div className="border-t border-gray-200 pt-4 sm:pt-6">
         <button
           onClick={handleLogout}
-          className="w-full bg-red-600 text-white py-3 px-4 rounded-lg hover:bg-red-700 transition-colors font-semibold"
+          className="w-full bg-red-600 text-white py-3.5 sm:py-3 px-4 rounded-lg hover:bg-red-700 active:bg-red-800 transition-colors font-semibold text-base sm:text-sm active:scale-95"
         >
           Cerrar Sesión
         </button>
