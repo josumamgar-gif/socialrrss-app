@@ -528,7 +528,7 @@ export default function PrincipalPage() {
 
       {/* Botones de acción independientes - Justo encima de las pestañas */}
       {filteredProfiles.length > 0 && currentProfile && (
-        <div className="fixed bottom-20 md:bottom-16 left-1/2 transform -translate-x-1/2 z-50 flex justify-center space-x-4 px-4">
+        <div className="fixed bottom-28 md:bottom-24 left-1/2 transform -translate-x-1/2 z-50 flex justify-center space-x-5 px-4">
           {/* Botón Izquierda (Siguiente Perfil) */}
           <button
             type="button"
@@ -542,10 +542,10 @@ export default function PrincipalPage() {
               }
             }}
             disabled={isAnimating}
-            className="bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-full shadow-xl hover:shadow-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-red-500 focus:ring-offset-2 w-14 h-14 flex items-center justify-center transform hover:scale-110 active:scale-95"
+            className="bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-full shadow-xl hover:shadow-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-red-500 focus:ring-offset-2 w-16 h-16 flex items-center justify-center transform hover:scale-110 active:scale-95"
             aria-label="Siguiente Perfil"
           >
-            <ArrowLeftIcon className="h-7 w-7" />
+            <ArrowLeftIcon className="h-8 w-8" />
           </button>
 
           {/* Botón Arriba (Ver Detalles) */}
@@ -561,10 +561,10 @@ export default function PrincipalPage() {
               }
             }}
             disabled={isAnimating}
-            className="bg-gradient-to-br from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white rounded-full shadow-xl hover:shadow-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-yellow-500 focus:ring-offset-2 w-14 h-14 flex items-center justify-center transform hover:scale-110 active:scale-95"
+            className="bg-gradient-to-br from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white rounded-full shadow-xl hover:shadow-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-yellow-500 focus:ring-offset-2 w-16 h-16 flex items-center justify-center transform hover:scale-110 active:scale-95"
             aria-label="Ver Detalles"
           >
-            <ArrowUpIcon className="h-7 w-7" />
+            <ArrowUpIcon className="h-8 w-8" />
           </button>
 
           {/* Botón Retroceder */}
@@ -584,10 +584,10 @@ export default function PrincipalPage() {
               backUsed || history.length === 0
                 ? 'bg-gradient-to-br from-gray-400 to-gray-500 cursor-not-allowed'
                 : 'bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700'
-            } text-white rounded-full shadow-xl hover:shadow-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-green-500 focus:ring-offset-2 w-14 h-14 flex items-center justify-center transform hover:scale-110 active:scale-95`}
+            } text-white rounded-full shadow-xl hover:shadow-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-green-500 focus:ring-offset-2 w-16 h-16 flex items-center justify-center transform hover:scale-110 active:scale-95`}
             aria-label="Retroceder"
           >
-            <ArrowUturnLeftIcon className="h-7 w-7" />
+            <ArrowUturnLeftIcon className="h-8 w-8" />
           </button>
 
           {/* Botón Derecha (Ir al Enlace) */}
@@ -612,10 +612,10 @@ export default function PrincipalPage() {
               }
             }}
             disabled={isAnimating}
-            className="bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-full shadow-xl hover:shadow-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 w-14 h-14 flex items-center justify-center transform hover:scale-110 active:scale-95"
+            className="bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-full shadow-xl hover:shadow-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 w-16 h-16 flex items-center justify-center transform hover:scale-110 active:scale-95"
             aria-label="Ir al Enlace"
           >
-            <ArrowRightIcon className="h-7 w-7" />
+            <ArrowRightIcon className="h-8 w-8" />
           </button>
         </div>
       )}
