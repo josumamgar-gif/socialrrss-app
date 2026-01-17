@@ -453,11 +453,15 @@ export default function PrincipalPage() {
 
       <div className="flex flex-col items-center justify-center w-full" style={{ 
         position: 'absolute',
-        top: '48%',
+        top: '50%',
         left: '50%',
         transform: 'translate(-50%, -50%)',
         width: '100%',
-        maxWidth: '28rem'
+        maxWidth: '28rem',
+        height: 'calc(100% - 12rem)', // Maximizar espacio: altura total menos espacio para filtro y botones
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
       }}>
         {needsDemoInteraction && (
           <div className="mb-4 max-w-md w-full mx-auto bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4 z-40">
@@ -480,7 +484,7 @@ export default function PrincipalPage() {
         )}
 
         {filteredProfiles.length > 0 && currentProfile && (
-          <div className="relative w-full max-w-md mx-auto profile-card-container" style={{ overflow: 'visible', touchAction: 'none', width: '100%' }}>
+          <div className="relative w-full max-w-md mx-auto profile-card-container" style={{ overflow: 'visible', touchAction: 'none', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             {filteredProfiles.slice(currentIndex, currentIndex + 3).map((profile, idx) => (
               <div
                 key={`${profile._id}-${currentIndex}`}
@@ -530,47 +534,9 @@ export default function PrincipalPage() {
         />
       )}
 
-      {/* Botones de acción independientes - Justo encima de las pestañas */}
+      {/* Botones de acción independientes - Estilo Tinder, grandes y visibles */}
       {filteredProfiles.length > 0 && currentProfile && (
-        <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50 flex justify-center space-x-4 px-4">
-          {/* Botón Izquierda (Siguiente Perfil) */}
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-              if (!isAnimating) {
-                setIsAnimating(true);
-                handleSwipeLeft();
-                setTimeout(() => setIsAnimating(false), 300);
-              }
-            }}
-            disabled={isAnimating}
-            className="bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-full shadow-xl hover:shadow-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-red-500 focus:ring-offset-2 w-12 h-12 flex items-center justify-center transform hover:scale-110 active:scale-95"
-            aria-label="Siguiente Perfil"
-          >
-            <ArrowLeftIcon className="h-5 w-5" />
-          </button>
-
-          {/* Botón Arriba (Ver Detalles) */}
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-              if (!isAnimating && currentProfile) {
-                setIsAnimating(true);
-                setSelectedProfile(currentProfile);
-                setTimeout(() => setIsAnimating(false), 300);
-              }
-            }}
-            disabled={isAnimating}
-            className="bg-gradient-to-br from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white rounded-full shadow-xl hover:shadow-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-yellow-500 focus:ring-offset-2 w-12 h-12 flex items-center justify-center transform hover:scale-110 active:scale-95"
-            aria-label="Ver Detalles"
-          >
-            <ArrowUpIcon className="h-5 w-5" />
-          </button>
-
+        <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50 flex justify-center items-center space-x-3 sm:space-x-4 px-4">
           {/* Botón Retroceder */}
           <button
             type="button"
@@ -587,11 +553,49 @@ export default function PrincipalPage() {
             className={`${
               backUsed || history.length === 0
                 ? 'bg-gradient-to-br from-gray-400 to-gray-500 cursor-not-allowed'
-                : 'bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700'
-            } text-white rounded-full shadow-xl hover:shadow-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-green-500 focus:ring-offset-2 w-12 h-12 flex items-center justify-center transform hover:scale-110 active:scale-95`}
+                : 'bg-gradient-to-br from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600'
+            } text-white rounded-full shadow-2xl hover:shadow-3xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-yellow-400 focus:ring-offset-2 w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center transform hover:scale-110 active:scale-95`}
             aria-label="Retroceder"
           >
-            <ArrowUturnLeftIcon className="h-5 w-5" />
+            <ArrowUturnLeftIcon className="h-7 w-7 sm:h-8 sm:w-8" />
+          </button>
+
+          {/* Botón Izquierda (Siguiente Perfil) */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              if (!isAnimating) {
+                setIsAnimating(true);
+                handleSwipeLeft();
+                setTimeout(() => setIsAnimating(false), 300);
+              }
+            }}
+            disabled={isAnimating}
+            className="bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-full shadow-2xl hover:shadow-3xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-red-500 focus:ring-offset-2 w-16 h-16 sm:w-18 sm:h-18 flex items-center justify-center transform hover:scale-110 active:scale-95 text-3xl font-bold"
+            aria-label="Siguiente Perfil"
+          >
+            ✕
+          </button>
+
+          {/* Botón Arriba (Ver Detalles) */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              if (!isAnimating && currentProfile) {
+                setIsAnimating(true);
+                setSelectedProfile(currentProfile);
+                setTimeout(() => setIsAnimating(false), 300);
+              }
+            }}
+            disabled={isAnimating}
+            className="bg-gradient-to-br from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white rounded-full shadow-2xl hover:shadow-3xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-yellow-500 focus:ring-offset-2 w-16 h-16 sm:w-18 sm:h-18 flex items-center justify-center transform hover:scale-110 active:scale-95"
+            aria-label="Ver Detalles"
+          >
+            <ArrowUpIcon className="h-7 w-7 sm:h-8 sm:w-8" />
           </button>
 
           {/* Botón Derecha (Ir al Enlace) */}
@@ -616,10 +620,10 @@ export default function PrincipalPage() {
               }
             }}
             disabled={isAnimating}
-            className="bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-full shadow-xl hover:shadow-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 w-12 h-12 flex items-center justify-center transform hover:scale-110 active:scale-95"
+            className="bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-full shadow-2xl hover:shadow-3xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 w-16 h-16 sm:w-18 sm:h-18 flex items-center justify-center transform hover:scale-110 active:scale-95"
             aria-label="Ir al Enlace"
           >
-            <ArrowRightIcon className="h-5 w-5" />
+            <ArrowRightIcon className="h-7 w-7 sm:h-8 sm:w-8" />
           </button>
         </div>
       )}

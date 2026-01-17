@@ -703,7 +703,7 @@ export default function ProfileCard({
 
   return (
     <>
-      <div ref={containerRef} className="relative w-full max-w-md mx-auto">
+      <div ref={containerRef} className="relative w-full max-w-md mx-auto h-full flex items-center justify-center">
         {/* Overlay cuando se hace clic en botón - 100% opaco */}
         {buttonAction.type && buttonActionConfig && (
           <div 
@@ -734,17 +734,16 @@ export default function ProfileCard({
           ref={cardRef}
           className="relative w-full bg-white overflow-hidden cursor-grab active:cursor-grabbing select-none"
             style={{
-              borderRadius: '24px',
-              border: '1px solid rgba(0, 0, 0, 0.1)',
+              borderRadius: '20px',
+              border: 'none',
               boxShadow: `
-                0 0 0 1px rgba(0, 0, 0, 0.05),
-                0 2px 4px rgba(0, 0, 0, 0.1),
-                0 8px 16px rgba(0, 0, 0, 0.15),
-                0 16px 32px rgba(0, 0, 0, 0.2),
-                0 32px 64px rgba(0, 0, 0, 0.25),
-                inset 0 1px 0 rgba(255, 255, 255, 0.9),
-                inset 0 -1px 0 rgba(0, 0, 0, 0.05)
+                0 4px 6px rgba(0, 0, 0, 0.1),
+                0 10px 20px rgba(0, 0, 0, 0.15),
+                0 20px 40px rgba(0, 0, 0, 0.2)
               `,
+              height: '100%',
+              minHeight: '500px',
+              maxHeight: 'calc(100vh - 14rem)',
             transform: buttonAction.type 
               ? undefined // La transformación de botones se maneja con style inline
               : `translate(${position.x}px, ${position.y}px) rotate(${rotation}deg)`,
@@ -771,24 +770,8 @@ export default function ProfileCard({
             }
           }}
         >
-          {/* Header con color según red social */}
-          <div className={`${getNetworkColor(profile.socialNetwork)} h-16 flex items-center justify-center gap-2`}>
-            <div className="text-white">
-              <SocialNetworkLogo network={profile.socialNetwork} className="w-6 h-6" />
-            </div>
-            <h2 className="text-white font-bold text-lg">
-              {profile.profileData.username || 
-               profile.profileData.channelName || 
-               profile.profileData.handle || 
-               profile.profileData.streamerName ||
-               profile.profileData.pageName ||
-               profile.profileData.twitterHandle ||
-               'Perfil'}
-            </h2>
-          </div>
-
-          {/* Imagen con descripción y datos superpuestos */}
-          <div className="relative h-[380px] bg-gray-200">
+          {/* Imagen principal - Ocupa todo el espacio disponible estilo Tinder */}
+          <div className="relative w-full h-full bg-gray-200" style={{ height: '100%', minHeight: '500px' }}>
             {profile.images && profile.images.length > 0 ? (
               <img
                 src={getImageUrl(profile.images[0])}
@@ -815,58 +798,88 @@ export default function ProfileCard({
               </div>
             )}
 
-            {/* Datos de redes sociales - Pastillas blancas superpuestas en la parte superior */}
-            <div className="absolute top-4 left-4 right-4 flex flex-wrap gap-2 z-10">
+            {/* Header con logo de red social - Parte superior izquierda */}
+            <div className="absolute top-4 left-4 z-20">
+              <div className={`${getNetworkColor(profile.socialNetwork)} w-12 h-12 rounded-full flex items-center justify-center shadow-lg`}>
+                <SocialNetworkLogo network={profile.socialNetwork} className="w-6 h-6 text-white" />
+              </div>
+            </div>
+
+            {/* Datos de redes sociales - Pastillas blancas superpuestas en la parte superior derecha */}
+            <div className="absolute top-4 right-4 flex flex-wrap gap-2 z-10 justify-end">
               {profile.profileData.followers && (
-                <span className="px-4 py-2 bg-white rounded-full text-sm font-semibold text-black shadow-lg">
+                <span className="px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-full text-xs font-semibold text-black shadow-lg">
                   👥 {profile.profileData.followers.toLocaleString()}
                 </span>
               )}
               {profile.profileData.subscribers && (
-                <span className="px-4 py-2 bg-white rounded-full text-sm font-semibold text-black shadow-lg">
+                <span className="px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-full text-xs font-semibold text-black shadow-lg">
                   👥 {profile.profileData.subscribers.toLocaleString()}
                 </span>
               )}
               {profile.profileData.videos && (
-                <span className="px-4 py-2 bg-white rounded-full text-sm font-semibold text-black shadow-lg">
+                <span className="px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-full text-xs font-semibold text-black shadow-lg">
                   🎥 {profile.profileData.videos.toLocaleString()}
                 </span>
               )}
               {profile.profileData.videoCount && (
-                <span className="px-4 py-2 bg-white rounded-full text-sm font-semibold text-black shadow-lg">
+                <span className="px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-full text-xs font-semibold text-black shadow-lg">
                   🎥 {profile.profileData.videoCount.toLocaleString()}
                 </span>
               )}
               {profile.profileData.posts && (
-                <span className="px-4 py-2 bg-white rounded-full text-sm font-semibold text-black shadow-lg">
+                <span className="px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-full text-xs font-semibold text-black shadow-lg">
                   📸 {profile.profileData.posts.toLocaleString()}
                 </span>
               )}
               {profile.profileData.likes && (
-                <span className="px-4 py-2 bg-white rounded-full text-sm font-semibold text-black shadow-lg">
+                <span className="px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-full text-xs font-semibold text-black shadow-lg">
                   ❤️ {profile.profileData.likes.toLocaleString()}
                 </span>
               )}
               {profile.profileData.tweets && (
-                <span className="px-4 py-2 bg-white rounded-full text-sm font-semibold text-black shadow-lg">
+                <span className="px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-full text-xs font-semibold text-black shadow-lg">
                   🐦 {profile.profileData.tweets.toLocaleString()}
                 </span>
               )}
             </div>
 
-            {/* Descripción superpuesta en la parte inferior con fondo opaco 75% */}
-            {profile.profileData.description && (
-              <div 
-                className="absolute bottom-0 left-0 right-0 p-6 z-10"
-                style={{
-                  background: 'linear-gradient(to top, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.5), transparent)',
-                }}
-              >
-                <p className="text-white text-base font-medium leading-relaxed line-clamp-4 drop-shadow-lg">
+            {/* Descripción estilo Tinder - Overlay oscuro grande en la parte inferior */}
+            <div 
+              className="absolute bottom-0 left-0 right-0 z-20"
+              style={{
+                background: 'linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.7) 40%, rgba(0, 0, 0, 0.4) 70%, transparent 100%)',
+                paddingTop: '2rem',
+                paddingBottom: '1.5rem',
+                paddingLeft: '1.5rem',
+                paddingRight: '1.5rem',
+              }}
+            >
+              {/* Nombre y red social */}
+              <div className="mb-3">
+                <h2 className="text-white font-bold text-2xl sm:text-3xl mb-1 drop-shadow-lg">
+                  {profile.profileData.username || 
+                   profile.profileData.channelName || 
+                   profile.profileData.handle || 
+                   profile.profileData.streamerName ||
+                   profile.profileData.pageName ||
+                   profile.profileData.twitterHandle ||
+                   'Perfil'}
+                </h2>
+                <div className="flex items-center gap-2">
+                  <span className="text-white/90 text-sm font-medium">
+                    {profile.socialNetwork.charAt(0).toUpperCase() + profile.socialNetwork.slice(1)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Descripción - Más grande y visible */}
+              {profile.profileData.description && (
+                <p className="text-white text-base sm:text-lg font-normal leading-relaxed drop-shadow-lg line-clamp-3">
                   {profile.profileData.description}
                 </p>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>
