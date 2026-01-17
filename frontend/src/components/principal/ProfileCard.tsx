@@ -309,22 +309,23 @@ export default function ProfileCard({
         if (onCornerEffectsChange) {
           onCornerEffectsChange({ left: 0, right: 0, top: 0, bottom: 0 });
         }
-        // Para el gesto a la derecha: SIEMPRE abrir enlace y ejecutar onSwipeRight (acción del botón azul)
-        // PRIMERO: Abrir el enlace inmediatamente (igual que el botón azul)
+        // Para el gesto a la derecha: SIEMPRE ejecutar la misma acción que el botón azul
+        // PASO 1: Abrir el enlace (igual que el botón azul)
         if (currentProfileLink) {
-          // Abrir enlace inmediatamente - el navegador lo manejará
           const linkWindow = window.open(currentProfileLink, '_blank', 'noopener,noreferrer');
-          // Si el popup fue bloqueado, intentar nuevamente después de un pequeño delay
+          // Si el popup fue bloqueado, intentar nuevamente
           if (!linkWindow || linkWindow.closed || typeof linkWindow.closed === 'undefined') {
             setTimeout(() => {
               window.open(currentProfileLink, '_blank', 'noopener,noreferrer');
             }, 100);
           }
         }
-        // SEGUNDO: Ejecutar el callback para avanzar al siguiente perfil (igual que el botón azul)
+        // PASO 2: Ejecutar onSwipeRight para avanzar al siguiente perfil (IGUAL QUE EL BOTÓN AZUL)
         if (currentOnSwipeRight) {
+          // Usar triggerSwipeAnimation para la animación visual
           triggerSwipeAnimation('right', currentOnSwipeRight);
         } else {
+          // Si no hay callback, al menos resetear la posición
           resetPosition();
         }
         return;

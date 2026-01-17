@@ -73,6 +73,10 @@ export const register = async (req: any, res: Response): Promise<void> => {
         email: user.email,
         fullName: user.fullName,
         bio: user.bio,
+        age: user.age,
+        location: user.location,
+        interests: user.interests,
+        favoriteSocialNetwork: user.favoriteSocialNetwork,
       },
     });
   } catch (error: any) {

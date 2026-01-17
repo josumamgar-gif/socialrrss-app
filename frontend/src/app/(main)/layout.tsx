@@ -155,7 +155,7 @@ export default function MainLayout({
 
       {/* Navegación móvil - Parte inferior FIJA (solo móvil) */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 safe-area-inset-bottom">
-        <div className="flex justify-around items-center h-20">
+        <div className="flex justify-around items-center h-24">
           {/* Promoción - Izquierda */}
           <Link
             href="/promocion"
@@ -167,15 +167,15 @@ export default function MainLayout({
               }
             }}
             className={`
-              flex flex-col items-center justify-center flex-1 h-full transition-colors py-2 cursor-pointer
+              flex flex-col items-center justify-center flex-1 h-full transition-colors py-3 cursor-pointer
               ${isActive('/promocion')
                 ? 'text-primary-600'
                 : 'text-gray-600'
               }
             `}
           >
-            <FireIcon className={`h-8 w-8 ${isActive('/promocion') ? 'text-primary-600' : 'text-gray-600'}`} />
-            <span className="text-sm font-medium mt-1">Promoción</span>
+            <FireIcon className={`h-10 w-10 ${isActive('/promocion') ? 'text-primary-600' : 'text-gray-600'}`} />
+            <span className="text-base font-medium mt-1.5">Promoción</span>
           </Link>
 
           {/* Principal - Centro con radar */}
@@ -189,7 +189,7 @@ export default function MainLayout({
               }
             }}
             className={`
-              flex flex-col items-center justify-center flex-1 h-full transition-colors py-2 cursor-pointer
+              flex flex-col items-center justify-center flex-1 h-full transition-colors py-3 cursor-pointer
               ${isActive('/principal')
                 ? 'text-primary-600'
                 : 'text-gray-600'
@@ -197,11 +197,11 @@ export default function MainLayout({
             `}
           >
             {isActive('/principal') ? (
-              <RadarIconSolid className="h-8 w-8 text-primary-600" />
+              <RadarIconSolid className="h-10 w-10 text-primary-600" />
             ) : (
-              <RadarIcon className="h-8 w-8 text-gray-600" />
+              <RadarIcon className="h-10 w-10 text-gray-600" />
             )}
-            <span className="text-sm font-medium mt-1">Principal</span>
+            <span className="text-base font-medium mt-1.5">Principal</span>
           </Link>
 
           {/* Ajustes - Derecha con martillo y llave */}
@@ -215,7 +215,7 @@ export default function MainLayout({
               }
             }}
             className={`
-              flex flex-col items-center justify-center flex-1 h-full transition-colors py-2 cursor-pointer
+              flex flex-col items-center justify-center flex-1 h-full transition-colors py-3 cursor-pointer
               ${isActive('/ajustes')
                 ? 'text-primary-600'
                 : 'text-gray-600'
@@ -223,11 +223,11 @@ export default function MainLayout({
             `}
           >
             {isActive('/ajustes') ? (
-              <CogIconSolid className="h-8 w-8 text-primary-600" />
+              <CogIconSolid className="h-10 w-10 text-primary-600" />
             ) : (
-              <CogIcon className="h-8 w-8 text-gray-600" />
+              <CogIcon className="h-10 w-10 text-gray-600" />
             )}
-            <span className="text-sm font-medium mt-1">Ajustes</span>
+            <span className="text-base font-medium mt-1.5">Ajustes</span>
           </Link>
         </div>
       </div>

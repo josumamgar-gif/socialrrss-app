@@ -8,11 +8,10 @@ import PaymentHistorySection from '@/components/ajustes/PaymentHistorySection';
 import PendingPaymentsSection from '@/components/ajustes/PendingPaymentsSection';
 import StatisticsSection from '@/components/ajustes/StatisticsSection';
 import AutoRenewalSection from '@/components/ajustes/AutoRenewalSection';
-import SupportSection from '@/components/ajustes/SupportSection';
 import WelcomeTutorial from '@/components/shared/WelcomeTutorial';
 import { InformationCircleIcon } from '@heroicons/react/24/outline';
 
-type TabType = 'profile' | 'payments' | 'statistics' | 'settings' | 'support';
+type TabType = 'profile' | 'payments' | 'statistics' | 'settings';
 
 export default function AjustesPage() {
   const [activeTab, setActiveTab] = useState<TabType>('profile');
@@ -43,7 +42,6 @@ export default function AjustesPage() {
     { id: 'payments' as TabType, name: 'Pagos', icon: '💳' },
     { id: 'statistics' as TabType, name: 'Estadísticas', icon: '📊' },
     { id: 'settings' as TabType, name: 'Configuración', icon: '⚙️' },
-    { id: 'support' as TabType, name: 'Soporte', icon: '💬' },
   ];
 
   const handleOpenTutorial = () => {
@@ -109,7 +107,6 @@ export default function AjustesPage() {
           )}
           {activeTab === 'statistics' && <StatisticsSection />}
           {activeTab === 'settings' && <AutoRenewalSection />}
-          {activeTab === 'support' && <SupportSection />}
         </div>
 
         {/* CTA para promocionar */}
