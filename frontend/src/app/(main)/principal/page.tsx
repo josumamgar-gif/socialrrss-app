@@ -340,14 +340,18 @@ export default function PrincipalPage() {
 
   // Mostrar selector después del tutorial si no se ha seleccionado una red
   useEffect(() => {
-    if (!loading && profiles.length > 0 && tutorialCompleted && !hasSelectedNetwork && !showNetworkSelector) {
+    if (typeof window === 'undefined') return;
+    if (showNetworkSelector) return; // Ya está visible, no hacer nada
+    
+    if (!loading && profiles.length > 0 && tutorialCompleted && !hasSelectedNetwork) {
       // Esperar un momento para que el tutorial se cierre completamente
       const timer = setTimeout(() => {
         setShowNetworkSelector(true);
       }, 800);
       return () => clearTimeout(timer);
     }
-  }, [loading, profiles.length, tutorialCompleted, hasSelectedNetwork, showNetworkSelector]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, profiles.length, tutorialCompleted, hasSelectedNetwork]);
 
   // Mostrar selector si está activo
   if (showNetworkSelector) {
