@@ -379,15 +379,20 @@ export default function PrincipalPage() {
 
   return (
     <div 
-      className="w-full bg-white flex items-center justify-center px-4 overflow-hidden relative fixed inset-0" 
+      className="w-full bg-white flex items-center justify-center px-4 overflow-hidden relative fixed inset-0"
       style={{ 
         height: '100vh',
+        height: '-webkit-fill-available', // Para Safari iOS
         width: '100vw',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         overflow: 'hidden',
         touchAction: 'none',
+        paddingTop: 'env(safe-area-inset-top)',
+        paddingBottom: 'env(safe-area-inset-bottom)',
+        paddingLeft: 'env(safe-area-inset-left)',
+        paddingRight: 'env(safe-area-inset-right)'
       }}
       onWheel={(e) => e.preventDefault()}
       onTouchMove={(e) => {

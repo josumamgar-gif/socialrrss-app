@@ -24,7 +24,11 @@ const SOCIAL_NETWORKS = [
   { value: 'otros', label: 'Otros' },
 ];
 
-export default function ProfileSection() {
+interface ProfileSectionProps {
+  setActiveTab?: (tab: 'profile' | 'payments' | 'statistics' | 'settings' | 'support') => void;
+}
+
+export default function ProfileSection({ setActiveTab }: ProfileSectionProps = {}) {
   const user = useAuthStore((state) => state.user);
   const setUser = useAuthStore((state) => state.setUser);
   const logout = useAuthStore((state) => state.logout);
@@ -136,8 +140,34 @@ export default function ProfileSection() {
     }
   };
 
+  const navigationButtons = [
+    { id: 'profile' as const, name: 'Mi Perfil', icon: '👤' },
+    { id: 'payments' as const, name: 'Pagos', icon: '💳' },
+    { id: 'statistics' as const, name: 'Estadísticas', icon: '📊' },
+    { id: 'settings' as const, name: 'Configuración', icon: '⚙️' },
+    { id: 'support' as const, name: 'Soporte', icon: '💬' },
+  ];
+
   return (
     <div className="space-y-6 max-w-4xl w-full mx-auto">
+      {/* Botones de navegación rápida - Justo encima de Comprueba tus Perfiles */}
+      {setActiveTab && (
+        <div className="bg-white rounded-none sm:rounded-lg shadow p-4 sm:p-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+            {navigationButtons.map((btn) => (
+              <button
+                key={btn.id}
+                onClick={() => setActiveTab(btn.id)}
+                className="flex flex-col items-center justify-center gap-2 p-4 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-primary-50 hover:to-primary-100 border border-gray-200 hover:border-primary-300 rounded-xl transition-all transform hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
+              >
+                <span className="text-3xl sm:text-4xl">{btn.icon}</span>
+                <span className="text-xs sm:text-sm font-medium text-gray-700">{btn.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Botón para ver perfiles contratados - Parte superior */}
       <div className="bg-white rounded-none sm:rounded-lg shadow p-4 sm:p-6">
         <button

@@ -51,7 +51,25 @@ export default function AjustesPage() {
   };
 
   return (
-    <div className="fixed inset-0 bg-white px-0 sm:px-4" style={{ height: '100vh', width: '100vw', touchAction: 'none', overflow: 'hidden', position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}>
+    <div 
+      className="fixed inset-0 bg-white px-0 sm:px-4" 
+      style={{ 
+        height: '100vh',
+        height: '-webkit-fill-available', // Para Safari iOS
+        width: '100vw', 
+        touchAction: 'none', 
+        overflow: 'hidden', 
+        position: 'fixed', 
+        top: 0, 
+        left: 0, 
+        right: 0, 
+        bottom: 0,
+        paddingTop: 'env(safe-area-inset-top)',
+        paddingBottom: 'env(safe-area-inset-bottom)',
+        paddingLeft: 'env(safe-area-inset-left)',
+        paddingRight: 'env(safe-area-inset-right)'
+      }}
+    >
       {/* Tutorial - se muestra cuando showTutorial es true */}
       {showTutorial && (
         <WelcomeTutorial 
@@ -100,7 +118,7 @@ export default function AjustesPage() {
 
         {/* Contenido de las tabs */}
         <div className="space-y-6 flex flex-col items-center">
-          {activeTab === 'profile' && <ProfileSection />}
+          {activeTab === 'profile' && <ProfileSection setActiveTab={setActiveTab} />}
           {activeTab === 'payments' && (
             <>
               <PendingPaymentsSection />

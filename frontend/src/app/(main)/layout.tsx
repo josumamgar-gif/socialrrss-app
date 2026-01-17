@@ -106,12 +106,12 @@ export default function MainLayout({
   const isActive = (href: string) => pathname === href;
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col" style={{ minHeight: '100vh', minHeight: '-webkit-fill-available' }}>
       <WelcomeTutorial />
       
       {/* Banner superior - Solo en Principal */}
       {pathname === '/principal' && (
-        <div className="fixed top-0 left-0 right-0 z-50">
+        <div className="fixed top-0 left-0 right-0 z-50 safe-area-inset-top" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
           <AppBanner />
         </div>
       )}
@@ -156,7 +156,13 @@ export default function MainLayout({
       </main>
 
       {/* Navegación móvil - Parte inferior FIJA (solo móvil) */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 safe-area-inset-bottom">
+      <div 
+        className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40" 
+        style={{ 
+          paddingBottom: 'env(safe-area-inset-bottom)',
+          paddingBottom: 'constant(safe-area-inset-bottom)' // Fallback iOS < 11.2
+        }}
+      >
         <div className="flex justify-around items-center h-24">
           {/* Promoción - Izquierda */}
           <Link

@@ -19,6 +19,10 @@
 html {
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+  /* Soporte para safe areas en iOS PWA (notch, barra de estado) */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  /* Fallback para navegadores que no soportan env() */
+  padding: constant(safe-area-inset-top) constant(safe-area-inset-right) constant(safe-area-inset-bottom) constant(safe-area-inset-left);
 }
 
 body {
@@ -26,6 +30,14 @@ body {
   background: #ffffff;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+  /* Asegurar que el body ocupe toda la altura disponible */
+  min-height: 100vh;
+  min-height: -webkit-fill-available; /* Para Safari iOS */
+  /* Usar safe areas para evitar que el contenido quede detrás del notch */
+  padding-top: env(safe-area-inset-top);
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
 }
 
 /* Prevenir zoom con doble toque */
@@ -118,6 +130,35 @@ div[role="textbox"] {
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
   }
+}
+
+/* Variables CSS para safe areas - Útiles para componentes */
+:root {
+  --safe-area-inset-top: env(safe-area-inset-top, 0px);
+  --safe-area-inset-right: env(safe-area-inset-right, 0px);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-inset-left: env(safe-area-inset-left, 0px);
+}
+
+/* Clase helper para safe areas */
+.safe-area-inset-top {
+  padding-top: env(safe-area-inset-top);
+  padding-top: constant(safe-area-inset-top); /* Fallback iOS < 11.2 */
+}
+
+.safe-area-inset-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom: constant(safe-area-inset-bottom); /* Fallback iOS < 11.2 */
+}
+
+.safe-area-inset-left {
+  padding-left: env(safe-area-inset-left);
+  padding-left: constant(safe-area-inset-left); /* Fallback iOS < 11.2 */
+}
+
+.safe-area-inset-right {
+  padding-right: env(safe-area-inset-right);
+  padding-right: constant(safe-area-inset-right); /* Fallback iOS < 11.2 */
 }
 
 /* Mejorar visibilidad de títulos */
