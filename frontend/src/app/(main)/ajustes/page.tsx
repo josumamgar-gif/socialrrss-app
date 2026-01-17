@@ -198,21 +198,6 @@ export default function AjustesPage() {
           </div>
         </div>
 
-        {/* CTA para promocionar - Solo cuando no hay menú activo */}
-        {!activeMenu && (
-          <div className="mt-6 sm:mt-8 bg-primary-600 rounded-none sm:rounded-md shadow-sm border-0 sm:border border-primary-700 p-4 sm:p-6 text-white text-center max-w-2xl mx-auto">
-            <h2 className="text-xl font-semibold mb-2">¡Promociona tu Perfil!</h2>
-            <p className="mb-4 opacity-90">
-              Lleva tu perfil al siguiente nivel y aumenta tu visibilidad
-            </p>
-            <Link
-              href="/promocion"
-              className="inline-block bg-white text-primary-600 px-6 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
-            >
-              Promocionar Perfil
-            </Link>
-          </div>
-        )}
       </div>
     </div>
   );

@@ -453,7 +453,7 @@ export default function PrincipalPage() {
 
       <div className="flex flex-col items-center justify-center w-full" style={{ 
         position: 'absolute',
-        top: '42%',
+        top: '48%',
         left: '50%',
         transform: 'translate(-50%, -50%)',
         width: '100%',
