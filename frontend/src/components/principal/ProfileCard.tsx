@@ -69,6 +69,7 @@ export default function ProfileCard({
   const [buttonAction, setButtonAction] = useState<DragAction>({ type: null, intensity: 0 });
   const [backUsed, setBackUsed] = useState(false);
   const [cornerEffects, setCornerEffects] = useState({ left: 0, right: 0, top: 0, bottom: 0 });
+  const linkOpenedRef = useRef(false); // Prevenir apertura duplicada del enlace
   const cardRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   
@@ -322,19 +323,8 @@ export default function ProfileCard({
         if (onCornerEffectsChange) {
           onCornerEffectsChange({ left: 0, right: 0, top: 0, bottom: 0 });
         }
-        // Para el gesto a la derecha: SIEMPRE ejecutar la misma acción que el botón azul
-        // PASO 1: Abrir el enlace (igual que el botón azul)
-        if (currentProfileLink) {
-          console.log('🔗 Abriendo enlace:', currentProfileLink);
-          const linkWindow = window.open(currentProfileLink, '_blank', 'noopener,noreferrer');
-          // Si el popup fue bloqueado, intentar nuevamente
-          if (!linkWindow || linkWindow.closed || typeof linkWindow.closed === 'undefined') {
-            setTimeout(() => {
-              window.open(currentProfileLink, '_blank', 'noopener,noreferrer');
-            }, 100);
-          }
-        }
-        // PASO 2: Ejecutar onSwipeRight para avanzar al siguiente perfil (IGUAL QUE EL BOTÓN AZUL)
+        // Para el gesto a la derecha: solo ejecutar onSwipeRight
+        // El enlace se abrirá en handleSwipeRight() en principal/page.tsx para evitar duplicados
         if (currentOnSwipeRight) {
           console.log('✅ Ejecutando onSwipeRight');
           // Usar triggerSwipeAnimation para la animación visual
@@ -384,23 +374,13 @@ export default function ProfileCard({
         // Movimiento horizontal dominante
         if (currentPosition.x > threshold) {
           console.log('➡️ Fallback: Ejecutando gesto derecha (posición absoluta)');
-          // Derecha - Resetear efectos, abrir enlace y ejecutar callback
+          // Derecha - Resetear efectos y ejecutar callback
           setCornerEffects({ left: 0, right: 0, top: 0, bottom: 0 });
           if (onCornerEffectsChange) {
             onCornerEffectsChange({ left: 0, right: 0, top: 0, bottom: 0 });
           }
-          // PRIMERO: Abrir el enlace inmediatamente
-          if (currentProfileLink) {
-            console.log('🔗 Abriendo enlace (fallback):', currentProfileLink);
-            const linkWindow = window.open(currentProfileLink, '_blank', 'noopener,noreferrer');
-            // Si el popup fue bloqueado, intentar nuevamente después de un pequeño delay
-            if (!linkWindow || linkWindow.closed || typeof linkWindow.closed === 'undefined') {
-              setTimeout(() => {
-                window.open(currentProfileLink, '_blank', 'noopener,noreferrer');
-              }, 100);
-            }
-          }
-          // SEGUNDO: Ejecutar el callback para avanzar al siguiente perfil
+          // Solo ejecutar el callback para avanzar al siguiente perfil
+          // El enlace se abrirá en handleSwipeRight() en principal/page.tsx para evitar duplicados
           if (currentOnSwipeRight) {
             console.log('✅ Ejecutando onSwipeRight (fallback)');
             triggerSwipeAnimation('right', currentOnSwipeRight);

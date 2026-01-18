@@ -203,6 +203,13 @@ export default function PrincipalPage() {
     const currentProfile = filteredProfiles[currentIndex];
     if (!currentProfile) return;
     
+    // Abrir enlace ANTES de avanzar al siguiente perfil (solo una vez)
+    if (currentProfile.link) {
+      const linkWindow = window.open(currentProfile.link, '_blank', 'noopener,noreferrer');
+      // Si el popup fue bloqueado, no intentar nuevamente para evitar duplicados
+      // El navegador ya bloqueó el popup, no tiene sentido intentar otra vez
+    }
+    
     markProfileAsViewed(currentProfile._id);
     setLastSwipeDirection('right');
     
@@ -582,15 +589,7 @@ export default function PrincipalPage() {
               e.preventDefault();
               if (!isAnimating && currentProfile) {
                 setIsAnimating(true);
-                // Abrir enlace primero
-                if (currentProfile.link) {
-                  const linkWindow = window.open(currentProfile.link, '_blank', 'noopener,noreferrer');
-                  if (!linkWindow || linkWindow.closed || typeof linkWindow.closed === 'undefined') {
-                    setTimeout(() => {
-                      window.open(currentProfile.link, '_blank', 'noopener,noreferrer');
-                    }, 100);
-                  }
-                }
+                // handleSwipeRight ya abre el enlace, no hacerlo aquí para evitar duplicados
                 handleSwipeRight();
                 setTimeout(() => setIsAnimating(false), 300);
               }
