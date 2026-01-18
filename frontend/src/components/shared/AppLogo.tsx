@@ -24,45 +24,86 @@ export default function AppLogo({ size = 'md', showText = false, className = '' 
   return (
     <div className={`flex flex-col items-center ${className}`}>
       <div className={`${sizeClasses[size]} relative`}>
-        {/* Fondo con gradiente chill y efecto de profundidad */}
-        <div className="absolute inset-0 bg-gradient-to-br from-pink-400 via-purple-500 to-blue-500 rounded-2xl shadow-lg transform rotate-3 opacity-60"></div>
-        <div className="absolute inset-0 bg-gradient-to-br from-orange-400 via-pink-500 to-purple-500 rounded-2xl shadow-lg transform -rotate-3 opacity-60"></div>
-        
-        {/* Contenedor principal con gradiente vibrante */}
-        <div className="relative w-full h-full bg-gradient-to-br from-pink-500 via-purple-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-xl overflow-hidden">
-          {/* Efecto de brillo animado */}
-          <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent"></div>
+        {/* Contenedor principal con fondo degradado moderno */}
+        <div className="relative w-full h-full bg-gradient-to-br from-blue-500 via-purple-600 to-pink-500 rounded-2xl flex items-center justify-center shadow-xl overflow-hidden">
+          {/* Efecto de brillo sutil */}
+          <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-transparent opacity-50"></div>
           
-          {/* Icono de fuego/llama chill mejorado */}
+          {/* Logo original: Redes sociales conectadas con flecha de crecimiento */}
           <svg 
             className={`${iconSize[size]} text-white drop-shadow-lg relative z-10`}
-            viewBox="0 0 24 24" 
-            fill="currentColor"
+            viewBox="0 0 100 100" 
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
           >
-            {/* Llama principal más estilizada */}
+            {/* Círculo base de Instagram (esquina superior izquierda) */}
+            <circle cx="25" cy="25" r="8" fill="white" opacity="0.95">
+              <animate attributeName="opacity" values="0.95;0.7;0.95" dur="2s" repeatCount="indefinite" />
+            </circle>
+            <rect x="20" y="20" width="10" height="10" rx="2" fill="none" stroke="white" strokeWidth="1.5" opacity="0.8" />
+            
+            {/* Círculo de TikTok (esquina superior derecha) */}
+            <circle cx="75" cy="25" r="7" fill="white" opacity="0.9">
+              <animate attributeName="opacity" values="0.9;0.6;0.9" dur="2.2s" repeatCount="indefinite" />
+            </circle>
+            <path d="M70 25 L75 20 L80 25 L75 30 Z" fill="white" opacity="0.7" />
+            
+            {/* Círculo de YouTube (esquina inferior izquierda) */}
+            <path d="M20 70 L30 65 L30 75 L20 70 Z" fill="white" opacity="0.9">
+              <animate attributeName="opacity" values="0.9;0.65;0.9" dur="1.8s" repeatCount="indefinite" />
+            </path>
+            <rect x="18" y="63" width="14" height="14" rx="1" fill="none" stroke="white" strokeWidth="1.5" opacity="0.7" />
+            
+            {/* Círculo de LinkedIn (esquina inferior derecha) */}
+            <rect x="70" y="68" width="10" height="10" rx="1" fill="white" opacity="0.85">
+              <animate attributeName="opacity" values="0.85;0.6;0.85" dur="2.1s" repeatCount="indefinite" />
+            </rect>
+            <circle cx="72" cy="70" r="1.5" fill="white" opacity="0.7" />
+            <rect x="74" y="70" width="5" height="1.5" rx="0.5" fill="white" opacity="0.7" />
+            <rect x="74" y="73" width="5" height="1.5" rx="0.5" fill="white" opacity="0.7" />
+            
+            {/* Flecha de crecimiento/promoción en el centro */}
             <path 
-              d="M12 22C12 22 7 17 7 12C7 9.5 8.5 7.5 10 6.5C10 6.5 9 4.5 10 3.5C10.8 2.8 11.5 3.2 11.5 4.5C11.5 3.5 12.5 2.5 13.5 3.5C14 4 13.2 5.2 12 6C13.2 7.2 14.5 8.5 14.5 10.5C14.5 13 12 17 12 22Z" 
-              fill="currentColor"
+              d="M45 35 L55 45 L50 45 L50 60 L40 60 L40 45 L35 45 Z" 
+              fill="white" 
               opacity="1"
-            />
-            {/* Llama secundaria */}
-            <path 
-              d="M10 20C10 20 6.5 16 6.5 12C6.5 10.5 7.5 9 8.5 8.2C8.5 8.2 7.8 6.5 8.5 5.8C9 5.3 9.5 5.7 9.5 6.8C9.5 6 10.2 5.3 10.8 6C11.2 6.4 10.8 7.2 10 7.8C10.8 8.8 11.5 9.8 11.5 11C11.5 13 10 16 10 20Z" 
-              fill="currentColor"
-              opacity="0.8"
-            />
-            {/* Chispas decorativas más visibles */}
-            <circle cx="15" cy="8" r="1.2" fill="currentColor" opacity="0.9" />
-            <circle cx="17" cy="10" r="1" fill="currentColor" opacity="0.7" />
-            <circle cx="16" cy="12.5" r="0.8" fill="currentColor" opacity="0.6" />
-            <circle cx="14.5" cy="6" r="0.6" fill="currentColor" opacity="0.5" />
+              className="drop-shadow-md"
+            >
+              <animateTransform
+                attributeName="transform"
+                type="translate"
+                values="0,0; 0,-3; 0,0"
+                dur="1.5s"
+                repeatCount="indefinite"
+              />
+            </path>
+            
+            {/* Líneas de conexión entre redes sociales */}
+            <line x1="33" y1="25" x2="45" y2="35" stroke="white" strokeWidth="1.5" opacity="0.4" strokeDasharray="2,2" />
+            <line x1="67" y1="25" x2="55" y2="35" stroke="white" strokeWidth="1.5" opacity="0.4" strokeDasharray="2,2" />
+            <line x1="25" y1="33" x2="40" y2="45" stroke="white" strokeWidth="1.5" opacity="0.4" strokeDasharray="2,2" />
+            <line x1="75" y1="32" x2="60" y2="45" stroke="white" strokeWidth="1.5" opacity="0.4" strokeDasharray="2,2" />
+            
+            {/* Partículas de crecimiento alrededor */}
+            <circle cx="50" cy="20" r="2" fill="white" opacity="0.6">
+              <animate attributeName="r" values="2;3;2" dur="1s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="80" cy="50" r="1.5" fill="white" opacity="0.5">
+              <animate attributeName="r" values="1.5;2.5;1.5" dur="1.2s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="20" cy="50" r="1.5" fill="white" opacity="0.5">
+              <animate attributeName="r" values="1.5;2.5;1.5" dur="1.3s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="50" cy="80" r="2" fill="white" opacity="0.6">
+              <animate attributeName="r" values="2;3;2" dur="1.1s" repeatCount="indefinite" />
+            </circle>
           </svg>
         </div>
       </div>
       
       {showText && (
-        <h1 className="mt-3 text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
-          Promoción RRSS
+        <h1 className="mt-3 text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent tracking-tight">
+          Explora
         </h1>
       )}
     </div>
