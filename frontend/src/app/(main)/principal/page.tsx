@@ -98,11 +98,13 @@ export default function PrincipalPage() {
           return !viewedProfiles.includes(p._id);
         });
         
-        // Si el backend no devuelve nada y el usuario es nuevo, usar demos locales como fallback
-        if (profilesToShow.length === 0 && !tutorialCompleted) {
+        // Usar siempre los perfiles del backend si están disponibles
+        // Solo usar fallback local si el backend no devuelve nada Y el usuario es nuevo
+        if (profilesToShow.length === 0 && !tutorialCompleted && allProfiles.length === 0) {
+          // Solo usar fallback si el backend realmente no devolvió nada
           setProfiles(demoProfiles);
         } else {
-          // Mantener el orden aleatorio que viene del backend
+          // Mantener el orden aleatorio que viene del backend (puede estar vacío si todos fueron filtrados)
           setProfiles(profilesToShow);
         }
 
