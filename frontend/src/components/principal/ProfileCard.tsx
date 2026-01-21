@@ -62,6 +62,12 @@ export default function ProfileCard({
   currentProfileIndex,
 }: ProfileCardProps) {
   const [position, setPosition] = useState({ x: 0, y: 0 });
+  
+  // Detectar si es un perfil demo
+  const isDemoProfile = (() => {
+    const userIdObj = profile.userId as any;
+    return userIdObj?.username === 'demo' || userIdObj?._id === '000000000000000000000000' || profile._id?.toString().startsWith('demo-');
+  })();
   const [isDragging, setIsDragging] = useState(false);
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
   const [isAnimating, setIsAnimating] = useState(false);
@@ -788,10 +794,16 @@ export default function ProfileCard({
             )}
 
             {/* Header con logo de red social - Parte superior izquierda */}
-            <div className="absolute top-4 left-4 z-20">
+            <div className="absolute top-4 left-4 z-20 flex flex-col gap-2">
               <div className={`${getNetworkColor(profile.socialNetwork)} w-12 h-12 rounded-full flex items-center justify-center shadow-lg`}>
                 <SocialNetworkLogo network={profile.socialNetwork} className="w-6 h-6 text-white" />
               </div>
+              {/* Etiqueta DEMO */}
+              {isDemoProfile && (
+                <span className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg border-2 border-white/50">
+                  DEMO
+                </span>
+              )}
             </div>
 
             {/* Datos de redes sociales - Pastillas blancas superpuestas en la parte superior derecha */}
