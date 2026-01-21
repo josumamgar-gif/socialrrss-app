@@ -51,13 +51,13 @@ export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange 
         return;
       }
       
-      // Si forceOpen es false expl?citamente, ocultar
+      // Si forceOpen es false explícitamente, ocultar
       if (forceOpen === false) {
         setIsVisible(false);
         return;
       }
       
-      // Si forceOpen es undefined, verificar si debe mostrarse autom?ticamente (comportamiento por defecto)
+      // Si forceOpen es undefined, verificar si debe mostrarse automáticamente (comportamiento por defecto)
       if (forceOpen === undefined) {
         const tutorialCompleted = localStorage.getItem('tutorialCompleted');
         if (!tutorialCompleted) {
@@ -71,13 +71,13 @@ export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange 
     {
       title: 'Bienvenido a Explora',
       content: [
-        'Explora perfiles y promociona los tuyos. Arrastra las tarjetas en cualquier direcci?n para interactuar.',
+        'Explora perfiles y promociona los tuyos. Arrastra las tarjetas en cualquier dirección para interactuar.',
       ],
       icon: 'home',
       highlight: null,
     },
     {
-      title: 'Gestos R?pidos',
+      title: 'Gestos Rápidos',
       content: [
         'Usa los botones inferiores o arrastra las tarjetas:',
       ],
@@ -88,7 +88,7 @@ export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange 
           icon: ArrowLeftIcon,
           color: 'red',
           title: 'Siguiente',
-          text: 'Izquierda / Bot?n rojo',
+          text: 'Izquierda / Botón rojo',
           description: 'Pasa al siguiente perfil',
           action: '',
         },
@@ -96,15 +96,15 @@ export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange 
           icon: ArrowUpIcon,
           color: 'yellow',
           title: 'Detalles',
-          text: 'Arriba / Bot?n amarillo',
-          description: 'Ver informaci?n completa',
+          text: 'Arriba / Botón amarillo',
+          description: 'Ver información completa',
           action: '',
         },
         {
           icon: ArrowRightIcon,
           color: 'blue',
           title: 'Enlace',
-          text: 'Derecha / Bot?n azul',
+          text: 'Derecha / Botón azul',
           description: 'Visitar perfil en su red social',
           action: '',
         },
@@ -112,7 +112,7 @@ export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange 
           icon: ArrowUturnLeftIcon,
           color: 'green',
           title: 'Retroceder',
-          text: 'Bot?n verde',
+          text: 'Botón verde',
           description: 'Volver al perfil anterior',
           action: '',
         },
@@ -129,7 +129,7 @@ export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange 
     {
       title: 'Todo listo',
       content: [
-        'Empieza explorando los perfiles demo y luego crea el tuyo en Promoci?n.',
+        'Empieza explorando los perfiles demo y luego crea el tuyo en Promoción.',
       ],
       icon: 'ready',
       highlight: null,
@@ -166,7 +166,7 @@ export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange 
     }
   };
 
-  // Prevenir scroll del body cuando el tutorial est? abierto
+  // Prevenir scroll del body cuando el tutorial está abierto
   useEffect(() => {
     if (isVisible) {
       document.body.style.overflow = 'hidden';
@@ -237,7 +237,7 @@ export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange 
 
         {/* Content - Scrollable */}
         <div className="px-4 py-3 sm:px-6 sm:py-6 flex-1 overflow-y-auto overscroll-contain scroll-smooth">
-          {/* Informaci?n principal */}
+          {/* Información principal */}
           <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
             {currentStepData.content.map((text, idx) => (
               <p key={idx} className="text-sm sm:text-base md:text-lg text-gray-700 leading-relaxed text-justify sm:text-left">
@@ -246,15 +246,15 @@ export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange 
             ))}
           </div>
 
-          {/* Indicador de secci?n */}
+          {/* Indicador de sección */}
           {currentStepData.highlight !== null && currentStepData.highlight !== undefined && (
             <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
               <div className="flex items-center gap-2 text-blue-800">
                 <InformationCircleIcon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
                 <p className="font-semibold text-xs sm:text-sm md:text-base">
-                  {currentStepData.highlight === 'principal' && '?? Encontrar?s esto en la pesta?a "Principal"'}
-                  {currentStepData.highlight === 'promocion' && '?? Encontrar?s esto en la pesta?a "Promoci?n"'}
-                  {currentStepData.highlight === 'ajustes' && '?? Encontrar?s esto en la pesta?a "Ajustes"'}
+                  {currentStepData.highlight === 'principal' && '💡 Encontrarás esto en la pestaña "Principal"'}
+                  {currentStepData.highlight === 'promocion' && '💡 Encontrarás esto en la pestaña "Promoción"'}
+                  {currentStepData.highlight === 'ajustes' && '💡 Encontrarás esto en la pestaña "Ajustes"'}
                 </p>
               </div>
             </div>
@@ -279,7 +279,7 @@ export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange 
                         <p className="text-xs sm:text-sm text-gray-600 mb-2">{gesture.description}</p>
                         {gesture.action && (
                           <div className="mt-2 p-2 bg-white/50 rounded-lg">
-                            <p className="text-xs font-semibold text-gray-700">? {gesture.action}</p>
+                            <p className="text-xs font-semibold text-gray-700">💡 {gesture.action}</p>
                           </div>
                         )}
                       </div>
