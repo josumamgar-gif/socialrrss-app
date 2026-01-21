@@ -320,21 +320,21 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
         ))}
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 shadow-md p-5 max-w-2xl mx-auto flex-shrink-0">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">Método de Pago</h3>
+      <div className="bg-white rounded-xl border border-gray-200 shadow-md p-6 max-w-2xl mx-auto flex-shrink-0">
+        <h3 className="text-lg font-semibold text-gray-900 mb-6 text-center">Método de Pago</h3>
         <div className="grid grid-cols-2 gap-4 max-w-lg mx-auto">
           <button
             onClick={() => setSelectedPaymentMethod('paypal')}
             className={`
-              flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all w-full
+              flex flex-col items-center justify-center p-6 rounded-xl border-2 transition-all w-full min-h-[120px]
               ${selectedPaymentMethod === 'paypal'
                 ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100 shadow-lg'
                 : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-md'
               }
             `}
           >
-            <div className="mb-2 flex items-center justify-center bg-white p-2 rounded-lg shadow-sm">
-              <svg viewBox="0 0 24 24" className="w-12 h-12">
+            <div className="mb-3 flex items-center justify-center bg-white p-3 rounded-lg shadow-sm w-full overflow-hidden">
+              <svg viewBox="0 0 24 24" className="w-16 h-16 flex-shrink-0" style={{ minWidth: '64px', minHeight: '64px' }}>
                 <path fill="#003087" d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.337 7.291-6.2 7.291h-2.287c-.524 0-.968.382-1.05.9l-1.12 7.203zm14.146-14.42a13.022 13.022 0 0 0-.44-2.277C20.172 2.988 18.478 2 15.853 2H8.4c-.524 0-.968.382-1.05.9L5.53 19.243h4.357c.524 0 .968-.382 1.05-.9l1.12-7.203c.082-.519.526-.9 1.05-.9h2.287c1.863 0 5.216-2.24 6.2-7.291.03-.15.054-.295.076-.438z"/>
                 <path fill="#009CDE" d="M21.222 2.663a13.022 13.022 0 0 0-.44-2.277C20.172 2.988 18.478 2 15.853 2H8.4c-.524 0-.968.382-1.05.9L5.53 19.243h4.357c.524 0 .968-.382 1.05-.9l1.12-7.203c.082-.519.526-.9 1.05-.9h2.287c1.863 0 5.216-2.24 6.2-7.291.03-.15.054-.295.076-.438z"/>
               </svg>
@@ -347,15 +347,15 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
           <button
             onClick={() => setSelectedPaymentMethod('card')}
             className={`
-              flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all w-full
+              flex flex-col items-center justify-center p-6 rounded-xl border-2 transition-all w-full min-h-[120px]
               ${selectedPaymentMethod === 'card'
                 ? 'border-blue-500 bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg'
                 : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-md'
               }
             `}
           >
-            <div className="mb-2">
-              <svg viewBox="0 0 24 24" className={`w-12 h-12 ${selectedPaymentMethod === 'card' ? 'text-white' : 'text-gray-700'}`} fill="none" stroke="currentColor" strokeWidth="2">
+            <div className="mb-3">
+              <svg viewBox="0 0 24 24" className={`w-16 h-16 ${selectedPaymentMethod === 'card' ? 'text-white' : 'text-gray-700'}`} fill="none" stroke="currentColor" strokeWidth="2">
                 <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
                 <line x1="1" y1="10" x2="23" y2="10"/>
                 <circle cx="6" cy="16" r="1.5" fill="currentColor"/>
@@ -376,8 +376,8 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
       )}
 
       {paymentCreated && clientSecret && (selectedPaymentMethod === 'card' || selectedPaymentMethod === 'sepa') && (
-        <div className="bg-white rounded-none sm:rounded-xl p-4 sm:p-6 border-2 border-primary-200 max-w-2xl mx-auto">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Completa tu Pago</h3>
+        <div className="bg-white rounded-none sm:rounded-xl p-6 sm:p-8 border-2 border-primary-200 max-w-2xl mx-auto mt-6">
+          <h3 className="text-xl font-semibold text-gray-900 mb-6 text-center">Completa tu Pago</h3>
           <StripePayment
             clientSecret={clientSecret}
             paymentMethod={selectedPaymentMethod as 'card' | 'sepa'}

@@ -5,6 +5,9 @@ import { loadStripe, StripeElementsOptions } from '@stripe/stripe-js';
 import {
   Elements,
   CardElement,
+  CardNumberElement,
+  CardExpiryElement,
+  CardCvcElement,
   useStripe,
   useElements,
 } from '@stripe/react-stripe-js';
@@ -41,8 +44,8 @@ function StripePaymentForm({
 
     try {
       if (paymentMethod === 'card') {
-        const cardElement = elements.getElement(CardElement);
-        if (!cardElement) {
+        const cardNumberElement = elements.getElement(CardNumberElement);
+        if (!cardNumberElement) {
           throw new Error('Elemento de tarjeta no encontrado');
         }
 
@@ -50,7 +53,7 @@ function StripePaymentForm({
           clientSecret,
           {
             payment_method: {
-              card: cardElement,
+              card: cardNumberElement,
             },
           }
         );
@@ -79,28 +82,57 @@ function StripePaymentForm({
   const cardElementOptions = {
     style: {
       base: {
-        fontSize: '16px',
-        color: '#424770',
+        fontSize: '18px',
+        color: '#1f2937',
+        fontFamily: 'system-ui, -apple-system, sans-serif',
         '::placeholder': {
-          color: '#aab7c4',
+          color: '#9ca3af',
         },
       },
       invalid: {
-        color: '#9e2146',
+        color: '#dc2626',
       },
     },
   };
 
   if (paymentMethod === 'card') {
     return (
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="p-4 border border-gray-300 rounded-lg bg-white">
-          <CardElement options={cardElementOptions} />
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="space-y-4">
+          {/* Número de tarjeta */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Número de Tarjeta
+            </label>
+            <div className="p-4 border-2 border-gray-300 rounded-lg bg-white focus-within:border-primary-500 focus-within:ring-2 focus-within:ring-primary-200 transition-all">
+              <CardNumberElement options={cardElementOptions} />
+            </div>
+          </div>
+
+          {/* Fecha de expiración y CVV en fila */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Fecha de Expiración
+              </label>
+              <div className="p-4 border-2 border-gray-300 rounded-lg bg-white focus-within:border-primary-500 focus-within:ring-2 focus-within:ring-primary-200 transition-all">
+                <CardExpiryElement options={cardElementOptions} />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                CVV
+              </label>
+              <div className="p-4 border-2 border-gray-300 rounded-lg bg-white focus-within:border-primary-500 focus-within:ring-2 focus-within:ring-primary-200 transition-all">
+                <CardCvcElement options={cardElementOptions} />
+              </div>
+            </div>
+          </div>
         </div>
         <button
           type="submit"
           disabled={!stripe || processing}
-          className="w-full bg-primary-600 text-white py-3 px-6 rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
+          className="w-full bg-primary-600 text-white py-4 px-6 rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-lg transition-all"
         >
           {processing ? 'Procesando...' : 'Pagar'}
         </button>
