@@ -76,7 +76,8 @@ export default function PrincipalPage() {
         // - Tras completar demo/tutorial: también agotamos los demos para que no reaparezcan infinitamente
         const allProfiles = response.profiles || [];
         
-        // Filtrar perfiles ya vistos (según estado de tutorial/demo)
+        // Filtrar perfiles ya vistos
+        // IMPORTANTE: Los usuarios nuevos SIEMPRE deben ver los perfiles demo para aprender
         const profilesToShow = allProfiles.filter((p: Profile) => {
           const userIdObj = p.userId as any;
           const isDemo =
@@ -84,15 +85,21 @@ export default function PrincipalPage() {
             userIdObj?.username === 'demo' ||
             userIdObj?._id === '000000000000000000000000';
           
-          // Demos: mostrarlos SOLO a usuarios que aún no han completado el demo
-          if (isDemo) return !demoCompleted;
+          // Demos: SIEMPRE mostrarlos a usuarios nuevos (sin tutorial completado)
+          // Solo ocultarlos si el usuario ya completó el tutorial Y el demo
+          if (isDemo) {
+            // Usuario nuevo: siempre mostrar demos
+            if (!tutorialCompleted) return true;
+            // Usuario con tutorial completado: mostrar demos solo si no completó el demo
+            return !demoCompleted;
+          }
           
-          // Caso normal (reales + demos): solo mostrar si no ha sido visto
+          // Perfiles reales: solo mostrar si no ha sido visto
           return !viewedProfiles.includes(p._id);
         });
         
         // Si el backend no devuelve nada y el usuario es nuevo, usar demos locales como fallback
-        if (profilesToShow.length === 0 && !demoCompleted && !tutorialCompleted) {
+        if (profilesToShow.length === 0 && !tutorialCompleted) {
           setProfiles(demoProfiles);
         } else {
           // Mantener el orden aleatorio que viene del backend
