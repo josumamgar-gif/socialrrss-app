@@ -79,17 +79,25 @@ export default function PrincipalPage() {
         // Filtrar perfiles ya vistos (según estado de tutorial/demo)
         const profilesToShow = allProfiles.filter((p: Profile) => {
           const userIdObj = p.userId as any;
-          const isDemo = userIdObj?.username === 'demo' || userIdObj?._id === '000000000000000000000000';
+          const isDemo =
+            (typeof p._id === 'string' && p._id.startsWith('demo-')) ||
+            userIdObj?.username === 'demo' ||
+            userIdObj?._id === '000000000000000000000000';
           
-          // Si no terminó el tutorial y tampoco completó el demo, mantener demos siempre visibles
-          if (isDemo && !tutorialCompleted && !demoCompleted) return true;
+          // Demos: mostrarlos SOLO a usuarios que aún no han completado el demo
+          if (isDemo) return !demoCompleted;
           
           // Caso normal (reales + demos): solo mostrar si no ha sido visto
           return !viewedProfiles.includes(p._id);
         });
         
-        // Mantener el orden aleatorio que viene del backend
-        setProfiles(profilesToShow);
+        // Si el backend no devuelve nada y el usuario es nuevo, usar demos locales como fallback
+        if (profilesToShow.length === 0 && !demoCompleted && !tutorialCompleted) {
+          setProfiles(demoProfiles);
+        } else {
+          // Mantener el orden aleatorio que viene del backend
+          setProfiles(profilesToShow);
+        }
 
         // Verificar demo completado
         setHasCompletedDemo(demoCompleted);
@@ -146,6 +154,8 @@ export default function PrincipalPage() {
   // Marcar perfil como visto
   const markProfileAsViewed = (profileId: string) => {
     if (typeof window === 'undefined') return;
+    // Demos locales: no persistir como "visto" (se controlan por demoCompleted)
+    if (profileId.startsWith('demo-')) return;
     
     const userId = user?.id || 'anonymous';
     const key = `viewedProfiles_${userId}`;
@@ -211,15 +221,22 @@ export default function PrincipalPage() {
           const allProfiles = response.profiles || [];
           const profilesToShow = allProfiles.filter((p: Profile) => {
             const userIdObj = p.userId as any;
-            const isDemo = userIdObj?.username === 'demo' || userIdObj?._id === '000000000000000000000000';
-            if (isDemo && !tutorialCompleted && !demoCompleted) return true;
+            const isDemo =
+              (typeof p._id === 'string' && p._id.startsWith('demo-')) ||
+              userIdObj?.username === 'demo' ||
+              userIdObj?._id === '000000000000000000000000';
+            if (isDemo) return !demoCompleted;
             return !viewedProfiles.includes(p._id);
           });
 
-          setProfiles(profilesToShow);
+          if (profilesToShow.length === 0 && !demoCompleted && !tutorialCompleted) {
+            setProfiles(demoProfiles);
+          } else {
+            setProfiles(profilesToShow);
+          }
           setCurrentIndex(0);
           setHistory([]);
-          setEndState(profilesToShow.length > 0 ? 'none' : 'no_more');
+          setEndState((profilesToShow.length > 0 || (!demoCompleted && !tutorialCompleted)) ? 'none' : 'no_more');
         } catch (e) {
           setEndState('no_more');
         }
@@ -275,15 +292,22 @@ export default function PrincipalPage() {
           const allProfiles = response.profiles || [];
           const profilesToShow = allProfiles.filter((p: Profile) => {
             const userIdObj = p.userId as any;
-            const isDemo = userIdObj?.username === 'demo' || userIdObj?._id === '000000000000000000000000';
-            if (isDemo && !tutorialCompleted && !demoCompleted) return true;
+            const isDemo =
+              (typeof p._id === 'string' && p._id.startsWith('demo-')) ||
+              userIdObj?.username === 'demo' ||
+              userIdObj?._id === '000000000000000000000000';
+            if (isDemo) return !demoCompleted;
             return !viewedProfiles.includes(p._id);
           });
 
-          setProfiles(profilesToShow);
+          if (profilesToShow.length === 0 && !demoCompleted && !tutorialCompleted) {
+            setProfiles(demoProfiles);
+          } else {
+            setProfiles(profilesToShow);
+          }
           setCurrentIndex(0);
           setHistory([]);
-          setEndState(profilesToShow.length > 0 ? 'none' : 'no_more');
+          setEndState((profilesToShow.length > 0 || (!demoCompleted && !tutorialCompleted)) ? 'none' : 'no_more');
         } catch (e) {
           setEndState('no_more');
         }
@@ -513,11 +537,18 @@ export default function PrincipalPage() {
                             const allProfiles = response.profiles || [];
                             const profilesToShow = allProfiles.filter((p: Profile) => {
                               const userIdObj = p.userId as any;
-                              const isDemo = userIdObj?.username === 'demo' || userIdObj?._id === '000000000000000000000000';
-                              if (isDemo && !tutorialCompleted && !demoCompleted) return true;
+                              const isDemo =
+                                (typeof p._id === 'string' && p._id.startsWith('demo-')) ||
+                                userIdObj?.username === 'demo' ||
+                                userIdObj?._id === '000000000000000000000000';
+                              if (isDemo) return !demoCompleted;
                               return !viewedProfiles.includes(p._id);
                             });
-                            setProfiles(profilesToShow);
+                            if (profilesToShow.length === 0 && !demoCompleted && !tutorialCompleted) {
+                              setProfiles(demoProfiles);
+                            } else {
+                              setProfiles(profilesToShow);
+                            }
                             setCurrentIndex(0);
                             setHistory([]);
                             setEndState(profilesToShow.length > 0 ? 'none' : 'no_more');
