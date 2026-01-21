@@ -211,12 +211,12 @@ export default function ProfileCard({
     card.style.willChange = 'transform, opacity';
     card.style.transform = `translate(${translateX}, ${currentPosition.y}px) rotate(${direction === 'left' ? '-30deg' : '30deg'})`;
     card.style.opacity = '0';
-    card.style.transition = 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1)';
+    card.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
 
     // Ejecutar callback más rápido para mejor fluidez (antes de que termine la animación visual)
     setTimeout(() => {
       callback();
-    }, 100);
+    }, 150);
 
     // Resetear estilos después de la animación
     setTimeout(() => {
@@ -233,7 +233,7 @@ export default function ProfileCard({
       if (onCornerEffectsChange) {
         onCornerEffectsChange({ left: 0, right: 0, top: 0, bottom: 0 });
       }
-    }, 250);
+    }, 450);
   }, [onCornerEffectsChange]); // Añadir dependencia
 
   const handleMove = useCallback((clientX: number, clientY: number) => {
@@ -592,10 +592,10 @@ export default function ProfileCard({
       // Forzar reflow
       card.offsetHeight;
       
-      // Animar hacia la posición original (centro) con animación más rápida
+      // Animar hacia la posición original (centro) con animación más suave
       card.style.transform = 'translate(0, 0) rotate(0deg)';
       card.style.opacity = '1';
-      card.style.transition = 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1)';
+      card.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
       
       // Ejecutar callback ANTES para que el cambio de índice ocurra inmediatamente
       callback();
@@ -616,7 +616,7 @@ export default function ProfileCard({
         if (onCornerEffectsChange) {
           onCornerEffectsChange({ left: 0, right: 0, top: 0, bottom: 0 });
         }
-      }, 300);
+      }, 450);
     });
   };
 
@@ -652,12 +652,12 @@ export default function ProfileCard({
       card.style.willChange = 'transform, opacity';
       card.style.transform = `translate(${translateX}, ${translateY}) rotate(${rotation})`;
       card.style.opacity = '0';
-      card.style.transition = 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1)';
+      card.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
       
       // Ejecutar callback más rápido para mejor fluidez
       setTimeout(() => {
         callback();
-      }, 120);
+      }, 150);
       
       // Resetear después de la animación
       setTimeout(() => {
@@ -674,7 +674,7 @@ export default function ProfileCard({
         if (onCornerEffectsChange) {
           onCornerEffectsChange({ left: 0, right: 0, top: 0, bottom: 0 });
         }
-      }, 300);
+      }, 450);
     });
   };
 
@@ -736,7 +736,7 @@ export default function ProfileCard({
             transform: buttonAction.type 
               ? undefined // La transformación de botones se maneja con style inline
               : `translate(${position.x}px, ${position.y}px) rotate(${rotation}deg)`,
-            transition: isDragging || buttonAction.type ? 'none' : 'transform 0.08s cubic-bezier(0.4, 0, 0.2, 1)',
+            transition: isDragging || buttonAction.type ? 'none' : 'transform 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
             zIndex: 1000 - index,
             touchAction: isDragging ? 'none' : 'auto', // Solo bloquear gestos cuando se está arrastrando
             willChange: isDragging ? 'transform' : 'auto',

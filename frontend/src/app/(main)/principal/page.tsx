@@ -451,8 +451,8 @@ export default function PrincipalPage() {
                     ? (lastSwipeDirection ? undefined : 'translate(0, 0) scale(1)')
                     : `translate(0, ${idx * 8}px) scale(${1 - idx * 0.05})`,
                   transition: idx === 0 
-                    ? 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)' 
-                    : 'opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                    ? 'opacity 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)' 
+                    : 'opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                   willChange: idx === 0 ? 'auto' : 'opacity, transform',
                   ...(idx === 0 && lastSwipeDirection ? {
                     animation: `${
@@ -460,7 +460,7 @@ export default function PrincipalPage() {
                       lastSwipeDirection === 'right' ? 'slideInFromLeft' :
                       lastSwipeDirection === 'up' ? 'slideInFromBottom' :
                       'slideInFromTop'
-                    } 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards`
+                    } 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`
                   } : {})
                 } as React.CSSProperties}
               >
