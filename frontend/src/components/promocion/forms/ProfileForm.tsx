@@ -689,7 +689,7 @@ export default function ProfileForm({ onSuccess, onCancel, defaultNetwork, onNet
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 pb-4">
+    <form onSubmit={handleSubmit} className="space-y-6 pb-8">
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Red Social *

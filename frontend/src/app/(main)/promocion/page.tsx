@@ -365,8 +365,8 @@ export default function PromocionPage() {
           WebkitOverflowScrolling: 'touch'
         } as React.CSSProperties}
       >
-        <div className="max-w-2xl mx-auto w-full min-h-full flex flex-col">
-          <div className="text-center py-4 flex-shrink-0 px-4 sm:px-0">
+        <div className="max-w-2xl mx-auto w-full py-4">
+          <div className="text-center mb-4 px-4 sm:px-0">
             <button
               onClick={handleBack}
               className="text-primary-600 hover:text-primary-700 font-medium"
@@ -374,8 +374,8 @@ export default function PromocionPage() {
               ← Volver a redes sociales
             </button>
           </div>
-          <div className="bg-white rounded-none sm:rounded-lg shadow-lg flex-1 flex flex-col">
-            <div className="p-4 sm:p-6 flex-shrink-0">
+          <div className="bg-white rounded-none sm:rounded-lg shadow-lg">
+            <div className="p-4 sm:p-6">
               <div className="mb-6">
                 {(() => {
                   const network = socialNetworks.find(n => n.id === displayNetwork);
@@ -393,7 +393,7 @@ export default function PromocionPage() {
                 })()}
               </div>
             </div>
-            <div className="flex-1 px-4 sm:px-6 pb-4 sm:pb-6">
+            <div className="px-4 sm:px-6 pb-8 sm:pb-12">
               <ProfileForm 
                 defaultNetwork={selectedNetwork}
                 onSuccess={(profileId, profile) => handleProfileCreated(profileId, profile)} 
