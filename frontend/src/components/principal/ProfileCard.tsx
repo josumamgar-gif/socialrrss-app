@@ -839,7 +839,7 @@ export default function ProfileCard({
               style={{
                 background: 'linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.85) 25%, rgba(0, 0, 0, 0.6) 50%, rgba(0, 0, 0, 0.3) 75%, transparent 100%)',
                 paddingTop: '4rem',
-                paddingBottom: '7rem', // Más espacio abajo para que no quede debajo de los botones
+                paddingBottom: '9rem', // Más espacio abajo para centrar mejor los botones
                 paddingLeft: '1.5rem',
                 paddingRight: '1.5rem',
               }}

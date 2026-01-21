@@ -491,7 +491,7 @@ export default function PrincipalPage() {
 
       {/* Botones de acción independientes - Estilo Tinder, grandes y visibles */}
       {filteredProfiles.length > 0 && currentProfile && (
-        <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50 flex justify-center items-center space-x-3 sm:space-x-4 px-4">
+        <div className="fixed bottom-24 left-1/2 transform -translate-x-1/2 z-50 flex justify-center items-center space-x-3 sm:space-x-4 px-4">
           {/* Botón Selector de RRSS */}
           <button
             type="button"
