@@ -1,0 +1,167 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+html {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  /* Soporte para safe areas en iOS PWA (notch, barra de estado) */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  /* Fallback para navegadores que no soportan env() */
+  padding: constant(safe-area-inset-top) constant(safe-area-inset-right) constant(safe-area-inset-bottom) constant(safe-area-inset-left);
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: #ffffff;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  /* Asegurar que el body ocupe toda la altura disponible */
+  min-height: 100vh;
+  min-height: -webkit-fill-available; /* Para Safari iOS */
+  /* Usar safe areas para evitar que el contenido quede detrás del notch */
+  padding-top: env(safe-area-inset-top);
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+}
+
+/* Prevenir zoom con doble toque */
+* {
+  touch-action: manipulation;
+}
+
+/* Permitir selección de texto donde sea necesario */
+input,
+textarea,
+[contenteditable],
+p,
+span,
+div[role="textbox"] {
+  -webkit-user-select: text;
+  user-select: text;
+  touch-action: auto;
+}
+
+/* Animaciones de entrada para tarjetas de perfil */
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translate(100px, 0) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translate(-100px, 0) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+@keyframes slideInFromBottom {
+  from {
+    opacity: 0;
+    transform: translate(0, 100px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+@keyframes slideInFromTop {
+  from {
+    opacity: 0;
+    transform: translate(0, -100px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Scroll suave para móviles */
+@media (max-width: 640px) {
+  .overflow-y-auto {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+}
+
+/* Variables CSS para safe areas - Útiles para componentes */
+:root {
+  --safe-area-inset-top: env(safe-area-inset-top, 0px);
+  --safe-area-inset-right: env(safe-area-inset-right, 0px);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-inset-left: env(safe-area-inset-left, 0px);
+}
+
+/* Clase helper para safe areas */
+.safe-area-inset-top {
+  padding-top: env(safe-area-inset-top);
+  padding-top: constant(safe-area-inset-top); /* Fallback iOS < 11.2 */
+}
+
+.safe-area-inset-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom: constant(safe-area-inset-bottom); /* Fallback iOS < 11.2 */
+}
+
+.safe-area-inset-left {
+  padding-left: env(safe-area-inset-left);
+  padding-left: constant(safe-area-inset-left); /* Fallback iOS < 11.2 */
+}
+
+.safe-area-inset-right {
+  padding-right: env(safe-area-inset-right);
+  padding-right: constant(safe-area-inset-right); /* Fallback iOS < 11.2 */
+}/* Mejorar visibilidad de títulos */
+.scroll-smooth {
+  scroll-behavior: smooth;
+}.overscroll-contain {
+  overscroll-behavior: contain;
+}

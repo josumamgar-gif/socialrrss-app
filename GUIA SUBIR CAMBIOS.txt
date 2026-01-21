@@ -1,0 +1,17 @@
+### 🔄 Para subir cambios futuros:
+
+Cuando hagas cambios en tu código y quieras subirlos a GitHub:
+
+```bash
+# 1. Ve a la carpeta del proyecto en PowerShell
+cd C:\Users\JOSU\Desktop\CURSOR
+
+# 2. Añade los cambios
+git add .
+
+# 3. Haz commit
+git commit -m "Descripción de los cambios"
+
+# 4. Sube a GitHub
+git push
+```
