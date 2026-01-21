@@ -6,71 +6,32 @@ import Profile from '../src/models/Profile';
 // Cargar variables de entorno
 dotenv.config({ path: path.join(__dirname, '../.env') });
 
-// Datos de perfiles demo
+// Datos de perfiles demo - REDUCIDO A 10 PERFILES TOTALES
+// Distribución: Instagram(2), TikTok(2), YouTube(2), LinkedIn(1), Facebook(1), X(1), Twitch(1)
 const demoProfilesData = [
-  // Instagram (8 perfiles)
+  // Instagram (2 perfiles)
   { username: 'maria_fotografia', followers: 125000, posts: 342, desc: 'Fotógrafa profesional especializada en retratos y paisajes urbanos' },
-  { username: 'chef_casero', followers: 89000, posts: 567, desc: 'Recetas caseras fáciles y deliciosas para el día a día' },
   { username: 'viajero_aventurero', followers: 234000, posts: 890, desc: 'Descubriendo los rincones más hermosos del mundo' },
-  { username: 'fitness_life', followers: 156000, posts: 445, desc: 'Transforma tu cuerpo y mente con entrenamientos efectivos' },
-  { username: 'moda_estilo', followers: 198000, posts: 678, desc: 'Tendencias de moda y estilo para todos los días' },
-  { username: 'arte_creativo', followers: 67000, posts: 234, desc: 'Arte digital y tradicional. Inspiración visual diaria' },
-  { username: 'mascotas_lindas', followers: 312000, posts: 1234, desc: 'Las mascotas más adorables del mundo' },
-  { username: 'cocina_gourmet', followers: 145000, posts: 456, desc: 'Recetas gourmet y técnicas culinarias profesionales' },
 
-  // TikTok (8 perfiles)
+  // TikTok (2 perfiles)
   { username: 'bailes_trending', followers: 450000, videos: 234, desc: 'Los bailes más populares de TikTok' },
   { username: 'comedia_rapida', followers: 320000, videos: 567, desc: 'Sketchs cómicos y situaciones divertidas' },
-  { username: 'tips_vida', followers: 189000, videos: 345, desc: 'Consejos útiles para mejorar tu vida diaria' },
-  { username: 'cocina_rapida', followers: 278000, videos: 678, desc: 'Recetas rápidas y fáciles en menos de 60 segundos' },
-  { username: 'fitness_rapido', followers: 234000, videos: 456, desc: 'Ejercicios rápidos para mantenerte en forma' },
-  { username: 'mascotas_divertidas', followers: 567000, videos: 890, desc: 'Videos graciosos de mascotas' },
-  { username: 'diy_proyectos', followers: 145000, videos: 234, desc: 'Proyectos DIY fáciles y creativos' },
-  { username: 'musica_covers', followers: 389000, videos: 567, desc: 'Covers de las canciones más populares' },
 
-  // YouTube (8 perfiles)
+  // YouTube (2 perfiles)
   { channelName: 'Tech Reviews', subscribers: 890000, videoCount: 234, desc: 'Reviews honestas de los últimos gadgets tecnológicos' },
-  { channelName: 'Cocina Fácil', subscribers: 456000, videoCount: 567, desc: 'Recetas paso a paso para cocinar en casa' },
   { channelName: 'Gaming Zone', subscribers: 1230000, videoCount: 890, desc: 'Gameplays, reviews y noticias de videojuegos' },
-  { channelName: 'Fitness Total', subscribers: 678000, videoCount: 345, desc: 'Rutinas de ejercicio y consejos de nutrición' },
-  { channelName: 'Viajes y Aventuras', subscribers: 345000, videoCount: 234, desc: 'Descubre destinos increíbles alrededor del mundo' },
-  { channelName: 'Educación Online', subscribers: 567000, videoCount: 456, desc: 'Aprende nuevas habilidades desde casa' },
-  { channelName: 'Música y Covers', subscribers: 789000, videoCount: 678, desc: 'Covers y música original' },
-  { channelName: 'Lifestyle Diario', subscribers: 234000, videoCount: 345, desc: 'Vlogs y contenido de estilo de vida' },
 
-  // LinkedIn (8 perfiles)
+  // LinkedIn (1 perfil)
   { name: 'Juan Pérez', title: 'CEO Tech Solutions', connections: 5000, desc: 'Emprendedor y líder en tecnología' },
-  { name: 'María García', title: 'Directora de Marketing', connections: 3500, desc: 'Especialista en marketing digital y estrategia' },
-  { name: 'Carlos López', title: 'Ingeniero de Software', connections: 2800, desc: 'Desarrollador full-stack con 10 años de experiencia' },
-  { name: 'Ana Martínez', title: 'Consultora de Negocios', connections: 4200, desc: 'Ayudando empresas a crecer y mejorar' },
-  { name: 'Roberto Sánchez', title: 'Diseñador UX/UI', connections: 1900, desc: 'Diseñando experiencias digitales excepcionales' },
-  { name: 'Laura Fernández', title: 'Recursos Humanos', connections: 3100, desc: 'Especialista en talento y desarrollo organizacional' },
-  { name: 'David Ruiz', title: 'Analista de Datos', connections: 2400, desc: 'Transformando datos en decisiones estratégicas' },
-  { name: 'Sofía Torres', title: 'Product Manager', connections: 3600, desc: 'Gestionando productos digitales exitosos' },
 
-  // Facebook (6 perfiles)
+  // Facebook (1 perfil)
   { pageName: 'Noticias Tech', likes: 890000, desc: 'Las últimas noticias de tecnología' },
-  { pageName: 'Cocina Casera', likes: 456000, desc: 'Recetas y tips de cocina para todos' },
-  { pageName: 'Fitness y Salud', likes: 678000, desc: 'Consejos de salud y ejercicio' },
-  { pageName: 'Viajes Baratos', likes: 345000, desc: 'Descubre destinos increíbles' },
-  { pageName: 'Música Actual', likes: 1230000, desc: 'La mejor música del momento' },
-  { pageName: 'Entretenimiento', likes: 567000, desc: 'Contenido divertido y entretenido' },
 
-  // X/Twitter (6 perfiles)
+  // X/Twitter (1 perfil)
   { handle: 'tech_news', followers: 234000, tweets: 5678, desc: 'Noticias de tecnología al instante' },
-  { handle: 'deportes_live', followers: 456000, tweets: 8901, desc: 'Cobertura deportiva en tiempo real' },
-  { handle: 'humor_diario', followers: 678000, tweets: 12345, desc: 'El mejor humor de internet' },
-  { handle: 'ciencia_actual', followers: 189000, tweets: 2345, desc: 'Descubrimientos científicos y curiosidades' },
-  { handle: 'economia_mundo', followers: 345000, tweets: 4567, desc: 'Análisis económico y financiero' },
-  { handle: 'cultura_pop', followers: 567000, tweets: 6789, desc: 'Tendencias culturales y entretenimiento' },
 
-  // Twitch (6 perfiles)
+  // Twitch (1 perfil)
   { streamerName: 'GamerPro', followers: 234000, game: 'Valorant', desc: 'Streams diarios de gaming competitivo' },
-  { streamerName: 'JustChatting', followers: 189000, game: 'Just Chatting', desc: 'Charla y comunidad todos los días' },
-  { streamerName: 'SpeedRunner', followers: 145000, game: 'Mario', desc: 'Speedruns y retos de videojuegos' },
-  { streamerName: 'MusicStream', followers: 278000, game: 'Music', desc: 'Música en vivo y DJ sets' },
-  { streamerName: 'ArtStream', followers: 89000, game: 'Art', desc: 'Creación artística en directo' },
-  { streamerName: 'CookingLive', followers: 156000, game: 'Cooking', desc: 'Cocina en vivo y recetas' },
 ];
 
 // Imágenes de Unsplash
@@ -101,8 +62,8 @@ const createDemoProfiles = () => {
   const profiles: any[] = [];
   let index = 0;
 
-  // Instagram (8 perfiles)
-  for (let i = 0; i < 8; i++) {
+  // Instagram (2 perfiles) - índices 0-1
+  for (let i = 0; i < 2; i++) {
     const p = demoProfilesData[i];
     profiles.push({
       userId: DEMO_USER_ID,
@@ -123,8 +84,8 @@ const createDemoProfiles = () => {
     index++;
   }
 
-  // TikTok (8 perfiles)
-  for (let i = 8; i < 16; i++) {
+  // TikTok (2 perfiles) - índices 2-3
+  for (let i = 2; i < 4; i++) {
     const p = demoProfilesData[i];
     profiles.push({
       userId: DEMO_USER_ID,
@@ -145,8 +106,8 @@ const createDemoProfiles = () => {
     index++;
   }
 
-  // YouTube (8 perfiles)
-  for (let i = 16; i < 24; i++) {
+  // YouTube (2 perfiles) - índices 4-5
+  for (let i = 4; i < 6; i++) {
     const p = demoProfilesData[i] as any;
     if (p.channelName) {
       profiles.push({
@@ -169,99 +130,91 @@ const createDemoProfiles = () => {
     }
   }
 
-  // LinkedIn (8 perfiles)
-  for (let i = 24; i < 32; i++) {
-    const p = demoProfilesData[i] as any;
-    if (p.name) {
-      profiles.push({
-        userId: DEMO_USER_ID,
-        socialNetwork: 'linkedin',
-        isActive: true,
-        isPaid: true,
-        paidUntil: null,
-        planType: 'lifetime',
-        profileData: {
-          fullName: p.name,
-          headline: p.title,
-          connections: p.connections,
-          description: p.desc,
-        },
-        images: getRandomImages(1),
-        link: `https://linkedin.com/in/${p.name.toLowerCase().replace(/\s+/g, '-')}`,
-      });
-      index++;
-    }
+  // LinkedIn (1 perfil) - índice 6
+  const linkedinProfile = demoProfilesData[6] as any;
+  if (linkedinProfile && linkedinProfile.name) {
+    profiles.push({
+      userId: DEMO_USER_ID,
+      socialNetwork: 'linkedin',
+      isActive: true,
+      isPaid: true,
+      paidUntil: null,
+      planType: 'lifetime',
+      profileData: {
+        fullName: linkedinProfile.name,
+        headline: linkedinProfile.title,
+        connections: linkedinProfile.connections,
+        description: linkedinProfile.desc,
+      },
+      images: getRandomImages(1),
+      link: `https://linkedin.com/in/${linkedinProfile.name.toLowerCase().replace(/\s+/g, '-')}`,
+    });
+    index++;
   }
 
-  // Facebook (6 perfiles)
-  for (let i = 32; i < 38; i++) {
-    const p = demoProfilesData[i] as any;
-    if (p.pageName) {
-      profiles.push({
-        userId: DEMO_USER_ID,
-        socialNetwork: 'facebook',
-        isActive: true,
-        isPaid: true,
-        paidUntil: null,
-        planType: 'lifetime',
-        profileData: {
-          pageName: p.pageName,
-          likes: p.likes,
-          description: p.desc,
-        },
-        images: getRandomImages(2),
-        link: `https://facebook.com/${p.pageName.toLowerCase().replace(/\s+/g, '')}`,
-      });
-      index++;
-    }
+  // Facebook (1 perfil) - índice 7
+  const facebookProfile = demoProfilesData[7] as any;
+  if (facebookProfile && facebookProfile.pageName) {
+    profiles.push({
+      userId: DEMO_USER_ID,
+      socialNetwork: 'facebook',
+      isActive: true,
+      isPaid: true,
+      paidUntil: null,
+      planType: 'lifetime',
+      profileData: {
+        pageName: facebookProfile.pageName,
+        likes: facebookProfile.likes,
+        description: facebookProfile.desc,
+      },
+      images: getRandomImages(2),
+      link: `https://facebook.com/${facebookProfile.pageName.toLowerCase().replace(/\s+/g, '')}`,
+    });
+    index++;
   }
 
-  // X/Twitter (6 perfiles)
-  for (let i = 38; i < 44; i++) {
-    const p = demoProfilesData[i] as any;
-    if (p.handle) {
-      profiles.push({
-        userId: DEMO_USER_ID,
-        socialNetwork: 'x',
-        isActive: true,
-        isPaid: true,
-        paidUntil: null,
-        planType: 'lifetime',
-        profileData: {
-          twitterHandle: p.handle,
-          followers: p.followers,
-          tweets: p.tweets,
-          description: p.desc,
-        },
-        images: getRandomImages(1),
-        link: `https://x.com/${p.handle}`,
-      });
-      index++;
-    }
+  // X/Twitter (1 perfil) - índice 8
+  const xProfile = demoProfilesData[8] as any;
+  if (xProfile && xProfile.handle) {
+    profiles.push({
+      userId: DEMO_USER_ID,
+      socialNetwork: 'x',
+      isActive: true,
+      isPaid: true,
+      paidUntil: null,
+      planType: 'lifetime',
+      profileData: {
+        twitterHandle: xProfile.handle,
+        followers: xProfile.followers,
+        tweets: xProfile.tweets,
+        description: xProfile.desc,
+      },
+      images: getRandomImages(1),
+      link: `https://x.com/${xProfile.handle}`,
+    });
+    index++;
   }
 
-  // Twitch (6 perfiles)
-  for (let i = 44; i < 50; i++) {
-    const p = demoProfilesData[i] as any;
-    if (p.streamerName) {
-      profiles.push({
-        userId: DEMO_USER_ID,
-        socialNetwork: 'twitch',
-        isActive: true,
-        isPaid: true,
-        paidUntil: null,
-        planType: 'lifetime',
-        profileData: {
-          streamerName: p.streamerName,
-          followers: p.followers,
-          game: p.game,
-          description: p.desc,
-        },
-        images: getRandomImages(2),
-        link: `https://twitch.tv/${p.streamerName.toLowerCase()}`,
-      });
-      index++;
-    }
+  // Twitch (1 perfil) - índice 9
+  const twitchProfile = demoProfilesData[9] as any;
+  if (twitchProfile && twitchProfile.streamerName) {
+    profiles.push({
+      userId: DEMO_USER_ID,
+      socialNetwork: 'twitch',
+      isActive: true,
+      isPaid: true,
+      paidUntil: null,
+      planType: 'lifetime',
+      profileData: {
+        streamerName: twitchProfile.streamerName,
+        followers: twitchProfile.followers,
+        game: twitchProfile.game,
+        description: twitchProfile.desc,
+      },
+      images: getRandomImages(2),
+      link: `https://twitch.tv/${twitchProfile.streamerName.toLowerCase()}`,
+    });
+    index++;
   }
 
   return profiles;

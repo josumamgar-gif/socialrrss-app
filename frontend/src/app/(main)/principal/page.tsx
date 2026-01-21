@@ -61,33 +61,23 @@ export default function PrincipalPage() {
         const viewedData = typeof window !== 'undefined' ? localStorage.getItem(key) : null;
         const viewedProfiles = viewedData ? JSON.parse(viewedData) : [];
         
-        // Separar perfiles demo de los reales
-        // Los perfiles demo tienen userId.username === 'demo' o userId._id === '000000000000000000000000'
+        // El backend ya devuelve los perfiles en orden aleatorio mezclados
+        // Solo necesitamos filtrar los ya vistos (solo para perfiles reales, no demos)
         const allProfiles = response.profiles || [];
-        const demoProfilesFromDB = allProfiles.filter((p: Profile) => {
+        
+        // Filtrar perfiles ya vistos (solo para perfiles reales, mantener demos siempre)
+        const profilesToShow = allProfiles.filter((p: Profile) => {
           const userIdObj = p.userId as any;
-          return userIdObj?.username === 'demo' || userIdObj?._id === '000000000000000000000000';
+          const isDemo = userIdObj?.username === 'demo' || userIdObj?._id === '000000000000000000000000';
+          
+          // Si es demo, siempre mostrarlo
+          if (isDemo) return true;
+          
+          // Si es real, solo mostrarlo si no ha sido visto
+          return !viewedProfiles.includes(p._id);
         });
-        const realProfiles = allProfiles.filter((p: Profile) => {
-          const userIdObj = p.userId as any;
-          return userIdObj?.username !== 'demo' && userIdObj?._id !== '000000000000000000000000';
-        });
         
-        // Filtrar perfiles ya vistos (solo para perfiles reales)
-        const unseenRealProfiles = realProfiles.filter((p: Profile) => !viewedProfiles.includes(p._id));
-        
-        const tutorialCompleted = typeof window !== 'undefined' ? 
-          localStorage.getItem('tutorialCompleted') === 'true' : false;
-        
-        let profilesToShow: Profile[] = [];
-        if (!tutorialCompleted) {
-          // Mostrar todos los perfiles demo + reales no vistos
-          profilesToShow = [...demoProfilesFromDB, ...unseenRealProfiles];
-        } else {
-          // Mezclar perfiles demo con reales (ya vienen mezclados del backend)
-          profilesToShow = [...demoProfilesFromDB, ...unseenRealProfiles];
-        }
-        
+        // Mantener el orden aleatorio que viene del backend
         setProfiles(profilesToShow);
 
         // Verificar demo completado
