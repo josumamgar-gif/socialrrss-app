@@ -230,7 +230,14 @@ const seedDemoProfiles = async () => {
 
     // Eliminar perfiles demo existentes (con userId demo)
     console.log('🗑️  Eliminando perfiles demo existentes...');
-    const deleteResult = await Profile.deleteMany({ userId: DEMO_USER_ID });
+    const deleteResult = await Profile.deleteMany({
+      $or: [
+        { userId: DEMO_USER_ID },
+        // Limpieza extra por si quedaron demos antiguos insertados sin userId válido
+        { userId: null as any },
+        { userId: { $exists: false } as any },
+      ],
+    });
     console.log(`✅ Eliminados ${deleteResult.deletedCount} perfiles demo existentes`);
 
     // Crear perfiles demo

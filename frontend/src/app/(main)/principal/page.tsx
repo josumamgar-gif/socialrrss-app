@@ -22,6 +22,7 @@ export default function PrincipalPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [history, setHistory] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
+  const [endState, setEndState] = useState<'none' | 'loading_more' | 'no_more'>('none');
   const [demoInteractions, setDemoInteractions] = useState(0);
   const [hasCompletedDemo, setHasCompletedDemo] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
@@ -52,6 +53,7 @@ export default function PrincipalPage() {
     const loadData = async () => {
       try {
         setLoading(true);
+        setEndState('none');
         const response = await profilesAPI.getAll();
         
         if (!mounted) return;
@@ -60,20 +62,29 @@ export default function PrincipalPage() {
         const key = `viewedProfiles_${userId}`;
         const viewedData = typeof window !== 'undefined' ? localStorage.getItem(key) : null;
         const viewedProfiles = viewedData ? JSON.parse(viewedData) : [];
+
+        const tutorialCompleted = typeof window !== 'undefined'
+          ? localStorage.getItem('tutorialCompleted') === 'true'
+          : false;
+        const demoCompleted = typeof window !== 'undefined'
+          ? localStorage.getItem('demoCompleted') === 'true'
+          : false;
         
         // El backend ya devuelve los perfiles en orden aleatorio mezclados
-        // Solo necesitamos filtrar los ya vistos (solo para perfiles reales, no demos)
+        // Filtramos vistos:
+        // - Durante el tutorial/demo: dejamos que los demos sigan apareciendo para aprender
+        // - Tras completar demo/tutorial: también agotamos los demos para que no reaparezcan infinitamente
         const allProfiles = response.profiles || [];
         
-        // Filtrar perfiles ya vistos (solo para perfiles reales, mantener demos siempre)
+        // Filtrar perfiles ya vistos (según estado de tutorial/demo)
         const profilesToShow = allProfiles.filter((p: Profile) => {
           const userIdObj = p.userId as any;
           const isDemo = userIdObj?.username === 'demo' || userIdObj?._id === '000000000000000000000000';
           
-          // Si es demo, siempre mostrarlo
-          if (isDemo) return true;
+          // Si no terminó el tutorial y tampoco completó el demo, mantener demos siempre visibles
+          if (isDemo && !tutorialCompleted && !demoCompleted) return true;
           
-          // Si es real, solo mostrarlo si no ha sido visto
+          // Caso normal (reales + demos): solo mostrar si no ha sido visto
           return !viewedProfiles.includes(p._id);
         });
         
@@ -81,9 +92,7 @@ export default function PrincipalPage() {
         setProfiles(profilesToShow);
 
         // Verificar demo completado
-        const completed = typeof window !== 'undefined' ? 
-          localStorage.getItem('demoCompleted') : null;
-        setHasCompletedDemo(completed === 'true');
+        setHasCompletedDemo(demoCompleted);
       } catch (error) {
         console.error('Error cargando perfiles:', error);
         if (mounted) {
@@ -137,7 +146,6 @@ export default function PrincipalPage() {
   // Marcar perfil como visto
   const markProfileAsViewed = (profileId: string) => {
     if (typeof window === 'undefined') return;
-    if (profileId.startsWith('demo-')) return;
     
     const userId = user?.id || 'anonymous';
     const key = `viewedProfiles_${userId}`;
@@ -184,8 +192,38 @@ export default function PrincipalPage() {
       setHistory([...history, currentIndex]);
       setCurrentIndex(currentIndex + 1);
     } else {
-      // Recargar perfiles
-      window.location.reload();
+      // Llegamos al final: intentar cargar más; si no hay, mostrar mensaje
+      setEndState('loading_more');
+      setTimeout(async () => {
+        try {
+          const response = await profilesAPI.getAll();
+          const userId = user?.id || 'anonymous';
+          const key = `viewedProfiles_${userId}`;
+          const viewedData = typeof window !== 'undefined' ? localStorage.getItem(key) : null;
+          const viewedProfiles = viewedData ? JSON.parse(viewedData) : [];
+          const tutorialCompleted = typeof window !== 'undefined'
+            ? localStorage.getItem('tutorialCompleted') === 'true'
+            : false;
+          const demoCompleted = typeof window !== 'undefined'
+            ? localStorage.getItem('demoCompleted') === 'true'
+            : false;
+
+          const allProfiles = response.profiles || [];
+          const profilesToShow = allProfiles.filter((p: Profile) => {
+            const userIdObj = p.userId as any;
+            const isDemo = userIdObj?.username === 'demo' || userIdObj?._id === '000000000000000000000000';
+            if (isDemo && !tutorialCompleted && !demoCompleted) return true;
+            return !viewedProfiles.includes(p._id);
+          });
+
+          setProfiles(profilesToShow);
+          setCurrentIndex(0);
+          setHistory([]);
+          setEndState(profilesToShow.length > 0 ? 'none' : 'no_more');
+        } catch (e) {
+          setEndState('no_more');
+        }
+      }, 150);
     }
   };
 
@@ -218,8 +256,38 @@ export default function PrincipalPage() {
       setHistory([...history, currentIndex]);
       setCurrentIndex(currentIndex + 1);
     } else {
-      // Recargar perfiles
-      window.location.reload();
+      // Llegamos al final: intentar cargar más; si no hay, mostrar mensaje
+      setEndState('loading_more');
+      setTimeout(async () => {
+        try {
+          const response = await profilesAPI.getAll();
+          const userId = user?.id || 'anonymous';
+          const key = `viewedProfiles_${userId}`;
+          const viewedData = typeof window !== 'undefined' ? localStorage.getItem(key) : null;
+          const viewedProfiles = viewedData ? JSON.parse(viewedData) : [];
+          const tutorialCompleted = typeof window !== 'undefined'
+            ? localStorage.getItem('tutorialCompleted') === 'true'
+            : false;
+          const demoCompleted = typeof window !== 'undefined'
+            ? localStorage.getItem('demoCompleted') === 'true'
+            : false;
+
+          const allProfiles = response.profiles || [];
+          const profilesToShow = allProfiles.filter((p: Profile) => {
+            const userIdObj = p.userId as any;
+            const isDemo = userIdObj?.username === 'demo' || userIdObj?._id === '000000000000000000000000';
+            if (isDemo && !tutorialCompleted && !demoCompleted) return true;
+            return !viewedProfiles.includes(p._id);
+          });
+
+          setProfiles(profilesToShow);
+          setCurrentIndex(0);
+          setHistory([]);
+          setEndState(profilesToShow.length > 0 ? 'none' : 'no_more');
+        } catch (e) {
+          setEndState('no_more');
+        }
+      }, 150);
     }
   };
 
@@ -408,6 +476,66 @@ export default function PrincipalPage() {
         paddingTop: 'env(safe-area-inset-top)',
         paddingBottom: '0'
       }}>
+        {endState !== 'none' && (
+          <div className="mb-4 max-w-md w-full mx-auto bg-white border-2 border-gray-200 rounded-xl p-5 z-40 shadow-lg">
+            <div className="flex items-start">
+              <span className="text-2xl mr-3">{endState === 'loading_more' ? '⏳' : '✅'}</span>
+              <div className="flex-1">
+                <h3 className="font-semibold text-gray-900 mb-1">
+                  {endState === 'loading_more' ? 'Cargando los siguientes perfiles…' : 'Ya no hay más perfiles'}
+                </h3>
+                <p className="text-sm text-gray-600">
+                  {endState === 'loading_more'
+                    ? 'Estamos buscando nuevos perfiles disponibles para ti.'
+                    : 'Vuelve más tarde o recarga para comprobar si hay nuevos.'}
+                </p>
+                {endState === 'no_more' && (
+                  <button
+                    onClick={() => {
+                      setEndState('loading_more');
+                      // disparar misma lógica de carga "al final"
+                      setTimeout(() => {
+                        // Simular swipe final: reutilizamos el handler izquierdo sin marcar visto extra
+                        // Más simple: recargar desde API manualmente
+                        (async () => {
+                          try {
+                            const response = await profilesAPI.getAll();
+                            const userId = user?.id || 'anonymous';
+                            const key = `viewedProfiles_${userId}`;
+                            const viewedData = typeof window !== 'undefined' ? localStorage.getItem(key) : null;
+                            const viewedProfiles = viewedData ? JSON.parse(viewedData) : [];
+                            const tutorialCompleted = typeof window !== 'undefined'
+                              ? localStorage.getItem('tutorialCompleted') === 'true'
+                              : false;
+                            const demoCompleted = typeof window !== 'undefined'
+                              ? localStorage.getItem('demoCompleted') === 'true'
+                              : false;
+                            const allProfiles = response.profiles || [];
+                            const profilesToShow = allProfiles.filter((p: Profile) => {
+                              const userIdObj = p.userId as any;
+                              const isDemo = userIdObj?.username === 'demo' || userIdObj?._id === '000000000000000000000000';
+                              if (isDemo && !tutorialCompleted && !demoCompleted) return true;
+                              return !viewedProfiles.includes(p._id);
+                            });
+                            setProfiles(profilesToShow);
+                            setCurrentIndex(0);
+                            setHistory([]);
+                            setEndState(profilesToShow.length > 0 ? 'none' : 'no_more');
+                          } catch {
+                            setEndState('no_more');
+                          }
+                        })();
+                      }, 150);
+                    }}
+                    className="mt-4 px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white rounded-full text-sm font-semibold transition-all duration-200"
+                  >
+                    Recargar
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
         {needsDemoInteraction && (
           <div className="mb-4 max-w-md w-full mx-auto bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4 z-40">
             <div className="flex items-start">
