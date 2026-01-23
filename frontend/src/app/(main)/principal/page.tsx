@@ -99,7 +99,13 @@ export default function PrincipalPage() {
         // Construir lista final de perfiles a mostrar
         let profilesToShow: Profile[] = [];
         
-        if (!tutorialCompleted || !demoCompleted) {
+        // Si los demos están agotados, solo mostrar perfiles reales
+        if (demosExhausted || demoCompleted) {
+          // Usuario que agotó los demos: solo perfiles reales (sin demos)
+          profilesToShow = realProfiles;
+          // Mezclar aleatoriamente los reales
+          profilesToShow = [...profilesToShow].sort(() => Math.random() - 0.5);
+        } else if (!tutorialCompleted || !demoCompleted) {
           // Usuario nuevo: mostrar demos (máximo 10, ya limitados por el backend) + reales
           // El backend ya limita a 10 demos, pero por seguridad limitamos aquí también
           const demosToShow = demoProfilesFromDB.slice(0, 10);
@@ -115,8 +121,8 @@ export default function PrincipalPage() {
         }
         
         // Si no hay perfiles del backend y el usuario es nuevo, usar fallback local (solo 10)
-        if (profilesToShow.length === 0 && !tutorialCompleted && allProfiles.length === 0) {
-          // Usar solo los primeros 10 demos locales como fallback
+        if (profilesToShow.length === 0 && !tutorialCompleted && allProfiles.length === 0 && !demosExhausted) {
+          // Usar solo los primeros 10 demos locales como fallback (solo si no se agotaron)
           const limitedLocalDemos = demoProfiles.slice(0, 10);
           setProfiles(limitedLocalDemos);
         } else {
@@ -280,6 +286,9 @@ export default function PrincipalPage() {
           const demoCompleted = typeof window !== 'undefined'
             ? localStorage.getItem('demoCompleted') === 'true'
             : false;
+          const demosExhausted = typeof window !== 'undefined'
+            ? localStorage.getItem('demosExhausted') === 'true'
+            : false;
 
           const allProfiles = response.profiles || [];
           const realProfiles: Profile[] = [];
@@ -378,6 +387,9 @@ export default function PrincipalPage() {
             : false;
           const demoCompleted = typeof window !== 'undefined'
             ? localStorage.getItem('demoCompleted') === 'true'
+            : false;
+          const demosExhausted = typeof window !== 'undefined'
+            ? localStorage.getItem('demosExhausted') === 'true'
             : false;
 
           const allProfiles = response.profiles || [];
