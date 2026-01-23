@@ -49,8 +49,10 @@ const shuffleArray = <T>(array: T[]): T[] => {
 
 export const getAllProfiles = async (_req: any, res: Response): Promise<void> => {
   try {
+    const DEMO_USER_ID = '000000000000000000000000';
+    
     // Obtener todos los perfiles activos (reales y demo)
-    const profiles = await Profile.find({ isActive: true })
+    const allProfiles = await Profile.find({ isActive: true })
       .populate({
         path: 'userId',
         select: 'username',
@@ -58,25 +60,39 @@ export const getAllProfiles = async (_req: any, res: Response): Promise<void> =>
       })
       .lean(); // Usar lean() para mejor rendimiento
 
-    // Procesar perfiles para manejar el caso de userId demo (null o no encontrado)
-    const processedProfiles = profiles.map((profile: any) => {
+    // Separar perfiles demo y reales
+    const demoProfiles: any[] = [];
+    const realProfiles: any[] = [];
+
+    allProfiles.forEach((profile: any) => {
       // Si el userId es null o no se pudo poblar (perfil demo), usar un objeto por defecto
-      if (!profile.userId || profile.userId.toString() === '000000000000000000000000') {
-        return {
+      if (!profile.userId || profile.userId.toString() === DEMO_USER_ID) {
+        demoProfiles.push({
           ...profile,
           userId: {
-            _id: '000000000000000000000000',
+            _id: DEMO_USER_ID,
             username: 'demo',
           },
-        };
+        });
+      } else {
+        realProfiles.push(profile);
       }
-      return profile;
     });
 
-    // Mezclar aleatoriamente los perfiles
-    const shuffledProfiles = shuffleArray(processedProfiles);
+    // LIMITAR DEMOS A MÁXIMO 10
+    const limitedDemoProfiles = demoProfiles.slice(0, 10);
 
-    res.json({ profiles: shuffledProfiles });
+    // Mezclar aleatoriamente los perfiles reales
+    const shuffledRealProfiles = shuffleArray(realProfiles);
+    
+    // Mezclar aleatoriamente los demos limitados
+    const shuffledDemoProfiles = shuffleArray(limitedDemoProfiles);
+
+    // Combinar: primero mezclar todo junto para que los reales pagados aparezcan mezclados con los demos
+    const combinedProfiles = [...shuffledRealProfiles, ...shuffledDemoProfiles];
+    const finalShuffledProfiles = shuffleArray(combinedProfiles);
+
+    res.json({ profiles: finalShuffledProfiles });
   } catch (error: any) {
     console.error('Error obteniendo perfiles:', error);
     res.status(500).json({ error: 'Error al obtener perfiles' });

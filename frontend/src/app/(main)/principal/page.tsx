@@ -69,42 +69,57 @@ export default function PrincipalPage() {
         const demoCompleted = typeof window !== 'undefined'
           ? localStorage.getItem('demoCompleted') === 'true'
           : false;
+        const demosExhausted = typeof window !== 'undefined'
+          ? localStorage.getItem('demosExhausted') === 'true'
+          : false;
         
-        // El backend ya devuelve los perfiles en orden aleatorio mezclados
-        // Filtramos vistos:
-        // - Durante el tutorial/demo: dejamos que los demos sigan apareciendo para aprender
-        // - Tras completar demo/tutorial: también agotamos los demos para que no reaparezcan infinitamente
+        // El backend ya devuelve máximo 10 demos mezclados con los reales
+        // Solo necesitamos filtrar los vistos y limitar demos si el usuario completó el tutorial
         const allProfiles = response.profiles || [];
+        const realProfiles: Profile[] = [];
+        const demoProfilesFromDB: Profile[] = [];
         
-        // Filtrar perfiles ya vistos
-        // IMPORTANTE: Los usuarios nuevos SIEMPRE deben ver los perfiles demo para aprender
-        const profilesToShow = allProfiles.filter((p: Profile) => {
+        allProfiles.forEach((p: Profile) => {
           const userIdObj = p.userId as any;
           const isDemo =
             (typeof p._id === 'string' && p._id.startsWith('demo-')) ||
             userIdObj?.username === 'demo' ||
             userIdObj?._id === '000000000000000000000000';
           
-          // Demos: SIEMPRE mostrarlos a usuarios nuevos (sin tutorial completado)
-          // Solo ocultarlos si el usuario ya completó el tutorial Y el demo
           if (isDemo) {
-            // Usuario nuevo: siempre mostrar demos
-            if (!tutorialCompleted) return true;
-            // Usuario con tutorial completado: mostrar demos solo si no completó el demo
-            return !demoCompleted;
+            demoProfilesFromDB.push(p);
+          } else {
+            // Perfiles reales: solo agregar si no ha sido visto
+            if (!viewedProfiles.includes(p._id)) {
+              realProfiles.push(p);
+            }
           }
-          
-          // Perfiles reales: solo mostrar si no ha sido visto
-          return !viewedProfiles.includes(p._id);
         });
         
-        // Usar siempre los perfiles del backend si están disponibles
-        // Solo usar fallback local si el backend no devuelve nada Y el usuario es nuevo
-        if (profilesToShow.length === 0 && !tutorialCompleted && allProfiles.length === 0) {
-          // Solo usar fallback si el backend realmente no devolvió nada
-          setProfiles(demoProfiles);
+        // Construir lista final de perfiles a mostrar
+        let profilesToShow: Profile[] = [];
+        
+        if (!tutorialCompleted || !demoCompleted) {
+          // Usuario nuevo: mostrar demos (máximo 10, ya limitados por el backend) + reales
+          // El backend ya limita a 10 demos, pero por seguridad limitamos aquí también
+          const demosToShow = demoProfilesFromDB.slice(0, 10);
+          // Mezclar demos y reales aleatoriamente (no poner demos primero)
+          profilesToShow = [...demosToShow, ...realProfiles];
+          // Mezclar todo aleatoriamente para que los reales pagados aparezcan mezclados
+          profilesToShow = [...profilesToShow].sort(() => Math.random() - 0.5);
         } else {
-          // Mantener el orden aleatorio que viene del backend (puede estar vacío si todos fueron filtrados)
+          // Usuario avanzado: solo perfiles reales (sin demos)
+          profilesToShow = realProfiles;
+          // Mezclar aleatoriamente los reales
+          profilesToShow = [...profilesToShow].sort(() => Math.random() - 0.5);
+        }
+        
+        // Si no hay perfiles del backend y el usuario es nuevo, usar fallback local (solo 10)
+        if (profilesToShow.length === 0 && !tutorialCompleted && allProfiles.length === 0) {
+          // Usar solo los primeros 10 demos locales como fallback
+          const limitedLocalDemos = demoProfiles.slice(0, 10);
+          setProfiles(limitedLocalDemos);
+        } else {
           setProfiles(profilesToShow);
         }
 
@@ -177,6 +192,45 @@ export default function PrincipalPage() {
     }
   };
 
+  // Detectar si se agotaron los perfiles demo
+  const checkIfDemosExhausted = (currentProfiles: Profile[], currentIdx: number) => {
+    if (typeof window === 'undefined') return false;
+    
+    // Verificar si el perfil actual es el último y es un demo
+    if (currentIdx >= currentProfiles.length - 1) {
+      const currentProfile = currentProfiles[currentIdx];
+      if (currentProfile) {
+        const userIdObj = currentProfile.userId as any;
+        const isDemo =
+          (typeof currentProfile._id === 'string' && currentProfile._id.startsWith('demo-')) ||
+          userIdObj?.username === 'demo' ||
+          userIdObj?._id === '000000000000000000000000';
+        
+        if (isDemo) {
+          // Verificar si todos los perfiles restantes son demos
+          const remainingProfiles = currentProfiles.slice(currentIdx);
+          const allRemainingAreDemos = remainingProfiles.every((p) => {
+            const pUserIdObj = p.userId as any;
+            return (
+              (typeof p._id === 'string' && p._id.startsWith('demo-')) ||
+              pUserIdObj?.username === 'demo' ||
+              pUserIdObj?._id === '000000000000000000000000'
+            );
+          });
+          
+          if (allRemainingAreDemos) {
+            // Marcar que los demos están agotados
+            localStorage.setItem('demosExhausted', 'true');
+            localStorage.setItem('demoCompleted', 'true');
+            setHasCompletedDemo(true);
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  };
+
   // Handler para seleccionar red social
   const handleNetworkSelect = (network: 'all' | SocialNetwork) => {
     setSelectedNetwork(network);
@@ -211,7 +265,7 @@ export default function PrincipalPage() {
       setHistory([...history, currentIndex]);
       setCurrentIndex(currentIndex + 1);
     } else {
-      // Llegamos al final: intentar cargar más; si no hay, mostrar mensaje
+      // Llegamos al final: recargar perfiles desde el backend
       setEndState('loading_more');
       setTimeout(async () => {
         try {
@@ -228,24 +282,52 @@ export default function PrincipalPage() {
             : false;
 
           const allProfiles = response.profiles || [];
-          const profilesToShow = allProfiles.filter((p: Profile) => {
+          const realProfiles: Profile[] = [];
+          const demoProfilesFromDB: Profile[] = [];
+          
+          allProfiles.forEach((p: Profile) => {
             const userIdObj = p.userId as any;
             const isDemo =
               (typeof p._id === 'string' && p._id.startsWith('demo-')) ||
               userIdObj?.username === 'demo' ||
               userIdObj?._id === '000000000000000000000000';
-            if (isDemo) return !demoCompleted;
-            return !viewedProfiles.includes(p._id);
+            
+            if (isDemo) {
+              demoProfilesFromDB.push(p);
+            } else {
+              if (!viewedProfiles.includes(p._id)) {
+                realProfiles.push(p);
+              }
+            }
           });
-
-          if (profilesToShow.length === 0 && !demoCompleted && !tutorialCompleted) {
-            setProfiles(demoProfiles);
+          
+          let profilesToShow: Profile[] = [];
+          // Si los demos están agotados, solo mostrar perfiles reales
+          if (demosExhausted || demoCompleted) {
+            // Usuario que agotó los demos: solo perfiles reales (sin demos)
+            profilesToShow = realProfiles;
+            profilesToShow = [...profilesToShow].sort(() => Math.random() - 0.5);
+          } else if (!tutorialCompleted || !demoCompleted) {
+            // Usuario nuevo: mostrar demos (máximo 10) + reales, mezclados aleatoriamente
+            const demosToShow = demoProfilesFromDB.slice(0, 10);
+            profilesToShow = [...demosToShow, ...realProfiles];
+            profilesToShow = [...profilesToShow].sort(() => Math.random() - 0.5);
+          } else {
+            // Usuario avanzado: solo perfiles reales
+            profilesToShow = realProfiles;
+            profilesToShow = [...profilesToShow].sort(() => Math.random() - 0.5);
+          }
+          
+          if (profilesToShow.length === 0 && !tutorialCompleted && allProfiles.length === 0 && !demosExhausted) {
+            // Fallback: solo 10 demos locales (solo si no se agotaron)
+            const limitedLocalDemos = demoProfiles.slice(0, 10);
+            setProfiles(limitedLocalDemos);
           } else {
             setProfiles(profilesToShow);
           }
           setCurrentIndex(0);
           setHistory([]);
-          setEndState((profilesToShow.length > 0 || (!demoCompleted && !tutorialCompleted)) ? 'none' : 'no_more');
+          setEndState(profilesToShow.length > 0 ? 'none' : 'no_more');
         } catch (e) {
           setEndState('no_more');
         }
@@ -282,7 +364,7 @@ export default function PrincipalPage() {
       setHistory([...history, currentIndex]);
       setCurrentIndex(currentIndex + 1);
     } else {
-      // Llegamos al final: intentar cargar más; si no hay, mostrar mensaje
+      // Llegamos al final: recargar perfiles desde el backend
       setEndState('loading_more');
       setTimeout(async () => {
         try {
@@ -299,24 +381,52 @@ export default function PrincipalPage() {
             : false;
 
           const allProfiles = response.profiles || [];
-          const profilesToShow = allProfiles.filter((p: Profile) => {
+          const realProfiles: Profile[] = [];
+          const demoProfilesFromDB: Profile[] = [];
+          
+          allProfiles.forEach((p: Profile) => {
             const userIdObj = p.userId as any;
             const isDemo =
               (typeof p._id === 'string' && p._id.startsWith('demo-')) ||
               userIdObj?.username === 'demo' ||
               userIdObj?._id === '000000000000000000000000';
-            if (isDemo) return !demoCompleted;
-            return !viewedProfiles.includes(p._id);
+            
+            if (isDemo) {
+              demoProfilesFromDB.push(p);
+            } else {
+              if (!viewedProfiles.includes(p._id)) {
+                realProfiles.push(p);
+              }
+            }
           });
-
-          if (profilesToShow.length === 0 && !demoCompleted && !tutorialCompleted) {
-            setProfiles(demoProfiles);
+          
+          let profilesToShow: Profile[] = [];
+          // Si los demos están agotados, solo mostrar perfiles reales
+          if (demosExhausted || demoCompleted) {
+            // Usuario que agotó los demos: solo perfiles reales (sin demos)
+            profilesToShow = realProfiles;
+            profilesToShow = [...profilesToShow].sort(() => Math.random() - 0.5);
+          } else if (!tutorialCompleted || !demoCompleted) {
+            // Usuario nuevo: mostrar demos (máximo 10) + reales, mezclados aleatoriamente
+            const demosToShow = demoProfilesFromDB.slice(0, 10);
+            profilesToShow = [...demosToShow, ...realProfiles];
+            profilesToShow = [...profilesToShow].sort(() => Math.random() - 0.5);
+          } else {
+            // Usuario avanzado: solo perfiles reales
+            profilesToShow = realProfiles;
+            profilesToShow = [...profilesToShow].sort(() => Math.random() - 0.5);
+          }
+          
+          if (profilesToShow.length === 0 && !tutorialCompleted && allProfiles.length === 0 && !demosExhausted) {
+            // Fallback: solo 10 demos locales (solo si no se agotaron)
+            const limitedLocalDemos = demoProfiles.slice(0, 10);
+            setProfiles(limitedLocalDemos);
           } else {
             setProfiles(profilesToShow);
           }
           setCurrentIndex(0);
           setHistory([]);
-          setEndState((profilesToShow.length > 0 || (!demoCompleted && !tutorialCompleted)) ? 'none' : 'no_more');
+          setEndState(profilesToShow.length > 0 ? 'none' : 'no_more');
         } catch (e) {
           setEndState('no_more');
         }
@@ -526,45 +636,65 @@ export default function PrincipalPage() {
                   <button
                     onClick={() => {
                       setEndState('loading_more');
-                      // disparar misma lógica de carga "al final"
-                      setTimeout(() => {
-                        // Simular swipe final: reutilizamos el handler izquierdo sin marcar visto extra
-                        // Más simple: recargar desde API manualmente
-                        (async () => {
-                          try {
-                            const response = await profilesAPI.getAll();
-                            const userId = user?.id || 'anonymous';
-                            const key = `viewedProfiles_${userId}`;
-                            const viewedData = typeof window !== 'undefined' ? localStorage.getItem(key) : null;
-                            const viewedProfiles = viewedData ? JSON.parse(viewedData) : [];
-                            const tutorialCompleted = typeof window !== 'undefined'
-                              ? localStorage.getItem('tutorialCompleted') === 'true'
-                              : false;
-                            const demoCompleted = typeof window !== 'undefined'
-                              ? localStorage.getItem('demoCompleted') === 'true'
-                              : false;
-                            const allProfiles = response.profiles || [];
-                            const profilesToShow = allProfiles.filter((p: Profile) => {
-                              const userIdObj = p.userId as any;
-                              const isDemo =
-                                (typeof p._id === 'string' && p._id.startsWith('demo-')) ||
-                                userIdObj?.username === 'demo' ||
-                                userIdObj?._id === '000000000000000000000000';
-                              if (isDemo) return !demoCompleted;
-                              return !viewedProfiles.includes(p._id);
-                            });
-                            if (profilesToShow.length === 0 && !demoCompleted && !tutorialCompleted) {
-                              setProfiles(demoProfiles);
+                      setTimeout(async () => {
+                        try {
+                          const response = await profilesAPI.getAll();
+                          const userId = user?.id || 'anonymous';
+                          const key = `viewedProfiles_${userId}`;
+                          const viewedData = typeof window !== 'undefined' ? localStorage.getItem(key) : null;
+                          const viewedProfiles = viewedData ? JSON.parse(viewedData) : [];
+                          const tutorialCompleted = typeof window !== 'undefined'
+                            ? localStorage.getItem('tutorialCompleted') === 'true'
+                            : false;
+                          const demoCompleted = typeof window !== 'undefined'
+                            ? localStorage.getItem('demoCompleted') === 'true'
+                            : false;
+
+                          const allProfiles = response.profiles || [];
+                          const realProfiles: Profile[] = [];
+                          const demoProfilesFromDB: Profile[] = [];
+                          
+                          allProfiles.forEach((p: Profile) => {
+                            const userIdObj = p.userId as any;
+                            const isDemo =
+                              (typeof p._id === 'string' && p._id.startsWith('demo-')) ||
+                              userIdObj?.username === 'demo' ||
+                              userIdObj?._id === '000000000000000000000000';
+                            
+                            if (isDemo) {
+                              demoProfilesFromDB.push(p);
                             } else {
-                              setProfiles(profilesToShow);
+                              if (!viewedProfiles.includes(p._id)) {
+                                realProfiles.push(p);
+                              }
                             }
-                            setCurrentIndex(0);
-                            setHistory([]);
-                            setEndState(profilesToShow.length > 0 ? 'none' : 'no_more');
-                          } catch {
-                            setEndState('no_more');
+                          });
+                          
+                          let profilesToShow: Profile[] = [];
+                          if (!tutorialCompleted || !demoCompleted) {
+                            // Usuario nuevo: mostrar demos (máximo 10) + reales, mezclados aleatoriamente
+                            const demosToShow = demoProfilesFromDB.slice(0, 10);
+                            profilesToShow = [...demosToShow, ...realProfiles];
+                            profilesToShow = [...profilesToShow].sort(() => Math.random() - 0.5);
+                          } else {
+                            // Usuario avanzado: solo perfiles reales
+                            profilesToShow = realProfiles;
+                            profilesToShow = [...profilesToShow].sort(() => Math.random() - 0.5);
                           }
-                        })();
+                          
+                          if (profilesToShow.length === 0 && !tutorialCompleted && allProfiles.length === 0) {
+                            // Fallback: solo 10 demos locales
+                            const limitedLocalDemos = demoProfiles.slice(0, 10);
+                            setProfiles(limitedLocalDemos);
+                          } else {
+                            setProfiles(profilesToShow);
+                          }
+                          setCurrentIndex(0);
+                          setHistory([]);
+                          setEndState(profilesToShow.length > 0 ? 'none' : 'no_more');
+                        } catch {
+                          setEndState('no_more');
+                        }
                       }, 150);
                     }}
                     className="mt-4 px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white rounded-full text-sm font-semibold transition-all duration-200"
