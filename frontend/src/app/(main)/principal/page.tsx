@@ -52,22 +52,17 @@ export default function PrincipalPage() {
     const loadProfiles = async () => {
       try {
         setLoading(true);
-        console.log('📦 Preparando perfiles demo...');
+        console.log('🚀 CREANDO PERFILES DEMO...');
 
-        // CREAR PERFILES DEMO LOCALES DIRECTAMENTE
-        const demoProfilesData: Profile[] = [
+        // PERFILES DEMO FIJOS
+        const demoProfiles: Profile[] = [
           {
             _id: 'demo-001',
             userId: 'demo',
             socialNetwork: 'instagram' as SocialNetwork,
             isActive: true,
             isPaid: false,
-            profileData: {
-              username: 'demo_foto',
-              followers: 1000,
-              posts: 50,
-              description: 'Fotografía profesional 📸',
-            },
+            profileData: { username: 'demo_foto', followers: 1000, posts: 50, description: 'Fotografía profesional 📸' },
             images: ['https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=600&fit=crop&q=80'],
             link: 'https://instagram.com/demo',
             createdAt: new Date().toISOString(),
@@ -81,12 +76,7 @@ export default function PrincipalPage() {
             socialNetwork: 'tiktok' as SocialNetwork,
             isActive: true,
             isPaid: false,
-            profileData: {
-              username: 'demo_tiktok',
-              followers: 500,
-              videos: 20,
-              description: 'Bailes y tendencias 🎵',
-            },
+            profileData: { username: 'demo_tiktok', followers: 500, videos: 20, description: 'Bailes y tendencias 🎵' },
             images: ['https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=600&fit=crop&q=80'],
             link: 'https://tiktok.com/@demo',
             createdAt: new Date().toISOString(),
@@ -100,12 +90,7 @@ export default function PrincipalPage() {
             socialNetwork: 'youtube' as SocialNetwork,
             isActive: true,
             isPaid: false,
-            profileData: {
-              channelName: 'Demo Channel',
-              subscribers: 2000,
-              videoCount: 30,
-              description: 'Contenido variado 📺',
-            },
+            profileData: { channelName: 'Demo Channel', subscribers: 2000, videoCount: 30, description: 'Contenido variado 📺' },
             images: ['https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400&h=600&fit=crop&q=80'],
             link: 'https://youtube.com/demo',
             createdAt: new Date().toISOString(),
@@ -115,75 +100,54 @@ export default function PrincipalPage() {
           }
         ];
 
-        console.log('✅ Perfiles demo creados:', demoProfilesData.length);
+        console.log('📄 Perfiles demo listos:', demoProfiles.length);
 
-        // Intentar agregar perfiles reales si hay usuario y API funciona
-        let allProfiles = [...demoProfilesData];
+        // FILTRAR PERFILES YA VISTOS POR ESTE USUARIO
+        let availableProfiles = [...demoProfiles];
 
         if (user) {
+          const viewedKey = `viewedProfiles_${user.id}`;
+          const viewedData = localStorage.getItem(viewedKey);
+          const viewedIds = viewedData ? JSON.parse(viewedData) : [];
+
+          console.log('👀 Perfiles ya vistos por usuario:', viewedIds.length);
+
+          availableProfiles = demoProfiles.filter(p => !viewedIds.includes(p._id));
+          console.log('✅ Perfiles demo disponibles:', availableProfiles.length);
+
+          // SI YA VIÓ TODOS LOS DEMO, MOSTRAR MENSAJE
+          if (availableProfiles.length === 0) {
+            console.log('🎯 Todos los perfiles demo han sido vistos - mostrando mensaje');
+            setProfiles([]);
+            setLoading(false);
+            return;
+          }
+
+          // INTENTAR CARGAR PERFILES REALES
           try {
-            console.log('🔄 Intentando cargar perfiles reales para usuario:', user.username);
             const response = await profilesAPI.getAll();
             const apiProfiles = response.profiles || [];
 
             if (apiProfiles.length > 0) {
-              // Filtrar solo perfiles reales (no demo)
               const realProfiles = apiProfiles.filter((p: any) => {
-                const isDemo = p._id?.startsWith('demo-') ||
-                               p.userId?.username === 'demo' ||
-                               p.userId === '000000000000000000000000';
-                return !isDemo;
+                const isDemo = p._id?.startsWith('demo-') || p.userId?.username === 'demo';
+                return !isDemo && !viewedIds.includes(p._id);
               });
 
               if (realProfiles.length > 0) {
-                console.log('✅ Agregando perfiles reales:', realProfiles.length);
-                allProfiles = [...allProfiles, ...realProfiles];
+                availableProfiles = [...availableProfiles, ...realProfiles];
+                console.log('➕ Agregados perfiles reales:', realProfiles.length);
               }
             }
-          } catch (apiError) {
-            console.warn('⚠️ API no disponible, continuando solo con demos');
+          } catch (error) {
+            console.log('⚠️ No se pudieron cargar perfiles reales');
           }
         }
 
-        console.log('📊 Total perfiles a mostrar:', allProfiles.length);
-
-        // VERIFICAR SI SE HAN VISTO SUFICIENTES PERFILES DEMO
-        if (allProfiles.length > 0 && user) {
-          const demoProfilesInList = allProfiles.filter(p => p._id.startsWith('local-demo-') || p._id.startsWith('demo-'));
-          const realProfilesInList = allProfiles.filter(p => !p._id.startsWith('local-demo-') && !p._id.startsWith('demo-'));
-
-          console.log('Demo profiles en lista:', demoProfilesInList.length);
-          console.log('Real profiles en lista:', realProfilesInList.length);
-
-          // Si solo hay perfiles demo (no hay reales), verificar si el usuario ya ha visto varios
-          if (demoProfilesInList.length >= 3 && realProfilesInList.length === 0) {
-            const viewedKey = `viewedProfiles_${user.id}`;
-            const viewedData = localStorage.getItem(viewedKey);
-            const viewedProfiles = viewedData ? JSON.parse(viewedData) : [];
-
-            // Contar cuántos perfiles demo han sido vistos
-            const demoProfileIds = demoProfilesInList.map(p => p._id);
-            const viewedDemoProfiles = demoProfileIds.filter(id => viewedProfiles.includes(id));
-
-            console.log('Perfiles demo vistos:', viewedDemoProfiles.length, 'de', demoProfilesInList.length);
-
-            // Si ha visto al menos 2 de los 3 perfiles demo, mostrar mensaje
-            if (viewedDemoProfiles.length >= 2) {
-              console.log('🎯 Usuario ha visto suficientes perfiles demo - mostrando mensaje especial');
-
-              // En lugar de mostrar perfiles, mostrar mensaje
-              setProfiles([]);
-              setLoading(false);
-              return; // Salir aquí para mostrar el mensaje vacío
-            }
-          }
-        }
-
-        // Mezclar y establecer
-        const shuffled = [...allProfiles].sort(() => Math.random() - 0.5);
+        // MEZCLAR Y ESTABLECER
+        const shuffled = [...availableProfiles].sort(() => Math.random() - 0.5);
         setProfiles(shuffled);
-
-        console.log('🎉 Perfiles cargados exitosamente');
+        console.log('🎉 PERFILES FINALES CARGADOS:', shuffled.length);
 
       } catch (error) {
         console.error('❌ Error cargando perfiles:', error);
@@ -212,13 +176,31 @@ export default function PrincipalPage() {
     }
   };
 
-  // Filtrar perfiles por red social seleccionada
+  // Filtrar perfiles por red social seleccionada Y excluir vistos
   const filteredProfiles = useMemo(() => {
-    if (selectedNetwork === 'all') {
-      return profiles;
+    if (!user) return [];
+
+    // Obtener perfiles ya vistos por este usuario
+    const viewedKey = `viewedProfiles_${user.id}`;
+    const viewedData = typeof window !== 'undefined' ? localStorage.getItem(viewedKey) : null;
+    const viewedProfiles = viewedData ? JSON.parse(viewedData) : [];
+
+    console.log('🔍 Perfiles totales:', profiles.length);
+    console.log('👀 Perfiles ya vistos:', viewedProfiles.length);
+
+    // Filtrar perfiles no vistos
+    let availableProfiles = profiles.filter(p => !viewedProfiles.includes(p._id));
+
+    console.log('✅ Perfiles disponibles (no vistos):', availableProfiles.length);
+
+    // Filtrar por red social si es necesario
+    if (selectedNetwork !== 'all') {
+      availableProfiles = availableProfiles.filter((p) => p.socialNetwork === selectedNetwork);
+      console.log('📱 Perfiles filtrados por red social:', availableProfiles.length);
     }
-    return profiles.filter((p) => p.socialNetwork === selectedNetwork);
-  }, [profiles, selectedNetwork]);
+
+    return availableProfiles;
+  }, [profiles, selectedNetwork, user]);
 
   // Resetear índice cuando cambia el filtro
   useEffect(() => {
@@ -240,24 +222,45 @@ export default function PrincipalPage() {
     setShowNetworkSelector(false);
   };
 
-  // Handlers simples
+  // Handlers simples - MARCAN COMO VISTOS Y AVANZAN
   const handleSwipeLeft = () => {
     const currentProfile = filteredProfiles[currentIndex];
-    if (!currentProfile) return;
+    if (!currentProfile) {
+      console.log('⚠️ No hay perfil actual para swipe left');
+      return;
+    }
 
+    // Marcar como visto ANTES de avanzar
     markProfileAsViewed(currentProfile._id);
     console.log('👎 Swipe left - perfil descartado:', currentProfile._id);
 
+    // Resetear historial al hacer swipe (no se puede volver atrás)
+    setHistory([]);
+    setBackUsed(false);
+
+    // Avanzar al siguiente perfil disponible
     if (currentIndex < filteredProfiles.length - 1) {
       setCurrentIndex(currentIndex + 1);
-      setHistory(prev => [...prev, currentIndex]);
+      console.log('📍 Avanzando al siguiente perfil');
+    } else {
+      // Si era el último perfil disponible, verificar si hay más perfiles disponibles
+      console.log('🎯 Último perfil visto - verificando si hay más perfiles');
+
+      // Forzar recarga de perfiles para ver si hay nuevos disponibles
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
     }
   };
 
   const handleSwipeRight = () => {
     const currentProfile = filteredProfiles[currentIndex];
-    if (!currentProfile) return;
+    if (!currentProfile) {
+      console.log('⚠️ No hay perfil actual para swipe right');
+      return;
+    }
 
+    // Marcar como visto SIEMPRE
     markProfileAsViewed(currentProfile._id);
 
     const userIdObj = currentProfile.userId as any;
@@ -267,28 +270,42 @@ export default function PrincipalPage() {
       userIdObj?._id === '000000000000000000000000';
 
     if (isDemo) {
-      console.log('❤️ Swipe right en demo - solo marcar como visto');
-      if (currentIndex < filteredProfiles.length - 1) {
-        setCurrentIndex(currentIndex + 1);
-        setHistory(prev => [...prev, currentIndex]);
-      }
+      console.log('❤️ Swipe right en demo - marcado como visto');
     } else {
       console.log('❤️ Swipe right en perfil real - abrir enlace');
       if (currentProfile.link) {
         window.open(currentProfile.link, '_blank');
       }
-      if (currentIndex < filteredProfiles.length - 1) {
-        setCurrentIndex(currentIndex + 1);
-        setHistory(prev => [...prev, currentIndex]);
-      }
+    }
+
+    // Resetear historial al hacer swipe (no se puede volver atrás)
+    setHistory([]);
+    setBackUsed(false);
+
+    // Avanzar al siguiente perfil disponible
+    if (currentIndex < filteredProfiles.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+      console.log('📍 Avanzando al siguiente perfil');
+    } else {
+      // Si era el último perfil disponible, verificar si hay más perfiles disponibles
+      console.log('🎯 Último perfil visto - verificando si hay más perfiles');
+
+      // Forzar recarga de perfiles para ver si hay nuevos disponibles
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
     }
   };
 
   const handleSwipeUp = () => {
     const currentProfile = filteredProfiles[currentIndex];
-    if (!currentProfile) return;
+    if (!currentProfile) {
+      console.log('⚠️ No hay perfil actual para swipe up');
+      return;
+    }
 
-    markProfileAsViewed(currentProfile._id);
+    // NO marcar como visto en swipe up (solo ver detalles)
+    console.log('⭐ Swipe up - ver detalles:', currentProfile._id);
 
     const userIdObj = currentProfile.userId as any;
     const isDemo =
@@ -297,13 +314,10 @@ export default function PrincipalPage() {
       userIdObj?._id === '000000000000000000000000';
 
     if (isDemo) {
-      console.log('⭐ Swipe up en demo - marcar como visto');
-      if (currentIndex < filteredProfiles.length - 1) {
-        setCurrentIndex(currentIndex + 1);
-        setHistory(prev => [...prev, currentIndex]);
-      }
+      console.log('⭐ Swipe up en demo - mostrar detalles');
+      setSelectedProfile(currentProfile);
     } else {
-      console.log('⭐ Swipe up en perfil real - ver detalles');
+      console.log('⭐ Swipe up en perfil real - mostrar detalles');
       setSelectedProfile(currentProfile);
     }
   };
