@@ -17,6 +17,7 @@ interface WelcomeTutorialProps {
   onClose?: () => void;
   forceOpen?: boolean; // Permite forzar la apertura del tutorial
   onForceOpenChange?: (open: boolean) => void; // Callback cuando se cierra manualmente
+  tutorialCompleted?: boolean; // Estado del tutorial desde el layout
 }
 
 interface StepData {
@@ -39,7 +40,7 @@ interface StepData {
   }>;
 }
 
-export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange }: WelcomeTutorialProps) {
+export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange, tutorialCompleted }: WelcomeTutorialProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -47,25 +48,26 @@ export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange 
     if (typeof window !== 'undefined') {
       // Si forceOpen es true, mostrar el tutorial forzadamente
       if (forceOpen === true) {
+        console.log('🎯 Tutorial forzado a abrir');
         setIsVisible(true);
         return;
       }
-      
+
       // Si forceOpen es false explícitamente, ocultar
       if (forceOpen === false) {
+        console.log('🚫 Tutorial forzado a cerrar');
         setIsVisible(false);
         return;
       }
-      
-      // Si forceOpen es undefined, verificar si debe mostrarse automáticamente (comportamiento por defecto)
+
+      // Si forceOpen es undefined, usar el estado pasado desde el layout
       if (forceOpen === undefined) {
-        const tutorialCompleted = localStorage.getItem('tutorialCompleted');
-        if (!tutorialCompleted) {
-          setIsVisible(true);
-        }
+        const shouldShow = tutorialCompleted === false;
+        console.log('📚 Estado tutorial - completado:', tutorialCompleted, 'debe mostrarse:', shouldShow);
+        setIsVisible(shouldShow);
       }
     }
-  }, [forceOpen]);
+  }, [forceOpen, tutorialCompleted]);
 
   const steps: StepData[] = [
     {
@@ -137,19 +139,25 @@ export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange 
   ];
 
   const handleClose = () => {
+    console.log('🎯 Tutorial terminando...');
     setIsVisible(false);
     if (typeof window !== 'undefined') {
       // Solo marcar como completado si no fue forzado a abrir (es decir, es la primera vez)
       if (!forceOpen) {
+        console.log('✅ Marcando tutorial como completado');
         localStorage.setItem('tutorialCompleted', 'true');
+      } else {
+        console.log('ℹ️ Tutorial forzado - no marcar como completado');
       }
     }
     if (onForceOpenChange) {
       onForceOpenChange(false);
     }
     if (onClose) {
+      console.log('📞 Ejecutando callback onClose');
       onClose();
     }
+    console.log('🏁 Tutorial cerrado completamente');
   };
 
   const handleNext = () => {

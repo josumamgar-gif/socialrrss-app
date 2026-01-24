@@ -60,11 +60,16 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   const [pathname, setPathname] = useState('');
+  const [tutorialCompleted, setTutorialCompleted] = useState(false);
   const { setUser, isAuthenticated, user } = useAuthStore();
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setPathname(window.location.pathname);
+
+      // Verificar estado del tutorial
+      const tutorialDone = localStorage.getItem('tutorialCompleted') === 'true';
+      setTutorialCompleted(tutorialDone);
 
       // Solo intentar cargar usuario si hay token y no está autenticado
       const token = getAuthToken();
@@ -79,11 +84,12 @@ export default function MainLayout({
           .catch((error) => {
             console.error('❌ Error cargando usuario, limpiando token:', error);
             localStorage.removeItem('token');
-            // No redirigir aquí, dejar que cada página maneje su propia lógica
+            // Redirigir a login si no se puede cargar el usuario
+            window.location.href = '/login';
           });
       }
     }
-  }, []); // Solo ejecutar una vez al montar
+  }, [isAuthenticated, user, setUser]); // Agregar dependencias para evitar recargas innecesarias
 
   const tabs = [
     {
@@ -108,7 +114,12 @@ export default function MainLayout({
 
   return (
     <div className="min-h-screen bg-white flex flex-col" style={{ minHeight: '-webkit-fill-available' } as React.CSSProperties}>
-      <WelcomeTutorial />
+      <WelcomeTutorial
+        onClose={() => {
+          console.log('📚 Tutorial cerrado, actualizando estado');
+          setTutorialCompleted(true);
+        }}
+      />
       
       {/* Pestañas de navegación - Parte superior FIJAS (solo desktop) */}
       <nav className={`hidden md:flex fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-40`}>

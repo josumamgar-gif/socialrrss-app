@@ -145,6 +145,11 @@ export default function RegisterPage() {
         sessionStorage.clear();
 
         console.log('✅ Registro exitoso, redirigiendo a principal...');
+        // IMPORTANTE: NO limpiar tutorialCompleted aquí
+        // El tutorial debe mostrarse solo UNA vez por usuario
+        // Limpiar otros estados que puedan interferir
+        sessionStorage.clear();
+
         // Redirigir simplemente, el MainLayout se encargará de cargar el usuario
         window.location.href = '/principal';
       }
