@@ -55,7 +55,7 @@ export default function Home() {
           >
             Iniciar Sesión
           </button>
-          
+
           <button
             onClick={() => router.push('/register')}
             className="w-full bg-white text-primary-600 border-2 border-primary-600 py-4 px-6 rounded-xl hover:bg-primary-50 font-semibold text-lg transition-all transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl"
