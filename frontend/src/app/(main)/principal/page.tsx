@@ -28,8 +28,9 @@ export default function PrincipalPage() {
   const [backUsed, setBackUsed] = useState(false);
   const [selectedNetwork, setSelectedNetwork] = useState<'all' | SocialNetwork>('all');
   const [showNetworkSelector, setShowNetworkSelector] = useState(false);
+  const [hasUserChecked, setHasUserChecked] = useState(false);
 
-  // Redirigir si no hay usuario
+  // Redirigir si no hay usuario después de un tiempo
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('token');
@@ -38,6 +39,8 @@ export default function PrincipalPage() {
       const timer = setTimeout(() => {
         if (!user && !token) {
           window.location.href = '/login';
+        } else {
+          setHasUserChecked(true);
         }
       }, 3000);
 
@@ -47,16 +50,18 @@ export default function PrincipalPage() {
 
   // Cargar perfiles cuando el usuario esté disponible
   useEffect(() => {
-    if (!user) {
-      setLoading(true);
+    if (!user || !hasUserChecked) {
       return;
     }
 
     const loadData = async () => {
       try {
         setLoading(true);
+        console.log('Cargando perfiles...');
+
         const response = await profilesAPI.getAll();
         const allProfiles = response.profiles || [];
+        console.log('Perfiles obtenidos de API:', allProfiles.length);
 
         // Separar perfiles reales y demo
         const realProfiles: Profile[] = [];
@@ -72,13 +77,17 @@ export default function PrincipalPage() {
           }
         });
 
+        console.log('Perfiles reales encontrados:', realProfiles.length);
+
         // Obtener perfiles vistos por este usuario
         const viewedKey = `viewedProfiles_${user.id}`;
         const viewedData = typeof window !== 'undefined' ? localStorage.getItem(viewedKey) : null;
         const viewedProfiles = viewedData ? JSON.parse(viewedData) : [];
+        console.log('Perfiles ya vistos:', viewedProfiles.length);
 
         // Filtrar perfiles reales no vistos (nuevos desde última sesión)
         const newRealProfiles = realProfiles.filter(p => !viewedProfiles.includes(p._id));
+        console.log('Perfiles reales nuevos:', newRealProfiles.length);
 
         // Para usuario nuevo: mostrar 10 demos + todos los reales
         // Para usuario existente: mostrar solo reales nuevos
@@ -89,10 +98,14 @@ export default function PrincipalPage() {
           // Usuario nuevo: 10 perfiles demo + todos los reales
           const demoProfilesToShow = demoProfiles.slice(0, 10);
           profilesToShow = [...demoProfilesToShow, ...realProfiles];
+          console.log('Usuario nuevo - mostrando 10 demos + todos los reales');
         } else {
           // Usuario existente: solo perfiles reales nuevos
           profilesToShow = newRealProfiles;
+          console.log('Usuario existente - mostrando solo reales nuevos');
         }
+
+        console.log('Total de perfiles a mostrar:', profilesToShow.length);
 
         // Mezclar aleatoriamente
         profilesToShow = [...profilesToShow].sort(() => Math.random() - 0.5);
@@ -107,7 +120,7 @@ export default function PrincipalPage() {
     };
 
     loadData();
-  }, [user]);
+  }, [user, hasUserChecked]);
 
   // Marcar perfil como visto
   const markProfileAsViewed = (profileId: string) => {
@@ -239,7 +252,8 @@ export default function PrincipalPage() {
     );
   }
 
-  if (loading) {
+  // Si está cargando y ya hemos verificado que hay usuario, mostrar ruleta
+  if (loading && hasUserChecked && user) {
     return (
       <div className="w-full bg-white flex items-center justify-center px-4 overflow-hidden relative fixed inset-0">
         <div className="flex items-center justify-center h-full">
@@ -249,10 +263,34 @@ export default function PrincipalPage() {
     );
   }
 
-  if (profiles.length === 0) {
+  // Si no hay usuario después de verificar, mostrar mensaje de error
+  if (!user && hasUserChecked) {
+    return (
+      <div className="w-full bg-white flex items-center justify-center px-4 overflow-hidden relative fixed inset-0">
+        <div className="text-center px-6">
+          <div className="text-6xl mb-6">⚠️</div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            Sesión expirada
+          </h2>
+          <p className="text-gray-600 mb-6 leading-relaxed">
+            Tu sesión ha expirado. Por favor, inicia sesión nuevamente.
+          </p>
+          <button
+            onClick={() => window.location.href = '/login'}
+            className="bg-primary-600 text-white py-3 px-6 rounded-xl hover:bg-primary-700 transition-colors font-medium shadow-lg hover:shadow-xl"
+          >
+            Ir al login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Si no está cargando y no hay perfiles, mostrar mensaje
+  if (!loading && profiles.length === 0 && hasUserChecked && user) {
     // Determinar si es usuario nuevo o existente
-    const viewedKey = user ? `viewedProfiles_${user.id}` : null;
-    const viewedData = viewedKey && typeof window !== 'undefined' ? localStorage.getItem(viewedKey) : null;
+    const viewedKey = `viewedProfiles_${user.id}`;
+    const viewedData = typeof window !== 'undefined' ? localStorage.getItem(viewedKey) : null;
     const viewedProfiles = viewedData ? JSON.parse(viewedData) : [];
     const isNewUser = viewedProfiles.length === 0;
 
@@ -261,18 +299,18 @@ export default function PrincipalPage() {
         <div className="text-center px-6">
           <div className="text-6xl mb-6">{isNewUser ? '📭' : '🔄'}</div>
           <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            {isNewUser ? 'No hay perfiles disponibles' : 'No hay perfiles nuevos por el momento'}
+            No hay más perfiles para mostrar
           </h2>
           <p className="text-gray-600 mb-6 leading-relaxed">
             {isNewUser
-              ? 'Actualmente no hay perfiles disponibles para mostrar.'
-              : 'No hay nuevos perfiles desde tu última visita. Vuelve más tarde para ver contenido nuevo.'
+              ? 'Bienvenido! Estamos trabajando en nuevos perfiles. Vuelve más tarde para descubrir contenido interesante.'
+              : 'Has visto todos los perfiles nuevos disponibles. Vuelve más tarde para ver contenido nuevo.'
             }
           </p>
           <button
             onClick={() => {
               setLoading(true);
-              window.location.reload();
+              setTimeout(() => window.location.reload(), 500);
             }}
             className="bg-primary-600 text-white py-3 px-6 rounded-xl hover:bg-primary-700 transition-colors font-medium shadow-lg hover:shadow-xl"
           >
