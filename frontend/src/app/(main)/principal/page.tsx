@@ -28,39 +28,32 @@ export default function PrincipalPage() {
   const [backUsed, setBackUsed] = useState(false);
   const [selectedNetwork, setSelectedNetwork] = useState<'all' | SocialNetwork>('all');
   const [showNetworkSelector, setShowNetworkSelector] = useState(false);
-  const [hasUserChecked, setHasUserChecked] = useState(false);
 
-  // Verificar autenticación inicial
+  // Verificar autenticación básica
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('token');
 
-      // Si hay token, intentar cargar usuario inmediatamente
-      if (token && !user) {
-        // Dar tiempo para que se cargue el usuario del store
-        const timer = setTimeout(() => {
-          if (!user) {
-            // Si después de 2 segundos no hay usuario, considerar sesión expirada
-            console.log('Sesión expirada - redirigiendo a login');
-            window.location.href = '/login';
-          } else {
-            setHasUserChecked(true);
-          }
-        }, 2000);
-        return () => clearTimeout(timer);
-      } else if (!token) {
-        // No hay token, redirigir inmediatamente
+      // Si no hay token, redirigir a login
+      if (!token) {
         window.location.href = '/login';
-      } else {
-        // Hay usuario y token
-        setHasUserChecked(true);
+        return;
       }
+
+      // Si hay token pero no hay usuario después de 3 segundos, redirigir
+      const timer = setTimeout(() => {
+        if (!user) {
+          window.location.href = '/login';
+        }
+      }, 3000);
+
+      return () => clearTimeout(timer);
     }
   }, [user]);
 
   // Cargar perfiles cuando el usuario esté disponible
   useEffect(() => {
-    if (!user || !hasUserChecked) {
+    if (!user) {
       return;
     }
 
@@ -130,7 +123,7 @@ export default function PrincipalPage() {
     };
 
     loadData();
-  }, [user, hasUserChecked]);
+  }, [user]);
 
   // Marcar perfil como visto
   const markProfileAsViewed = (profileId: string) => {
@@ -262,8 +255,8 @@ export default function PrincipalPage() {
     );
   }
 
-  // Si está cargando y ya hemos verificado que hay usuario, mostrar ruleta
-  if (loading && hasUserChecked && user) {
+  // Mostrar loading mientras se carga todo
+  if (loading || !user) {
     return (
       <div className="w-full bg-white flex items-center justify-center px-4 overflow-hidden relative fixed inset-0">
         <div className="flex items-center justify-center h-full">
@@ -273,31 +266,8 @@ export default function PrincipalPage() {
     );
   }
 
-  // Si no hay usuario después de verificar Y no hay token, mostrar mensaje de error
-  if (!user && hasUserChecked && (!localStorage.getItem('token'))) {
-    return (
-      <div className="w-full bg-white flex items-center justify-center px-4 overflow-hidden relative fixed inset-0">
-        <div className="text-center px-6">
-          <div className="text-6xl mb-6">⚠️</div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            Sesión expirada
-          </h2>
-          <p className="text-gray-600 mb-6 leading-relaxed">
-            Tu sesión ha expirado. Por favor, inicia sesión nuevamente.
-          </p>
-          <button
-            onClick={() => window.location.href = '/login'}
-            className="bg-primary-600 text-white py-3 px-6 rounded-xl hover:bg-primary-700 transition-colors font-medium shadow-lg hover:shadow-xl"
-          >
-            Ir al login
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // Si no está cargando y no hay perfiles, mostrar mensaje
-  if (!loading && profiles.length === 0 && hasUserChecked && user) {
+  // Si no hay perfiles, mostrar mensaje
+  if (profiles.length === 0) {
     // Determinar si es usuario nuevo o existente
     const viewedKey = `viewedProfiles_${user.id}`;
     const viewedData = typeof window !== 'undefined' ? localStorage.getItem(viewedKey) : null;
