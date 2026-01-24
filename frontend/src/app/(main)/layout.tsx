@@ -60,28 +60,30 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   const [pathname, setPathname] = useState('');
-  const { setUser, isAuthenticated } = useAuthStore();
+  const { setUser, isAuthenticated, user } = useAuthStore();
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setPathname(window.location.pathname);
-      
-      // Inicializar sesión desde el token si existe (sin bloquear la carga)
+
+      // Solo intentar cargar usuario si hay token y no está autenticado
       const token = getAuthToken();
-      if (token && !isAuthenticated) {
-        // Cargar usuario en background sin bloquear
+      if (token && !isAuthenticated && !user) {
+        console.log('🔄 Cargando usuario desde token en MainLayout');
+
         authAPI.getMe()
           .then((response) => {
+            console.log('✅ Usuario cargado correctamente:', response.user.username);
             setUser(response.user);
           })
           .catch((error) => {
-            // Si el token es inválido, limpiar silenciosamente
-            console.error('Error verificando sesión:', error);
+            console.error('❌ Error cargando usuario, limpiando token:', error);
             localStorage.removeItem('token');
+            // No redirigir aquí, dejar que cada página maneje su propia lógica
           });
       }
     }
-  }, [setUser, isAuthenticated]);
+  }, []); // Solo ejecutar una vez al montar
 
   const tabs = [
     {

@@ -131,18 +131,21 @@ export default function RegisterPage() {
         interests: dataToSend.interests.length > 0 ? dataToSend.interests : undefined,
         favoriteSocialNetwork: dataToSend.favoriteSocialNetwork || undefined,
       });
-      
+
+      // Guardar token y usuario
       setAuthToken(response.token);
-      setUser(response.user);
-      
+
       if (typeof window !== 'undefined') {
-        // Asegurarse de que el tutorial se muestre para usuarios nuevos
-        // NO establecer tutorialCompleted para que se muestre el tutorial y los demos
+        // Limpiar cualquier estado anterior que pueda causar problemas
         localStorage.removeItem('tutorialCompleted');
         localStorage.removeItem('demoCompleted');
-        
-        // Reemplazar la entrada del historial para evitar volver al registro con el botón atrás
-        window.history.replaceState(null, '', '/principal');
+        localStorage.removeItem('demosExhausted');
+
+        // Limpiar también otros posibles estados conflictivos
+        sessionStorage.clear();
+
+        console.log('✅ Registro exitoso, redirigiendo a principal...');
+        // Redirigir simplemente, el MainLayout se encargará de cargar el usuario
         window.location.href = '/principal';
       }
     } catch (err: any) {

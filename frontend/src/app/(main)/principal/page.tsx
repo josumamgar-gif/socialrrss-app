@@ -15,20 +15,26 @@ export default function PrincipalPage() {
   console.log('🎯 PrincipalPage se ha montado');
   console.log('👤 Usuario actual:', user ? { id: user.id, username: user.username } : 'No autenticado');
 
-  // Redirigir a login si no está autenticado
+  // Solo redirigir si definitivamente no hay usuario después de un tiempo
   useEffect(() => {
-    if (!user && !loading) {
-      console.log('🚨 Usuario no autenticado, redirigiendo a login...');
-      if (typeof window !== 'undefined') {
-        window.location.href = '/login';
-      }
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      // Si no hay token ni usuario después de 2 segundos, redirigir
+      const timer = setTimeout(() => {
+        if (!user && !token) {
+          console.log('🚨 No hay usuario ni token, redirigiendo a login...');
+          window.location.href = '/login';
+        }
+      }, 2000);
+
+      return () => clearTimeout(timer);
     }
-  }, [user, loading]);
+  }, [user]);
 
   useEffect(() => {
     if (!user) {
       console.log('⏳ Esperando autenticación del usuario...');
-      setLoading(false);
+      // No establecer loading en false aquí, esperar a que llegue el usuario
       return;
     }
 
