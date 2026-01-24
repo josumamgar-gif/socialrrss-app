@@ -1,54 +1,52 @@
 import mongoose from 'mongoose';
-import dotenv from 'dotenv';
 import Profile from '../src/models/Profile';
-
-// Load environment variables
-dotenv.config();
-
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/promocion-rrss';
 
 async function checkDemoProfiles() {
   try {
-    // Connect to MongoDB
-    await mongoose.connect(MONGODB_URI);
+    // Conectar a MongoDB
+    const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/socialrrss';
+    await mongoose.connect(mongoUri);
     console.log('✅ Conectado a MongoDB');
 
-    console.log('\n🔍 Perfiles DEMO en base de datos:');
-
-    // Find demo profiles
-    const DEMO_USER_ID = '000000000000000000000000';
-
+    // Buscar perfiles demo
     const demoProfiles = await Profile.find({
-      userId: DEMO_USER_ID
-    }).select('_id socialNetwork profileData.username profileData.channelName isActive createdAt');
-
-    demoProfiles.forEach((p, i) => {
-      console.log(`${i+1}. ${p.socialNetwork} - ${p.profileData.username || p.profileData.channelName} (ID: ${p._id}) - Activo: ${p.isActive}`);
+      $or: [
+        { _id: { $regex: /^demo-/ } },
+        { 'userId.username': 'demo' },
+        { 'userId._id': '000000000000000000000000' }
+      ]
     });
 
-    console.log(`\n📊 Total perfiles demo encontrados: ${demoProfiles.length}`);
+    console.log(`📄 Perfiles demo encontrados: ${demoProfiles.length}`);
 
-    // Group by social network
-    const byNetwork = demoProfiles.reduce((acc, p) => {
-      acc[p.socialNetwork] = (acc[p.socialNetwork] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    if (demoProfiles.length === 0) {
+      console.log('⚠️  No hay perfiles demo. Ejecutar populate-demo-profiles.ts');
+    } else {
+      console.log('Perfiles demo disponibles:');
+      demoProfiles.forEach((profile, index) => {
+        const username = profile.profileData?.username || profile.profileData?.channelName || 'Sin nombre';
+        console.log(`  ${index + 1}. ${profile._id} - ${profile.socialNetwork} - ${username}`);
+      });
+    }
 
-    console.log('\n📈 Distribución por red social:');
-    Object.entries(byNetwork).forEach(([network, count]) => {
-      console.log(`   ${network}: ${count} perfiles`);
+    // También verificar perfiles reales
+    const realProfiles = await Profile.find({
+      $and: [
+        { _id: { $not: { $regex: /^demo-/ } } },
+        { 'userId.username': { $ne: 'demo' } },
+        { 'userId._id': { $ne: '000000000000000000000000' } }
+      ]
     });
 
-    // Disconnect from MongoDB
-    await mongoose.disconnect();
-    console.log('\n🔌 Desconectado de MongoDB');
+    console.log(`👥 Perfiles reales encontrados: ${realProfiles.length}`);
 
   } catch (error) {
-    console.error('❌ Error:', error);
+    console.error('❌ Error verificando perfiles:', error);
+  } finally {
     await mongoose.disconnect();
-    process.exit(1);
+    console.log('🔌 Desconectado de MongoDB');
   }
 }
 
-// Run the check
+// Ejecutar verificación
 checkDemoProfiles();
