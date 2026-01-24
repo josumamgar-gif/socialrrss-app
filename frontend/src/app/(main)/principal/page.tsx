@@ -55,7 +55,7 @@ export default function PrincipalPage() {
         console.log('📦 Preparando perfiles demo...');
 
         // CREAR PERFILES DEMO LOCALES DIRECTAMENTE
-        const demoProfilesData = [
+        const demoProfilesData: Profile[] = [
           {
             _id: 'demo-001',
             userId: 'demo',
@@ -307,35 +307,23 @@ export default function PrincipalPage() {
     );
   }
 
-  // Si no hay perfiles, mostrar mensaje
+  // Si no hay perfiles, mostrar mensaje (esto no debería pasar con la nueva lógica)
   if (profiles.length === 0) {
-    // Determinar si es usuario nuevo o existente
-    const viewedKey = `viewedProfiles_${user.id}`;
-    const viewedData = typeof window !== 'undefined' ? localStorage.getItem(viewedKey) : null;
-    const viewedProfiles = viewedData ? JSON.parse(viewedData) : [];
-    const isNewUser = viewedProfiles.length === 0;
-
     return (
       <div className="w-full bg-white flex items-center justify-center px-4 overflow-hidden relative fixed inset-0">
         <div className="text-center px-6">
-          <div className="text-6xl mb-6">{isNewUser ? '📭' : '🔄'}</div>
+          <div className="text-6xl mb-6">📭</div>
           <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            No hay más perfiles para mostrar
+            No hay perfiles disponibles
           </h2>
           <p className="text-gray-600 mb-6 leading-relaxed">
-            {isNewUser
-              ? 'Bienvenido! Estamos trabajando en nuevos perfiles. Vuelve más tarde para descubrir contenido interesante.'
-              : 'Has visto todos los perfiles nuevos disponibles. Vuelve más tarde para ver contenido nuevo.'
-            }
+            Estamos preparando los perfiles. Vuelve a cargar la página.
           </p>
           <button
-            onClick={() => {
-              setLoading(true);
-              setTimeout(() => window.location.reload(), 500);
-            }}
+            onClick={() => window.location.reload()}
             className="bg-primary-600 text-white py-3 px-6 rounded-xl hover:bg-primary-700 transition-colors font-medium shadow-lg hover:shadow-xl"
           >
-            Comprobar de nuevo
+            Recargar página
           </button>
         </div>
       </div>
