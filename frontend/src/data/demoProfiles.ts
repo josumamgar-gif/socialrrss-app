@@ -16,11 +16,11 @@ const youtubeProfiles = [
   { channelName: 'Demo Channel', subscribers: 2000, videoCount: 30, desc: 'Contenido variado 📺' },
 ];
 
-const linkedinProfiles = [];
-const facebookProfiles = [];
-const xProfiles = [];
-const twitchProfiles = [];
-const otrosProfiles = [];
+const linkedinProfiles: any[] = [];
+const facebookProfiles: any[] = [];
+const xProfiles: any[] = [];
+const twitchProfiles: any[] = [];
+const otrosProfiles: any[] = [];
 
 // Imágenes de Unsplash para usar
 const imageUrls = [

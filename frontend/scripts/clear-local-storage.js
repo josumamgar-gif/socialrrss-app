@@ -5,6 +5,9 @@ if (typeof window !== 'undefined') {
   // Limpiar token de autenticación
   localStorage.removeItem('token');
 
+  // Limpiar tutorial completado
+  localStorage.removeItem('tutorialCompleted');
+
   // Limpiar perfiles vistos
   const keys = Object.keys(localStorage);
   keys.forEach(key => {
@@ -17,8 +20,11 @@ if (typeof window !== 'undefined') {
   // Limpiar cualquier otro dato relacionado con usuarios
   localStorage.removeItem('saved_email');
   localStorage.removeItem('user');
+  localStorage.removeItem('demoCompleted');
+  localStorage.removeItem('demosExhausted');
 
   console.log('✅ localStorage limpiado completamente');
+  console.log('🔄 Recarga la página para ver el tutorial y perfiles demo');
 } else {
   console.log('⚠️  Este script debe ejecutarse en el navegador');
 }
