@@ -28,6 +28,13 @@ export default function PrincipalPage() {
           ? localStorage.getItem('demosExhausted') === 'true'
           : false;
 
+        console.log('🔍 Estado localStorage:', {
+          tutorialCompleted,
+          demoCompleted,
+          demosExhausted,
+          userId: user?.id
+        });
+
         const allProfiles = response.profiles || [];
         const realProfiles: Profile[] = [];
         const demoProfilesFromDB: Profile[] = [];
@@ -48,7 +55,14 @@ export default function PrincipalPage() {
 
         let profilesToShow: Profile[] = [];
 
+        console.log('📊 Cantidades:', {
+          realProfiles: realProfiles.length,
+          demoProfilesFromDB: demoProfilesFromDB.length,
+          allProfiles: allProfiles.length
+        });
+
         if (demosExhausted || demoCompleted) {
+          console.log('🎯 Condición 1: demosExhausted || demoCompleted = true');
           profilesToShow = realProfiles;
           profilesToShow = [...profilesToShow].sort(() => Math.random() - 0.5);
 
@@ -60,6 +74,7 @@ export default function PrincipalPage() {
             setProfiles(profilesToShow);
           }
         } else if (!tutorialCompleted || !demoCompleted) {
+          console.log('🎯 Condición 2: !tutorialCompleted || !demoCompleted = true');
           const demosToShow = demoProfilesFromDB.slice(0, 10);
           profilesToShow = [...demosToShow, ...realProfiles];
           profilesToShow = [...profilesToShow].sort(() => Math.random() - 0.5);
@@ -67,6 +82,7 @@ export default function PrincipalPage() {
           setWaitingForNewUsers(false);
           setProfiles(profilesToShow);
         } else {
+          console.log('🎯 Condición 3: ninguna de las anteriores');
           profilesToShow = realProfiles;
           profilesToShow = [...profilesToShow].sort(() => Math.random() - 0.5);
 
@@ -76,9 +92,12 @@ export default function PrincipalPage() {
 
         if (profilesToShow.length === 0 && !tutorialCompleted && allProfiles.length === 0 && !demosExhausted) {
           const limitedLocalDemos = demoProfiles.slice(0, 10);
+          console.log('🎯 Usando demos locales:', limitedLocalDemos.length);
           setWaitingForNewUsers(false);
           setProfiles(limitedLocalDemos);
         }
+
+        console.log('📋 Perfiles finales a mostrar:', profilesToShow.length);
       } catch (error) {
         console.error('Error cargando perfiles:', error);
         setProfiles([]);
