@@ -11,26 +11,6 @@ export function middleware(request: NextRequest) {
   // Temporalmente deshabilitar CSP estricto para resolver problemas
   // TODO: Re-habilitar CSP cuando se resuelvan los problemas de evaluación
   return response;
-  } else {
-    // CSP estricto en producción
-    const cspHeader = [
-      "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://www.paypal.com https://www.paypalobjects.com https://www.googletagmanager.com",
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "img-src 'self' data: https: blob:",
-      "font-src 'self' https://fonts.gstatic.com data:",
-      "connect-src 'self' https://api.stripe.com https://api.socialrrss.com https://*.vercel.app wss:",
-      "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://www.paypal.com",
-      "object-src 'none'",
-      "base-uri 'self'",
-      "form-action 'self'",
-      "frame-ancestors 'none'",
-      "worker-src 'self' blob: 'unsafe-eval'",
-    ].join('; ');
-
-    response.headers.set('Content-Security-Policy', cspHeader);
-    response.headers.set('X-Content-Security-Policy', cspHeader);
-  }
 
   return response;
 }
