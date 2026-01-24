@@ -178,15 +178,20 @@ export default function PrincipalPage() {
 
   // Filtrar perfiles por red social seleccionada Y excluir vistos
   const filteredProfiles = useMemo(() => {
-    if (!user) return [];
+    if (!user) {
+      console.log('🚫 No hay usuario - filteredProfiles vacío');
+      return [];
+    }
 
     // Obtener perfiles ya vistos por este usuario
     const viewedKey = `viewedProfiles_${user.id}`;
     const viewedData = typeof window !== 'undefined' ? localStorage.getItem(viewedKey) : null;
     const viewedProfiles = viewedData ? JSON.parse(viewedData) : [];
 
-    console.log('🔍 Perfiles totales:', profiles.length);
-    console.log('👀 Perfiles ya vistos:', viewedProfiles.length);
+    console.log('🔍 FILTRANDO PERFILES:');
+    console.log('   Total perfiles en state:', profiles.length);
+    console.log('   Perfiles ya vistos:', viewedProfiles.length);
+    console.log('   Red social seleccionada:', selectedNetwork);
 
     // Filtrar perfiles no vistos
     let availableProfiles = profiles.filter(p => !viewedProfiles.includes(p._id));
@@ -198,6 +203,8 @@ export default function PrincipalPage() {
       availableProfiles = availableProfiles.filter((p) => p.socialNetwork === selectedNetwork);
       console.log('📱 Perfiles filtrados por red social:', availableProfiles.length);
     }
+
+    console.log('🎯 RESULTADO FINAL filteredProfiles:', availableProfiles.length);
 
     return availableProfiles;
   }, [profiles, selectedNetwork, user]);
@@ -390,7 +397,9 @@ export default function PrincipalPage() {
   }
 
   // Si no hay perfiles, mostrar mensaje de perfiles agotados Y selector de redes
+  console.log('🎨 RENDER: profiles.length =', profiles.length, 'filteredProfiles.length =', filteredProfiles.length);
   if (profiles.length === 0) {
+    console.log('💬 MOSTRANDO MENSAJE DE PERFILES AGOTADOS');
     return (
       <div className="w-full bg-white flex items-center justify-center px-4 overflow-hidden relative fixed inset-0">
         <div className="text-center px-6 max-w-md mx-auto">
