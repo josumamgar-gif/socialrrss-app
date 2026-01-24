@@ -11,37 +11,58 @@ export default function PrincipalPage() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [waitingForNewUsers, setWaitingForNewUsers] = useState(false);
+  const [hasInitialized, setHasInitialized] = useState(false);
 
   console.log('🎯 PrincipalPage se ha montado');
   console.log('👤 Usuario actual:', user ? { id: user.id, username: user.username } : 'No autenticado');
 
-  // Solo redirigir si definitivamente no hay usuario después de un tiempo
+  // Manejar redirección y timeout de carga
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('token');
-      // Si no hay token ni usuario después de 2 segundos, redirigir
-      const timer = setTimeout(() => {
-        if (!user && !token) {
+
+      // Si tenemos token pero no usuario, esperamos hasta 10 segundos
+      if (token && !user && !hasInitialized) {
+        console.log('⏳ Token encontrado, esperando carga de usuario...');
+        const timer = setTimeout(() => {
+          if (!user) {
+            console.log('🚨 Timeout esperando usuario, redirigiendo a login...');
+            window.location.href = '/login';
+          }
+        }, 10000);
+        return () => clearTimeout(timer);
+      }
+
+      // Si no hay token ni usuario después de 3 segundos, redirigir
+      if (!token && !user && !hasInitialized) {
+        const timer = setTimeout(() => {
           console.log('🚨 No hay usuario ni token, redirigiendo a login...');
           window.location.href = '/login';
-        }
-      }, 2000);
-
-      return () => clearTimeout(timer);
+        }, 3000);
+        return () => clearTimeout(timer);
+      }
     }
-  }, [user]);
+  }, [user, hasInitialized]);
 
+  // Cargar perfiles cuando el usuario esté disponible
   useEffect(() => {
     if (!user) {
-      console.log('⏳ Esperando autenticación del usuario...');
-      // No establecer loading en false aquí, esperar a que llegue el usuario
+      console.log('⏳ Usuario no disponible, esperando...');
+      // Solo mantener loading si no hemos inicializado aún
+      if (!hasInitialized) {
+        setLoading(true);
+      }
       return;
+    }
+
+    if (hasInitialized) {
+      console.log('🔄 Usuario cambió, recargando datos...');
     }
 
     const loadData = async () => {
       try {
-        setLoading(true);
         console.log('🔄 Iniciando carga de perfiles para usuario:', user.id);
+        setLoading(true);
 
         const response = await profilesAPI.getAll();
         console.log('📡 Respuesta de API recibida:', response.profiles?.length || 0, 'perfiles');
@@ -59,14 +80,8 @@ export default function PrincipalPage() {
         console.log('🔍 Estado localStorage:', {
           tutorialCompleted,
           demoCompleted,
-          demosExhausted
-        });
-
-        console.log('🔍 Estado localStorage:', {
-          tutorialCompleted,
-          demoCompleted,
           demosExhausted,
-          userId: user?.id
+          userId: user.id
         });
 
         const allProfiles = response.profiles || [];
@@ -133,16 +148,20 @@ export default function PrincipalPage() {
 
         console.log('📋 Perfiles finales a mostrar:', profilesToShow.length);
         console.log('✅ Carga de perfiles completada');
+
+        setHasInitialized(true);
       } catch (error) {
-        console.error('Error cargando perfiles:', error);
+        console.error('❌ Error cargando perfiles:', error);
         setProfiles([]);
+        setWaitingForNewUsers(false);
+        setHasInitialized(true);
       } finally {
         setLoading(false);
       }
     };
 
     loadData();
-  }, [user]);
+  }, [user, hasInitialized]);
 
   if (waitingForNewUsers) {
     return (
@@ -192,8 +211,48 @@ export default function PrincipalPage() {
     loading,
     waitingForNewUsers,
     profilesCount: profiles.length,
-    hasUser: !!user
+    hasUser: !!user,
+    hasInitialized
   });
+
+  // Si estamos cargando, mostrar spinner
+  if (loading) {
+    return (
+      <div className="w-full bg-white flex items-center justify-center px-4 overflow-hidden relative fixed inset-0">
+        <div className="flex items-center justify-center h-full">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // Si no hay perfiles y hemos terminado de cargar, mostrar mensaje
+  if (!loading && profiles.length === 0 && !waitingForNewUsers) {
+    return (
+      <div className="w-full bg-white flex items-center justify-center px-4 overflow-hidden relative fixed inset-0">
+        <div className="text-center px-6">
+          <div className="text-6xl mb-6">📭</div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            No hay perfiles disponibles
+          </h2>
+          <p className="text-gray-600 mb-6 leading-relaxed">
+            Actualmente no hay perfiles disponibles para mostrar. Vuelve más tarde o recarga la página para comprobar si han llegado nuevos perfiles.
+          </p>
+          <button
+            onClick={() => {
+              setLoading(true);
+              setHasInitialized(false);
+              // Forzar recarga
+              window.location.reload();
+            }}
+            className="bg-primary-600 text-white py-3 px-6 rounded-xl hover:bg-primary-700 transition-colors font-medium shadow-lg hover:shadow-xl"
+          >
+            Comprobar nuevos perfiles
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full bg-white flex items-center justify-center px-4 overflow-hidden relative fixed inset-0">
