@@ -140,7 +140,9 @@ export default function RegisterPage() {
         // Limpiar cualquier estado anterior que pueda causar problemas
         localStorage.removeItem('demoCompleted');
         localStorage.removeItem('demosExhausted');
-        // NO limpiar tutorialCompleted aquí - queremos que se muestre el tutorial
+
+        // FORZAR que el tutorial se muestre para usuarios nuevos
+        localStorage.removeItem('tutorialCompleted');
 
         // Limpiar también otros posibles estados conflictivos
         sessionStorage.clear();
@@ -148,8 +150,10 @@ export default function RegisterPage() {
         console.log('✅ Registro exitoso, usuario guardado:', response.user.username);
         console.log('🔄 Redirigiendo a principal con usuario ya disponible...');
 
-        // Redirigir con usuario ya disponible en el store
-        window.location.href = '/principal';
+        // Pequeño delay para asegurar que el store se actualice
+        setTimeout(() => {
+          window.location.href = '/principal';
+        }, 100);
       }
     } catch (err: any) {
       setError(err.response?.data?.error || 'Error al registrarse');

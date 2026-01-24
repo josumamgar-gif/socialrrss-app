@@ -65,6 +65,7 @@ export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange,
         // Solo mostrar si tutorialCompleted es explícitamente false
         const shouldShow = tutorialCompleted === false;
         console.log('📚 Estado tutorial - completado:', tutorialCompleted, 'debe mostrarse:', shouldShow, 'tipo:', typeof tutorialCompleted);
+        console.log('📚 localStorage tutorialCompleted:', localStorage.getItem('tutorialCompleted'));
         setIsVisible(shouldShow);
       }
     }

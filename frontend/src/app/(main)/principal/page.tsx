@@ -41,37 +41,42 @@ export default function PrincipalPage() {
         return;
       }
 
-      // Si hay token pero no hay usuario después de 5 segundos, intentar recargar
-      // Esto es más tiempo para dar oportunidad al MainLayout de cargar el usuario
-      const timer = setTimeout(() => {
-        if (!user) {
-          console.log('⚠️ Usuario no disponible después de 5 segundos, recargando página');
-          window.location.reload();
-        } else {
-          console.log('✅ Usuario disponible:', user.username);
-        }
-      }, 5000);
-
-      return () => clearTimeout(timer);
+      console.log('✅ Token encontrado, esperando usuario...');
     }
-  }, [user]);
+  }, []); // Solo verificar una vez
 
   // Cargar perfiles cuando el usuario esté disponible
   useEffect(() => {
     if (!user) {
+      console.log('⏳ Esperando usuario para cargar perfiles...');
       return;
     }
+
+    console.log('✅ Usuario disponible, cargando perfiles:', user.username);
 
     const loadData = async () => {
       try {
         setLoading(true);
-        console.log('Cargando perfiles...');
+        console.log('🔄 Cargando perfiles de API...');
 
         const response = await profilesAPI.getAll();
         const allProfiles = response.profiles || [];
-        console.log('Perfiles obtenidos de API:', allProfiles.length);
+        console.log('📄 Perfiles obtenidos de API:', allProfiles.length);
 
-        // Separar perfiles reales y demo
+        console.log('Procesando perfiles de API...');
+
+        // SIEMPRE incluir perfiles demo locales (los primeros 3)
+        const localDemoProfiles = demoProfiles.slice(0, 3).map((profile, index) => ({
+          ...profile,
+          _id: `local-demo-${index + 1}`,
+          userId: '000000000000000000000000',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }));
+
+        console.log('Perfiles demo locales preparados:', localDemoProfiles.length);
+
+        // Filtrar perfiles reales (no demo)
         const realProfiles: Profile[] = [];
         allProfiles.forEach((p: Profile) => {
           const userIdObj = p.userId as any;
@@ -97,20 +102,21 @@ export default function PrincipalPage() {
         const newRealProfiles = realProfiles.filter(p => !viewedProfiles.includes(p._id));
         console.log('Perfiles reales nuevos:', newRealProfiles.length);
 
-        // Para usuario nuevo: mostrar 10 demos + todos los reales
-        // Para usuario existente: mostrar solo reales nuevos
-        const isNewUser = viewedProfiles.length === 0;
+        // Lógica simplificada: SIEMPRE mostrar demos + reales disponibles
         let profilesToShow: Profile[] = [];
 
-        if (isNewUser) {
-          // Usuario nuevo: 10 perfiles demo + todos los reales
-          const demoProfilesToShow = demoProfiles.slice(0, 10);
-          profilesToShow = [...demoProfilesToShow, ...realProfiles];
-          console.log('Usuario nuevo - mostrando 10 demos + todos los reales');
+        // Incluir siempre los perfiles demo locales
+        profilesToShow = [...localDemoProfiles];
+
+        // Agregar perfiles reales si existen
+        if (newRealProfiles.length > 0) {
+          profilesToShow = [...profilesToShow, ...newRealProfiles];
+          console.log('Mostrando demos + perfiles reales nuevos');
+        } else if (realProfiles.length > 0) {
+          profilesToShow = [...profilesToShow, ...realProfiles];
+          console.log('Mostrando demos + todos los perfiles reales');
         } else {
-          // Usuario existente: solo perfiles reales nuevos
-          profilesToShow = newRealProfiles;
-          console.log('Usuario existente - mostrando solo reales nuevos');
+          console.log('Mostrando solo perfiles demo (no hay reales)');
         }
 
         console.log('Total de perfiles a mostrar:', profilesToShow.length);

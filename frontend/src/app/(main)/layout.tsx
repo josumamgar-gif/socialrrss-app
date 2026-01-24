@@ -60,20 +60,14 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   const [pathname, setPathname] = useState('');
-  const [tutorialCompleted, setTutorialCompleted] = useState(() => {
-    // Inicializar correctamente desde localStorage
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('tutorialCompleted') === 'true';
-    }
-    return false;
-  });
+  const [tutorialCompleted, setTutorialCompleted] = useState(false);
   const { setUser, isAuthenticated, user } = useAuthStore();
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setPathname(window.location.pathname);
 
-      // Verificar estado del tutorial - actualizar cada vez que cambie la ruta
+      // Verificar estado del tutorial
       const tutorialDone = localStorage.getItem('tutorialCompleted') === 'true';
       console.log('📚 Estado tutorial en layout:', tutorialDone, 'ruta:', window.location.pathname);
       setTutorialCompleted(tutorialDone);
@@ -91,12 +85,11 @@ export default function MainLayout({
           .catch((error) => {
             console.error('❌ Error cargando usuario, limpiando token:', error);
             localStorage.removeItem('token');
-            // Redirigir a login si no se puede cargar el usuario
             window.location.href = '/login';
           });
       }
     }
-  }, [isAuthenticated, user, setUser]); // Agregar dependencias para evitar recargas innecesarias
+  }, []); // Solo ejecutar una vez al montar
 
   const tabs = [
     {

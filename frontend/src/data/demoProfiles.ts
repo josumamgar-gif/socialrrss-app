@@ -3,44 +3,24 @@ import { Profile } from '@/types';
 // Generar IDs únicos para perfiles demo (mantener prefijo demo- para lógica interna, pero no visible)
 const generateId = (index: number) => `demo-${index.toString().padStart(2, '0')}`;
 
-// Nombres y datos realistas para cada red social - REDUCIDO A 10 PERFILES TOTALES
-// Distribución: Instagram(2), TikTok(2), YouTube(2), LinkedIn(1), Facebook(1), X(1), Twitch(1)
+// Perfiles demo SIMPLIFICADOS - SOLO 3 PARA PRUEBA RÁPIDA
 const instagramProfiles = [
-  { username: 'maria_fotografia', followers: 125000, posts: 342, desc: 'Fotógrafa profesional especializada en retratos y paisajes urbanos' },
-  { username: 'viajero_aventurero', followers: 234000, posts: 890, desc: 'Descubriendo los rincones más hermosos del mundo' },
+  { username: 'demo_foto', followers: 1000, posts: 50, desc: 'Fotografía profesional 📸' },
 ];
 
 const tiktokProfiles = [
-  { username: 'bailes_trending', followers: 450000, videos: 234, desc: 'Los bailes más populares de TikTok' },
-  { username: 'comedia_rapida', followers: 320000, videos: 567, desc: 'Sketchs cómicos y situaciones divertidas' },
+  { username: 'demo_tiktok', followers: 500, videos: 20, desc: 'Bailes y tendencias 🎵' },
 ];
 
 const youtubeProfiles = [
-  { channelName: 'Tech Reviews', subscribers: 890000, videoCount: 234, desc: 'Reviews honestas de los últimos gadgets tecnológicos' },
-  { channelName: 'Gaming Zone', subscribers: 1230000, videoCount: 890, desc: 'Gameplays, reviews y noticias de videojuegos' },
+  { channelName: 'Demo Channel', subscribers: 2000, videoCount: 30, desc: 'Contenido variado 📺' },
 ];
 
-const linkedinProfiles = [
-  { name: 'Juan Pérez', title: 'CEO Tech Solutions', connections: 5000, desc: 'Emprendedor y líder en tecnología' },
-];
-
-const facebookProfiles = [
-  { pageName: 'Noticias Tech', likes: 890000, desc: 'Las últimas noticias de tecnología' },
-];
-
-const xProfiles = [
-  { handle: 'tech_news', followers: 234000, tweets: 5678, desc: 'Noticias de tecnología al instante' },
-];
-
-const twitchProfiles = [
-  { streamerName: 'GamerPro', followers: 234000, game: 'Valorant', desc: 'Streams diarios de gaming competitivo' },
-];
-
-const otrosProfiles = [
-  { name: 'Blog Personal', desc: 'Mi blog personal sobre diversos temas' },
-  { name: 'Portfolio Creativo', desc: 'Showcase de trabajos creativos' },
-  { name: 'Tienda Online', desc: 'Productos únicos y exclusivos' },
-];
+const linkedinProfiles = [];
+const facebookProfiles = [];
+const xProfiles = [];
+const twitchProfiles = [];
+const otrosProfiles = [];
 
 // Imágenes de Unsplash para usar
 const imageUrls = [
