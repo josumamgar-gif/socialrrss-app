@@ -67,9 +67,9 @@ export default function MainLayout({
     if (typeof window !== 'undefined') {
       setPathname(window.location.pathname);
 
-      // Verificar estado del tutorial
+      // Verificar estado del tutorial - FORZAR mostrar si no está completado
       const tutorialDone = localStorage.getItem('tutorialCompleted') === 'true';
-      console.log('📚 Estado tutorial en layout:', tutorialDone, 'ruta:', window.location.pathname);
+      console.log('📚 Tutorial completado:', tutorialDone, '- Mostrar tutorial:', !tutorialDone);
       setTutorialCompleted(tutorialDone);
 
       // Solo intentar cargar usuario si hay token y no está autenticado
@@ -89,7 +89,7 @@ export default function MainLayout({
           });
       }
     }
-  }, []); // Solo ejecutar una vez al montar
+  }, [isAuthenticated, user, setUser]);
 
   const tabs = [
     {

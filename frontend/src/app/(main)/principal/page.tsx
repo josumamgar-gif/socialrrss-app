@@ -45,96 +45,126 @@ export default function PrincipalPage() {
     }
   }, []); // Solo verificar una vez
 
-  // Cargar perfiles cuando el usuario esté disponible
+  // Cargar perfiles - LÓGICA ULTRA-SIMPLE Y GARANTIZADA
   useEffect(() => {
-    if (!user) {
-      console.log('⏳ Esperando usuario para cargar perfiles...');
-      return;
-    }
+    console.log('🚀 Iniciando carga de perfiles...');
 
-    console.log('✅ Usuario disponible, cargando perfiles:', user.username);
-
-    const loadData = async () => {
+    const loadProfiles = async () => {
       try {
         setLoading(true);
-        console.log('🔄 Cargando perfiles de API...');
+        console.log('📦 Preparando perfiles demo...');
 
-        const response = await profilesAPI.getAll();
-        const allProfiles = response.profiles || [];
-        console.log('📄 Perfiles obtenidos de API:', allProfiles.length);
-
-        console.log('Procesando perfiles de API...');
-
-        // SIEMPRE incluir perfiles demo locales (los primeros 3)
-        const localDemoProfiles = demoProfiles.slice(0, 3).map((profile, index) => ({
-          ...profile,
-          _id: `local-demo-${index + 1}`,
-          userId: '000000000000000000000000',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        }));
-
-        console.log('Perfiles demo locales preparados:', localDemoProfiles.length);
-
-        // Filtrar perfiles reales (no demo)
-        const realProfiles: Profile[] = [];
-        allProfiles.forEach((p: Profile) => {
-          const userIdObj = p.userId as any;
-          const isDemo =
-            (typeof p._id === 'string' && p._id.startsWith('demo-')) ||
-            userIdObj?.username === 'demo' ||
-            userIdObj?._id === '000000000000000000000000';
-
-          if (!isDemo) {
-            realProfiles.push(p);
+        // CREAR PERFILES DEMO LOCALES DIRECTAMENTE
+        const demoProfilesData = [
+          {
+            _id: 'demo-001',
+            userId: 'demo',
+            socialNetwork: 'instagram' as SocialNetwork,
+            isActive: true,
+            isPaid: false,
+            profileData: {
+              username: 'demo_foto',
+              followers: 1000,
+              posts: 50,
+              description: 'Fotografía profesional 📸',
+            },
+            images: ['https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=600&fit=crop&q=80'],
+            link: 'https://instagram.com/demo',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            paidUntil: null,
+            planType: null,
+          },
+          {
+            _id: 'demo-002',
+            userId: 'demo',
+            socialNetwork: 'tiktok' as SocialNetwork,
+            isActive: true,
+            isPaid: false,
+            profileData: {
+              username: 'demo_tiktok',
+              followers: 500,
+              videos: 20,
+              description: 'Bailes y tendencias 🎵',
+            },
+            images: ['https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=600&fit=crop&q=80'],
+            link: 'https://tiktok.com/@demo',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            paidUntil: null,
+            planType: null,
+          },
+          {
+            _id: 'demo-003',
+            userId: 'demo',
+            socialNetwork: 'youtube' as SocialNetwork,
+            isActive: true,
+            isPaid: false,
+            profileData: {
+              channelName: 'Demo Channel',
+              subscribers: 2000,
+              videoCount: 30,
+              description: 'Contenido variado 📺',
+            },
+            images: ['https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400&h=600&fit=crop&q=80'],
+            link: 'https://youtube.com/demo',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            paidUntil: null,
+            planType: null,
           }
-        });
+        ];
 
-        console.log('Perfiles reales encontrados:', realProfiles.length);
+        console.log('✅ Perfiles demo creados:', demoProfilesData.length);
 
-        // Obtener perfiles vistos por este usuario
-        const viewedKey = `viewedProfiles_${user.id}`;
-        const viewedData = typeof window !== 'undefined' ? localStorage.getItem(viewedKey) : null;
-        const viewedProfiles = viewedData ? JSON.parse(viewedData) : [];
-        console.log('Perfiles ya vistos:', viewedProfiles.length);
+        // Intentar agregar perfiles reales si hay usuario y API funciona
+        let allProfiles = [...demoProfilesData];
 
-        // Filtrar perfiles reales no vistos (nuevos desde última sesión)
-        const newRealProfiles = realProfiles.filter(p => !viewedProfiles.includes(p._id));
-        console.log('Perfiles reales nuevos:', newRealProfiles.length);
+        if (user) {
+          try {
+            console.log('🔄 Intentando cargar perfiles reales para usuario:', user.username);
+            const response = await profilesAPI.getAll();
+            const apiProfiles = response.profiles || [];
 
-        // Lógica simplificada: SIEMPRE mostrar demos + reales disponibles
-        let profilesToShow: Profile[] = [];
+            if (apiProfiles.length > 0) {
+              // Filtrar solo perfiles reales (no demo)
+              const realProfiles = apiProfiles.filter((p: any) => {
+                const isDemo = p._id?.startsWith('demo-') ||
+                               p.userId?.username === 'demo' ||
+                               p.userId === '000000000000000000000000';
+                return !isDemo;
+              });
 
-        // Incluir siempre los perfiles demo locales
-        profilesToShow = [...localDemoProfiles];
-
-        // Agregar perfiles reales si existen
-        if (newRealProfiles.length > 0) {
-          profilesToShow = [...profilesToShow, ...newRealProfiles];
-          console.log('Mostrando demos + perfiles reales nuevos');
-        } else if (realProfiles.length > 0) {
-          profilesToShow = [...profilesToShow, ...realProfiles];
-          console.log('Mostrando demos + todos los perfiles reales');
-        } else {
-          console.log('Mostrando solo perfiles demo (no hay reales)');
+              if (realProfiles.length > 0) {
+                console.log('✅ Agregando perfiles reales:', realProfiles.length);
+                allProfiles = [...allProfiles, ...realProfiles];
+              }
+            }
+          } catch (apiError) {
+            console.warn('⚠️ API no disponible, continuando solo con demos');
+          }
         }
 
-        console.log('Total de perfiles a mostrar:', profilesToShow.length);
+        console.log('📊 Total perfiles a mostrar:', allProfiles.length);
 
-        // Mezclar aleatoriamente
-        profilesToShow = [...profilesToShow].sort(() => Math.random() - 0.5);
+        // Mezclar y establecer
+        const shuffled = [...allProfiles].sort(() => Math.random() - 0.5);
+        setProfiles(shuffled);
 
-        setProfiles(profilesToShow);
+        console.log('🎉 Perfiles cargados exitosamente');
+
       } catch (error) {
-        console.error('Error cargando perfiles:', error);
+        console.error('❌ Error cargando perfiles:', error);
+        // Fallback mínimo
         setProfiles([]);
       } finally {
         setLoading(false);
       }
     };
 
-    loadData();
-  }, [user]);
+    // Cargar perfiles inmediatamente (no esperar usuario)
+    loadProfiles();
+  }, [user]); // Pero reactivar si cambia el usuario
 
   // Marcar perfil como visto
   const markProfileAsViewed = (profileId: string) => {
@@ -266,8 +296,8 @@ export default function PrincipalPage() {
     );
   }
 
-  // Mostrar loading mientras se carga todo
-  if (loading || !user) {
+  // Mostrar loading mientras se cargan perfiles
+  if (loading) {
     return (
       <div className="w-full bg-white flex items-center justify-center px-4 overflow-hidden relative fixed inset-0">
         <div className="flex items-center justify-center h-full">
