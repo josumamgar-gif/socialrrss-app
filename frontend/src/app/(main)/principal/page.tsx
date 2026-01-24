@@ -147,6 +147,38 @@ export default function PrincipalPage() {
 
         console.log('📊 Total perfiles a mostrar:', allProfiles.length);
 
+        // VERIFICAR SI SE HAN VISTO SUFICIENTES PERFILES DEMO
+        if (allProfiles.length > 0 && user) {
+          const demoProfilesInList = allProfiles.filter(p => p._id.startsWith('local-demo-') || p._id.startsWith('demo-'));
+          const realProfilesInList = allProfiles.filter(p => !p._id.startsWith('local-demo-') && !p._id.startsWith('demo-'));
+
+          console.log('Demo profiles en lista:', demoProfilesInList.length);
+          console.log('Real profiles en lista:', realProfilesInList.length);
+
+          // Si solo hay perfiles demo (no hay reales), verificar si el usuario ya ha visto varios
+          if (demoProfilesInList.length >= 3 && realProfilesInList.length === 0) {
+            const viewedKey = `viewedProfiles_${user.id}`;
+            const viewedData = localStorage.getItem(viewedKey);
+            const viewedProfiles = viewedData ? JSON.parse(viewedData) : [];
+
+            // Contar cuántos perfiles demo han sido vistos
+            const demoProfileIds = demoProfilesInList.map(p => p._id);
+            const viewedDemoProfiles = demoProfileIds.filter(id => viewedProfiles.includes(id));
+
+            console.log('Perfiles demo vistos:', viewedDemoProfiles.length, 'de', demoProfilesInList.length);
+
+            // Si ha visto al menos 2 de los 3 perfiles demo, mostrar mensaje
+            if (viewedDemoProfiles.length >= 2) {
+              console.log('🎯 Usuario ha visto suficientes perfiles demo - mostrando mensaje especial');
+
+              // En lugar de mostrar perfiles, mostrar mensaje
+              setProfiles([]);
+              setLoading(false);
+              return; // Salir aquí para mostrar el mensaje vacío
+            }
+          }
+        }
+
         // Mezclar y establecer
         const shuffled = [...allProfiles].sort(() => Math.random() - 0.5);
         setProfiles(shuffled);
@@ -307,23 +339,23 @@ export default function PrincipalPage() {
     );
   }
 
-  // Si no hay perfiles, mostrar mensaje (esto no debería pasar con la nueva lógica)
+  // Si no hay perfiles, mostrar mensaje de perfiles agotados
   if (profiles.length === 0) {
     return (
       <div className="w-full bg-white flex items-center justify-center px-4 overflow-hidden relative fixed inset-0">
         <div className="text-center px-6">
-          <div className="text-6xl mb-6">📭</div>
+          <div className="text-6xl mb-6">🔄</div>
           <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            No hay perfiles disponibles
+            No tenemos más perfiles para mostrar
           </h2>
           <p className="text-gray-600 mb-6 leading-relaxed">
-            Estamos preparando los perfiles. Vuelve a cargar la página.
+            Hemos terminado de mostrarte todos los perfiles disponibles. Vuelve más tarde para ver contenido nuevo.
           </p>
           <button
             onClick={() => window.location.reload()}
             className="bg-primary-600 text-white py-3 px-6 rounded-xl hover:bg-primary-700 transition-colors font-medium shadow-lg hover:shadow-xl"
           >
-            Recargar página
+            Comprobar de nuevo
           </button>
         </div>
       </div>
@@ -386,21 +418,6 @@ export default function PrincipalPage() {
         paddingBottom: '0'
       }}>
 
-        {/* Botón selector de red social */}
-        <button
-          onClick={() => setShowNetworkSelector(true)}
-          className="absolute top-4 left-4 z-20 bg-white/90 backdrop-blur-sm rounded-full p-3 shadow-lg hover:shadow-xl transition-all"
-          style={{ backdropFilter: 'blur(10px)' }}
-        >
-          <Squares2X2Icon className="h-6 w-6 text-gray-700" />
-        </button>
-
-        {/* Indicador de red seleccionada */}
-        {selectedNetwork !== 'all' && (
-          <div className="absolute top-4 right-4 z-20 bg-primary-600 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg">
-            {selectedNetwork}
-          </div>
-        )}
 
         {filteredProfiles.length > 0 && (
           <div className="relative w-full max-w-md mx-auto profile-card-container" style={{ overflow: 'visible', touchAction: 'none', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -437,8 +454,21 @@ export default function PrincipalPage() {
           </div>
         )}
 
-        {/* Controles de navegación - Parte inferior */}
-        <div className="absolute bottom-6 left-6 right-6 flex justify-between items-center">
+        {/* Controles de navegación - Parte inferior - AL FRENTE DE TODO */}
+        <div className="absolute bottom-6 left-6 right-6 flex justify-between items-center z-50">
+          {/* Botón Selector de Red Social - Extremo izquierdo */}
+          <button
+            onClick={() => setShowNetworkSelector(true)}
+            className="bg-white/90 backdrop-blur-sm text-gray-700 rounded-full p-3 shadow-lg hover:shadow-xl transition-all relative z-50"
+            style={{
+              backdropFilter: 'blur(10px)',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.1)',
+              zIndex: 50
+            }}
+            aria-label="Seleccionar red social"
+          >
+            <Squares2X2Icon className="h-6 w-6" />
+          </button>
           {/* Botón Izquierda (No me gusta) */}
           <button
             onClick={(e) => {
@@ -451,9 +481,10 @@ export default function PrincipalPage() {
               }
             }}
             disabled={isAnimating}
-            className="bg-red-500 hover:bg-red-600 text-white rounded-full transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none w-16 h-16 sm:w-18 sm:w-18 flex items-center justify-center transform hover:scale-110 active:scale-95"
+            className="bg-red-500 hover:bg-red-600 text-white rounded-full transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none w-16 h-16 sm:w-18 sm:w-18 flex items-center justify-center transform hover:scale-110 active:scale-95 relative z-50"
             style={{
-              boxShadow: '0 8px 16px rgba(239, 68, 68, 0.5), 0 4px 8px rgba(239, 68, 68, 0.4)'
+              boxShadow: '0 8px 16px rgba(239, 68, 68, 0.5), 0 4px 8px rgba(239, 68, 68, 0.4)',
+              zIndex: 50
             }}
             aria-label="No me gusta"
           >
@@ -472,9 +503,10 @@ export default function PrincipalPage() {
               }
             }}
             disabled={isAnimating || backUsed || history.length === 0}
-            className="bg-gray-500 hover:bg-gray-600 text-white rounded-full transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center transform hover:scale-110 active:scale-95"
+            className="bg-gray-500 hover:bg-gray-600 text-white rounded-full transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center transform hover:scale-110 active:scale-95 relative z-50"
             style={{
-              boxShadow: '0 6px 12px rgba(107, 114, 128, 0.5), 0 3px 6px rgba(107, 114, 128, 0.4)'
+              boxShadow: '0 6px 12px rgba(107, 114, 128, 0.5), 0 3px 6px rgba(107, 114, 128, 0.4)',
+              zIndex: 50
             }}
             aria-label="Volver al perfil anterior"
           >
@@ -493,9 +525,10 @@ export default function PrincipalPage() {
               }
             }}
             disabled={isAnimating}
-            className="bg-yellow-500 hover:bg-yellow-600 text-white rounded-full transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center transform hover:scale-110 active:scale-95"
+            className="bg-yellow-500 hover:bg-yellow-600 text-white rounded-full transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center transform hover:scale-110 active:scale-95 relative z-50"
             style={{
-              boxShadow: '0 6px 12px rgba(234, 179, 8, 0.5), 0 3px 6px rgba(234, 179, 8, 0.4)'
+              boxShadow: '0 6px 12px rgba(234, 179, 8, 0.5), 0 3px 6px rgba(234, 179, 8, 0.4)',
+              zIndex: 50
             }}
             aria-label="Ver detalles del perfil"
           >
@@ -514,9 +547,10 @@ export default function PrincipalPage() {
               }
             }}
             disabled={isAnimating}
-            className="bg-blue-500 hover:bg-blue-600 text-white rounded-full transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none w-16 h-16 sm:w-18 sm:h-18 flex items-center justify-center transform hover:scale-110 active:scale-95"
+            className="bg-blue-500 hover:bg-blue-600 text-white rounded-full transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none w-16 h-16 sm:w-18 sm:h-18 flex items-center justify-center transform hover:scale-110 active:scale-95 relative z-50"
             style={{
-              boxShadow: '0 8px 16px rgba(59, 130, 246, 0.5), 0 4px 8px rgba(59, 130, 246, 0.4)'
+              boxShadow: '0 8px 16px rgba(59, 130, 246, 0.5), 0 4px 8px rgba(59, 130, 246, 0.4)',
+              zIndex: 50
             }}
             aria-label="Ir al Enlace"
           >
