@@ -33,7 +33,7 @@ export interface ProfileData {
   description?: string;
 }
 
-export type PlanType = 'monthly' | 'yearly' | 'lifetime';
+export type PlanType = 'monthly' | 'yearly' | 'lifetime' | 'free_trial';
 export type PaymentMethod = 'paypal' | 'card' | 'sepa' | 'stripe';
 
 export interface Profile {

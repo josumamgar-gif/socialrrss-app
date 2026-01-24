@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth.middleware';
 import User from '../models/User';
+import Promotion from '../models/Promotion';
 import { generateToken } from '../utils/jwt';
 
 export const register = async (req: any, res: Response): Promise<void> => {
@@ -58,6 +59,66 @@ export const register = async (req: any, res: Response): Promise<void> => {
 
     await user.save();
 
+    // Check and apply free promotion automatically for first 100 users
+    let promotionActivated = false;
+    let promotionData = null;
+
+    try {
+      console.log('🔍 Verificando promoción gratuita para nuevo usuario...');
+      const usedPromotionsCount = await Promotion.countDocuments({
+        type: 'free_trial_30_days',
+        status: { $in: ['active', 'expired', 'converted'] }
+      });
+
+      console.log(`📊 Promociones usadas: ${usedPromotionsCount}/100`);
+
+      if (usedPromotionsCount < 100) {
+        console.log('✅ Aplicando promoción gratuita...');
+
+        // Calculate promotion dates
+        const startDate = new Date();
+        const endDate = new Date();
+        endDate.setDate(endDate.getDate() + 30);
+
+        // Create promotion record
+        const promotion = new Promotion({
+          userId: user._id,
+          type: 'free_trial_30_days',
+          status: 'active',
+          startDate,
+          endDate,
+          usageCount: usedPromotionsCount + 1,
+          maxUsage: 100,
+        });
+
+        await promotion.save();
+        console.log('✅ Registro de promoción guardado');
+
+        // Update user with promotion data
+        user.isOnFreePromotion = true;
+        user.freePromotionStartDate = startDate;
+        user.freePromotionEndDate = endDate;
+        await user.save();
+        console.log('✅ Usuario actualizado con promoción');
+
+        promotionActivated = true;
+        promotionData = {
+          type: promotion.type,
+          status: promotion.status,
+          startDate: promotion.startDate,
+          endDate: promotion.endDate,
+          remainingDays: 30,
+        };
+
+        console.log('🎉 Promoción gratuita aplicada exitosamente');
+      } else {
+        console.log('❌ Promoción gratuita no disponible (límite alcanzado)');
+      }
+    } catch (promotionError) {
+      console.error('❌ Error aplicando promoción gratuita:', promotionError);
+      // Continue with registration even if promotion fails
+    }
+
     // Generar token
     const token = generateToken({
       userId: user._id.toString(),
@@ -77,7 +138,12 @@ export const register = async (req: any, res: Response): Promise<void> => {
         location: user.location,
         interests: user.interests,
         favoriteSocialNetwork: user.favoriteSocialNetwork,
+        isOnFreePromotion: user.isOnFreePromotion,
+        freePromotionStartDate: user.freePromotionStartDate,
+        freePromotionEndDate: user.freePromotionEndDate,
       },
+      freePromotionActivated: promotionActivated,
+      promotion: promotionData,
     });
   } catch (error: any) {
     console.error('Error en registro:', error);

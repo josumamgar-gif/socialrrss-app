@@ -11,6 +11,10 @@ export interface IUser extends Document {
   location?: string;
   interests?: string[];
   favoriteSocialNetwork?: string;
+  // Promotion fields
+  isOnFreePromotion?: boolean;
+  freePromotionStartDate?: Date;
+  freePromotionEndDate?: Date;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -66,6 +70,19 @@ const UserSchema: Schema = new Schema(
     favoriteSocialNetwork: {
       type: String,
       enum: ['tiktok', 'youtube', 'instagram', 'facebook', 'linkedin', 'twitch', 'x', 'otros', null],
+      default: null,
+    },
+    // Promotion fields
+    isOnFreePromotion: {
+      type: Boolean,
+      default: false,
+    },
+    freePromotionStartDate: {
+      type: Date,
+      default: null,
+    },
+    freePromotionEndDate: {
+      type: Date,
       default: null,
     },
   },

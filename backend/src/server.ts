@@ -13,6 +13,7 @@ import pricingRoutes from './routes/pricing.routes';
 import authRoutes from './routes/auth.routes';
 import profilesRoutes from './routes/profiles.routes';
 import supportRoutes from './routes/support.routes';
+import promotionRoutes from './routes/promotion.routes';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -104,6 +105,7 @@ app.use('/api/profiles', profilesRoutes);
 app.use('/api/payments', paymentsRoutes);
 app.use('/api/pricing', pricingRoutes);
 app.use('/api/support', supportRoutes);
+app.use('/api/promotion', promotionRoutes);
 
 // Ruta de prueba
 app.get('/api/health', (_req, res) => {

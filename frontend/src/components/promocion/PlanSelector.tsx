@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { PricingPlan, PlanType, PaymentMethod } from '@/types';
-import { pricingAPI, paymentsAPI } from '@/lib/api';
+import { pricingAPI, paymentsAPI, promotionAPI } from '@/lib/api';
 import { CheckIcon } from '@heroicons/react/24/solid';
 import StripePayment from './StripePayment';
 import { Profile } from '@/types';
@@ -27,6 +27,8 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
   const [stripePaymentId, setStripePaymentId] = useState<string | null>(null);
   const [paymentId, setPaymentId] = useState<string | null>(null);
   const [profileData, setProfileData] = useState<Profile | null>(profile || null);
+  const [freePromotionAvailable, setFreePromotionAvailable] = useState(false);
+  const [remainingFreeSpots, setRemainingFreeSpots] = useState(0);
   const planRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   useEffect(() => {
@@ -40,23 +42,22 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
     }
   }, [profileId, profile]);
 
-  // Efecto para centrar el plan recomendado (10€ anual) al cargar
+  // Efecto para seleccionar el plan gratis por defecto si está disponible
   useEffect(() => {
     if (plans.length > 0 && !selectedPlan) {
-      // Buscar el plan de 10€ anual (recomendado)
-      const recommendedPlan = plans.find(p => p.price === 10 && p.durationDays === 365);
-      if (recommendedPlan) {
-        setSelectedPlan(recommendedPlan.type);
-        // Centrar el plan recomendado después de un delay para asegurar que el DOM esté listo
-        setTimeout(() => {
-          scrollToPlan(recommendedPlan.type);
-        }, 400);
-      } else if (plans.length > 0) {
-        // Si no hay plan recomendado, seleccionar el primero
-        setSelectedPlan(plans[0].type);
-        setTimeout(() => {
-          scrollToPlan(plans[0].type);
-        }, 400);
+      // Priorizar el plan gratis si está disponible
+      const freePlan = plans.find(p => p.type === 'free_trial');
+      if (freePlan) {
+        setSelectedPlan(freePlan.type);
+      } else {
+        // Si no hay plan gratis, seleccionar el recomendado (10€ anual)
+        const recommendedPlan = plans.find(p => p.price === 10 && p.durationDays === 365);
+        if (recommendedPlan) {
+          setSelectedPlan(recommendedPlan.type);
+        } else if (plans.length > 0) {
+          // Si no hay recomendado, seleccionar el primero
+          setSelectedPlan(plans[0].type);
+        }
       }
     }
   }, [plans]);
@@ -88,7 +89,8 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
       setLoadingPlans(true);
       const response = await pricingAPI.getPlans();
       setPlans(response.plans);
-      // No seleccionar automáticamente aquí, se hará en el useEffect que busca el recomendado
+      setFreePromotionAvailable(response.freePromotionAvailable || false);
+      setRemainingFreeSpots(response.remainingFreeSpots || 0);
     } catch (err: any) {
       setError('Error al cargar los planes');
       console.error(err);
@@ -128,9 +130,44 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
     setError(null);
 
     try {
+      // Handle free promotion activation
+      if (selectedPlan === 'free_trial') {
+        const promotionResponse = await promotionAPI.activateFreePromotion();
+
+        // Create a mock payment record for the free promotion
+        const freePlanData = plans.find(p => p.type === 'free_trial');
+        if (freePlanData && profileData) {
+          localStorage.setItem('lastPayment', JSON.stringify({
+            _id: `free-${Date.now()}`,
+            amount: 0,
+            planType: 'free_trial',
+            paymentMethod: 'free',
+            createdAt: new Date().toISOString(),
+            profileId: profileId,
+            promotionData: promotionResponse.promotion,
+          }));
+        }
+
+        // Call onPaymentSuccess if provided
+        if (onPaymentSuccess && freePlanData && profileData) {
+          onPaymentSuccess({
+            _id: `free-${Date.now()}`,
+            amount: 0,
+            planType: 'free_trial',
+            paymentMethod: 'free',
+            createdAt: new Date().toISOString(),
+            promotionData: promotionResponse.promotion,
+          });
+        }
+
+        setLoading(false);
+        return;
+      }
+
+      // Handle paid plans (existing logic)
       const response = await paymentsAPI.createOrder(profileId, selectedPlan, selectedPaymentMethod);
       setPaymentId(response.paymentId);
-      
+
       // Guardar datos del pago para mostrar recibo después
       const selectedPlanData = plans.find(p => p.type === selectedPlan);
       if (selectedPlanData && profileData) {
@@ -143,7 +180,7 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
           profileId: profileId,
         }));
       }
-      
+
       if (selectedPaymentMethod === 'paypal' && response.orderId) {
         // Para PayPal, necesitamos redirigir al usuario a la página de aprobación
         const approvalUrl = response.approvalUrl;
@@ -216,6 +253,8 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
         return '📆';
       case 'lifetime':
         return '⭐';
+      case 'free_trial':
+        return '🎁';
       default:
         return '💎';
     }
@@ -229,6 +268,8 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
         return 'border-green-500 bg-green-50';
       case 'lifetime':
         return 'border-purple-500 bg-purple-50';
+      case 'free_trial':
+        return 'border-emerald-500 bg-emerald-50';
       default:
         return 'border-gray-300 bg-gray-50';
     }
@@ -256,9 +297,10 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
         </div>
       )}
 
-      {/* Grid de planes - Simple y responsive */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6" id="plans-carousel">
-        {plans.map((plan) => (
+      {/* Lista de planes - Diseño vertical optimizado para móvil y desktop */}
+      <div className="space-y-3 sm:space-y-4 mb-6 max-w-2xl mx-auto px-2 sm:px-0">
+
+        {plans.map((plan, index) => (
           <div
             key={plan.type}
             ref={(el) => {
@@ -266,56 +308,77 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
             }}
             onClick={() => setSelectedPlan(plan.type)}
             className={`
-              relative border-2 rounded-xl p-5 pt-8 cursor-pointer transition-all overflow-visible
-              shadow-lg
-              ${selectedPlan === plan.type 
-                ? `${getPlanColor(plan.type)} shadow-xl border-primary-500 ring-2 ring-primary-300` 
-                : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-xl'
+              relative border-2 rounded-xl p-4 sm:p-6 cursor-pointer transition-all duration-200 overflow-visible
+              ${selectedPlan === plan.type
+                ? `${getPlanColor(plan.type)} shadow-xl border-primary-500 ring-2 ring-primary-300`
+                : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-lg'
               }
             `}
           >
-            {plan.price === 10 && plan.durationDays === 365 && (
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
+            {/* Badge superior */}
+            <div className="absolute -top-2 left-4 flex gap-2">
+              {plan.type === 'free_trial' && remainingFreeSpots > 0 && (
+                <span className="bg-emerald-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg whitespace-nowrap">
+                  GRATIS • {remainingFreeSpots} DISPONIBLES
+                </span>
+              )}
+              {plan.price === 10 && plan.durationDays === 365 && (
                 <span className="bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg whitespace-nowrap">
                   RECOMENDADO
                 </span>
-              </div>
-            )}
-            {plan.price === 50 && (
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
+              )}
+              {plan.price === 50 && (
                 <span className="bg-purple-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg whitespace-nowrap">
                   ÚNICO
                 </span>
-              </div>
-            )}
-            {selectedPlan === plan.type && (
-              <div className="absolute top-3 right-3">
-                <CheckIcon className="h-5 w-5 text-primary-600" />
-              </div>
-            )}
-            
-            <div className="text-center mb-3">
-              <div className="text-3xl mb-2">{getPlanIcon(plan.type)}</div>
-              <h3 className="text-lg font-bold text-gray-900">{plan.name}</h3>
-              <div className="mt-2">
-                <span className="text-2xl font-bold text-gray-900">
-                  {plan.price % 1 === 0 ? `${plan.price}` : plan.price.toFixed(2)}€
-                </span>
-                {plan.durationDays && plan.durationDays > 0 && (
-                  <span className="text-gray-600 text-xs ml-1">/{plan.durationDays === 365 ? 'año' : 'mes'}</span>
-                )}
-              </div>
-              <p className="text-xs text-gray-600 mt-1">{plan.description}</p>
+              )}
             </div>
 
-            <ul className="space-y-1.5">
-              {plan.features.map((feature, idx) => (
-                <li key={idx} className="flex items-start">
-                  <CheckIcon className="h-4 w-4 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                  <span className="text-xs text-gray-700">{feature}</span>
-                </li>
-              ))}
-            </ul>
+            {/* Check icon cuando está seleccionado */}
+            {selectedPlan === plan.type && (
+              <div className="absolute top-3 right-3 sm:top-4 sm:right-4">
+                <CheckIcon className="h-5 w-5 sm:h-6 sm:w-6 text-primary-600" />
+              </div>
+            )}
+
+            {/* Contenido del plan */}
+            <div className="flex items-start gap-4">
+              {/* Icono del plan */}
+              <div className="flex-shrink-0">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-100 flex items-center justify-center text-xl sm:text-2xl">
+                  {getPlanIcon(plan.type)}
+                </div>
+              </div>
+
+              {/* Información del plan */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-lg font-bold text-gray-900">{plan.name}</h3>
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-gray-900">
+                      {plan.price % 1 === 0 ? `${plan.price}` : plan.price.toFixed(2)}€
+                    </div>
+                    {plan.durationDays && plan.durationDays > 0 && (
+                      <div className="text-sm text-gray-600">
+                        /{plan.durationDays === 365 ? 'año' : 'mes'}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <p className="text-sm text-gray-600 mb-3">{plan.description}</p>
+
+                {/* Lista de características */}
+                <div className="space-y-1">
+                  {plan.features.map((feature, idx) => (
+                    <div key={idx} className="flex items-start gap-2">
+                      <CheckIcon className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm text-gray-700">{feature}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         ))}
       </div>
@@ -401,16 +464,27 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
               </>
             ) : (
               <>
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-                <span>
-                  {(() => {
-                    const planPrice = selectedPlan ? plans.find(p => p.type === selectedPlan)?.price || 0 : 0;
-                    const formattedPrice = planPrice % 1 === 0 ? planPrice : planPrice.toFixed(2);
-                    return `Pagar ${formattedPrice}€`;
-                  })()}
-                </span>
+                {selectedPlan === 'free_trial' ? (
+                  <>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>Activar Prueba Gratuita</span>
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    <span>
+                      {(() => {
+                        const planPrice = selectedPlan ? plans.find(p => p.type === selectedPlan)?.price || 0 : 0;
+                        const formattedPrice = planPrice % 1 === 0 ? planPrice : planPrice.toFixed(2);
+                        return `Pagar ${formattedPrice}€`;
+                      })()}
+                    </span>
+                  </>
+                )}
               </>
             )}
           </button>

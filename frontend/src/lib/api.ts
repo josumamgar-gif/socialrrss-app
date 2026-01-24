@@ -166,13 +166,87 @@ export const profilesAPI = {
 
 // API de planes de pago
 export const pricingAPI = {
-  getPlans: async (): Promise<{ plans: PricingPlan[] }> => {
-    const response = await api.get<{ plans: PricingPlan[] }>('/pricing');
+  getPlans: async (): Promise<{
+    plans: PricingPlan[];
+    freePromotionAvailable?: boolean;
+    remainingFreeSpots?: number;
+  }> => {
+    const response = await api.get<{
+      plans: PricingPlan[];
+      freePromotionAvailable?: boolean;
+      remainingFreeSpots?: number;
+    }>('/pricing');
     return response.data;
   },
 };
 
 // API de pagos
+// API de promociones
+export const promotionAPI = {
+  checkAvailability: async (): Promise<{
+    isAvailable: boolean;
+    remainingSpots: number;
+    totalSpots: number;
+    usedSpots: number;
+  }> => {
+    const response = await api.get<{
+      isAvailable: boolean;
+      remainingSpots: number;
+      totalSpots: number;
+      usedSpots: number;
+    }>('/promotion/availability');
+    return response.data;
+  },
+
+  activateFreePromotion: async (): Promise<{
+    message: string;
+    promotion: {
+      type: string;
+      status: string;
+      startDate: string;
+      endDate: string;
+      remainingDays: number;
+    };
+  }> => {
+    const response = await api.post<{
+      message: string;
+      promotion: {
+        type: string;
+        status: string;
+        startDate: string;
+        endDate: string;
+        remainingDays: number;
+      };
+    }>('/promotion/activate');
+    return response.data;
+  },
+
+  getUserStatus: async (): Promise<{
+    hasPromotion: boolean;
+    promotion?: {
+      type: string;
+      status: string;
+      startDate: string;
+      endDate: string;
+      remainingDays: number;
+      isExpired: boolean;
+    };
+  }> => {
+    const response = await api.get<{
+      hasPromotion: boolean;
+      promotion?: {
+        type: string;
+        status: string;
+        startDate: string;
+        endDate: string;
+        remainingDays: number;
+        isExpired: boolean;
+      };
+    }>('/promotion/status');
+    return response.data;
+  },
+};
+
 export const paymentsAPI = {
   createOrder: async (
     profileId: string,

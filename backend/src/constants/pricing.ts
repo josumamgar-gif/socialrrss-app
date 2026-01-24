@@ -1,4 +1,4 @@
-export type PlanType = 'monthly' | 'yearly' | 'lifetime';
+export type PlanType = 'monthly' | 'yearly' | 'lifetime' | 'free_trial';
 
 export interface PricingPlan {
   type: PlanType;
@@ -9,6 +9,21 @@ export interface PricingPlan {
   description: string;
   features: string[];
 }
+
+export const FREE_PROMOTION_PLAN: PricingPlan = {
+  type: 'free_trial',
+  name: 'Prueba Gratuita 30 Días',
+  price: 0.0,
+  currency: 'EUR',
+  durationDays: 30,
+  description: 'Prueba gratuita por tiempo limitado',
+  features: [
+    'Promoción gratuita durante 30 días',
+    'Acceso completo a todas las funciones',
+    'Soporte por email',
+    'Sin compromiso - luego 1€/mes',
+  ],
+};
 
 export const PRICING_PLANS: PricingPlan[] = [
   {
