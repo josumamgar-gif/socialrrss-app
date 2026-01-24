@@ -60,15 +60,22 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   const [pathname, setPathname] = useState('');
-  const [tutorialCompleted, setTutorialCompleted] = useState(false);
+  const [tutorialCompleted, setTutorialCompleted] = useState(() => {
+    // Inicializar correctamente desde localStorage
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('tutorialCompleted') === 'true';
+    }
+    return false;
+  });
   const { setUser, isAuthenticated, user } = useAuthStore();
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setPathname(window.location.pathname);
 
-      // Verificar estado del tutorial
+      // Verificar estado del tutorial - actualizar cada vez que cambie la ruta
       const tutorialDone = localStorage.getItem('tutorialCompleted') === 'true';
+      console.log('📚 Estado tutorial en layout:', tutorialDone, 'ruta:', window.location.pathname);
       setTutorialCompleted(tutorialDone);
 
       // Solo intentar cargar usuario si hay token y no está autenticado

@@ -62,8 +62,9 @@ export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange,
 
       // Si forceOpen es undefined, usar el estado pasado desde el layout
       if (forceOpen === undefined) {
+        // Solo mostrar si tutorialCompleted es explícitamente false
         const shouldShow = tutorialCompleted === false;
-        console.log('📚 Estado tutorial - completado:', tutorialCompleted, 'debe mostrarse:', shouldShow);
+        console.log('📚 Estado tutorial - completado:', tutorialCompleted, 'debe mostrarse:', shouldShow, 'tipo:', typeof tutorialCompleted);
         setIsVisible(shouldShow);
       }
     }

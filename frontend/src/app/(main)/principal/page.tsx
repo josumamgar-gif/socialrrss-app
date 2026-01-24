@@ -34,18 +34,23 @@ export default function PrincipalPage() {
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('token');
 
-      // Si no hay token, redirigir a login
+      // Si no hay token, redirigir inmediatamente a login
       if (!token) {
+        console.log('❌ No hay token, redirigiendo a login');
         window.location.href = '/login';
         return;
       }
 
-      // Si hay token pero no hay usuario después de 3 segundos, redirigir
+      // Si hay token pero no hay usuario después de 5 segundos, intentar recargar
+      // Esto es más tiempo para dar oportunidad al MainLayout de cargar el usuario
       const timer = setTimeout(() => {
         if (!user) {
-          window.location.href = '/login';
+          console.log('⚠️ Usuario no disponible después de 5 segundos, recargando página');
+          window.location.reload();
+        } else {
+          console.log('✅ Usuario disponible:', user.username);
         }
-      }, 3000);
+      }, 5000);
 
       return () => clearTimeout(timer);
     }

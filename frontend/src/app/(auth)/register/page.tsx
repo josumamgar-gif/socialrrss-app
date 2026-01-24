@@ -132,25 +132,23 @@ export default function RegisterPage() {
         favoriteSocialNetwork: dataToSend.favoriteSocialNetwork || undefined,
       });
 
-      // Guardar token y usuario
+      // Guardar token y usuario en el store inmediatamente
       setAuthToken(response.token);
+      setUser(response.user);
 
       if (typeof window !== 'undefined') {
         // Limpiar cualquier estado anterior que pueda causar problemas
-        localStorage.removeItem('tutorialCompleted');
         localStorage.removeItem('demoCompleted');
         localStorage.removeItem('demosExhausted');
+        // NO limpiar tutorialCompleted aquí - queremos que se muestre el tutorial
 
         // Limpiar también otros posibles estados conflictivos
         sessionStorage.clear();
 
-        console.log('✅ Registro exitoso, redirigiendo a principal...');
-        // IMPORTANTE: NO limpiar tutorialCompleted aquí
-        // El tutorial debe mostrarse solo UNA vez por usuario
-        // Limpiar otros estados que puedan interferir
-        sessionStorage.clear();
+        console.log('✅ Registro exitoso, usuario guardado:', response.user.username);
+        console.log('🔄 Redirigiendo a principal con usuario ya disponible...');
 
-        // Redirigir simplemente, el MainLayout se encargará de cargar el usuario
+        // Redirigir con usuario ya disponible en el store
         window.location.href = '/principal';
       }
     } catch (err: any) {
