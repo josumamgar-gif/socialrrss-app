@@ -243,13 +243,31 @@ export default function PrincipalPage() {
       setCurrentIndex(currentIndex + 1);
       console.log('📍 Avanzando al siguiente perfil');
     } else {
-      // Si era el último perfil disponible, verificar si hay más perfiles disponibles
-      console.log('🎯 Último perfil visto - verificando si hay más perfiles');
+      // Si era el último perfil disponible, verificar el estado
+      console.log('🎯 Último perfil visto - verificando estado');
 
-      // Forzar recarga de perfiles para ver si hay nuevos disponibles
-      setTimeout(() => {
-        window.location.reload();
-      }, 500);
+      // Verificar si quedan perfiles disponibles después del filtro
+      const viewedKey = user ? `viewedProfiles_${user.id}` : '';
+      const viewedData = viewedKey && typeof window !== 'undefined' ? localStorage.getItem(viewedKey) : null;
+      const viewedProfiles = viewedData ? JSON.parse(viewedData) : [];
+      const unseenProfiles = profiles.filter(p => !viewedProfiles.includes(p._id));
+
+      console.log('📊 Análisis final:');
+      console.log('   Total perfiles:', profiles.length);
+      console.log('   Perfiles vistos:', viewedProfiles.length);
+      console.log('   Perfiles sin ver:', unseenProfiles.length);
+
+      if (unseenProfiles.length === 0) {
+        // No hay más perfiles disponibles - mostrar mensaje
+        console.log('💬 NO HAY MÁS PERFILES - mostrando mensaje');
+        setProfiles([]); // Forzar mostrar mensaje de perfiles agotados
+      } else {
+        // Hay más perfiles en otras categorías - recargar para actualizar filtros
+        console.log('🔄 Hay más perfiles disponibles - recargando');
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
+      }
     }
   };
 
@@ -287,13 +305,31 @@ export default function PrincipalPage() {
       setCurrentIndex(currentIndex + 1);
       console.log('📍 Avanzando al siguiente perfil');
     } else {
-      // Si era el último perfil disponible, verificar si hay más perfiles disponibles
-      console.log('🎯 Último perfil visto - verificando si hay más perfiles');
+      // Si era el último perfil disponible, verificar el estado
+      console.log('🎯 Último perfil visto - verificando estado');
 
-      // Forzar recarga de perfiles para ver si hay nuevos disponibles
-      setTimeout(() => {
-        window.location.reload();
-      }, 500);
+      // Verificar si quedan perfiles disponibles después del filtro
+      const viewedKey = user ? `viewedProfiles_${user.id}` : '';
+      const viewedData = viewedKey && typeof window !== 'undefined' ? localStorage.getItem(viewedKey) : null;
+      const viewedProfiles = viewedData ? JSON.parse(viewedData) : [];
+      const unseenProfiles = profiles.filter(p => !viewedProfiles.includes(p._id));
+
+      console.log('📊 Análisis final:');
+      console.log('   Total perfiles:', profiles.length);
+      console.log('   Perfiles vistos:', viewedProfiles.length);
+      console.log('   Perfiles sin ver:', unseenProfiles.length);
+
+      if (unseenProfiles.length === 0) {
+        // No hay más perfiles disponibles - mostrar mensaje
+        console.log('💬 NO HAY MÁS PERFILES - mostrando mensaje');
+        setProfiles([]); // Forzar mostrar mensaje de perfiles agotados
+      } else {
+        // Hay más perfiles en otras categorías - recargar para actualizar filtros
+        console.log('🔄 Hay más perfiles disponibles - recargando');
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
+      }
     }
   };
 
