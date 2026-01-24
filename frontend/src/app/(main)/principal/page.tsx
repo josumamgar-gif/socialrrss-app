@@ -24,7 +24,6 @@ export default function PrincipalPage() {
   const [loading, setLoading] = useState(true);
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
   const [cornerEffects, setCornerEffects] = useState({ left: 0, right: 0, top: 0, bottom: 0 });
-  const [lastSwipeDirection, setLastSwipeDirection] = useState<'left' | 'right' | 'up' | 'down' | 'back' | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const [backUsed, setBackUsed] = useState(false);
   const [selectedNetwork, setSelectedNetwork] = useState<'all' | SocialNetwork>('all');
@@ -366,20 +365,12 @@ export default function PrincipalPage() {
                   zIndex: idx === 0 ? 10 : 5 - idx,
                   opacity: idx === 0 ? 1 : Math.max(0.2, 0.6 - idx * 0.2),
                   transform: idx === 0
-                    ? (lastSwipeDirection ? undefined : 'translate(0, 0) scale(1)')
+                    ? 'translate(0, 0) scale(1)'
                     : `translate(0, ${idx * 8}px) scale(${1 - idx * 0.05})`,
                   transition: idx === 0
                     ? 'opacity 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
                     : 'opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-                  willChange: idx === 0 ? 'auto' : 'opacity, transform',
-                  ...(idx === 0 && lastSwipeDirection ? {
-                    animation: `${
-                      lastSwipeDirection === 'left' ? 'slideInFromRight' :
-                      lastSwipeDirection === 'right' ? 'slideInFromLeft' :
-                      lastSwipeDirection === 'up' ? 'slideInFromBottom' :
-                      'slideInFromTop'
-                    } 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`
-                  } : {})
+                  willChange: idx === 0 ? 'auto' : 'opacity, transform'
                 } as React.CSSProperties}
               >
                 <ProfileCard
@@ -408,7 +399,6 @@ export default function PrincipalPage() {
               e.preventDefault();
               if (!isAnimating) {
                 setIsAnimating(true);
-                setLastSwipeDirection('left');
                 handleSwipeLeft();
                 setTimeout(() => setIsAnimating(false), 300);
               }
@@ -430,7 +420,6 @@ export default function PrincipalPage() {
               e.preventDefault();
               if (!isAnimating && !backUsed && history.length > 0) {
                 setIsAnimating(true);
-                setLastSwipeDirection('back');
                 handleGoBack();
                 setTimeout(() => setIsAnimating(false), 300);
               }
@@ -452,7 +441,6 @@ export default function PrincipalPage() {
               e.preventDefault();
               if (!isAnimating) {
                 setIsAnimating(true);
-                setLastSwipeDirection('up');
                 handleSwipeUp();
                 setTimeout(() => setIsAnimating(false), 300);
               }
@@ -474,7 +462,6 @@ export default function PrincipalPage() {
               e.preventDefault();
               if (!isAnimating) {
                 setIsAnimating(true);
-                setLastSwipeDirection('right');
                 handleSwipeRight();
                 setTimeout(() => setIsAnimating(false), 300);
               }
