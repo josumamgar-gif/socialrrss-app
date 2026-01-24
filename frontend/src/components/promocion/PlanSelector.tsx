@@ -248,15 +248,15 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
   const getPlanIcon = (type: PlanType) => {
     switch (type) {
       case 'monthly':
-        return '📅';
+        return '💼';
       case 'yearly':
-        return '📆';
+        return '📈';
       case 'lifetime':
-        return '⭐';
+        return '🏆';
       case 'free_trial':
-        return '🎁';
+        return '🎯';
       default:
-        return '💎';
+        return '💼';
     }
   };
 

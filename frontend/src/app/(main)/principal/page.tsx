@@ -353,17 +353,35 @@ export default function PrincipalPage() {
     );
   }
 
-  // Si no hay perfiles, mostrar mensaje de perfiles agotados
+  // Si no hay perfiles, mostrar mensaje de perfiles agotados Y selector de redes
   if (profiles.length === 0) {
     return (
       <div className="w-full bg-white flex items-center justify-center px-4 overflow-hidden relative fixed inset-0">
-        <div className="text-center px-6">
+        <div className="text-center px-6 max-w-md mx-auto">
+          {/* Selector de red social - SIEMPRE VISIBLE */}
+          <div className="mb-8">
+            <button
+              onClick={() => setShowNetworkSelector(true)}
+              className="bg-white/90 backdrop-blur-sm text-gray-700 rounded-full p-4 shadow-lg hover:shadow-xl transition-all relative z-50"
+              style={{
+                backdropFilter: 'blur(10px)',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.1)',
+                zIndex: 50
+              }}
+              aria-label="Seleccionar red social"
+            >
+              <Squares2X2Icon className="h-7 w-7" />
+            </button>
+            <p className="text-sm text-gray-600 mt-2">Cambiar filtro de redes</p>
+          </div>
+
+          {/* Mensaje de perfiles agotados */}
           <div className="text-6xl mb-6">🔄</div>
           <h2 className="text-2xl font-bold text-gray-900 mb-4">
             No tenemos más perfiles para mostrar
           </h2>
           <p className="text-gray-600 mb-6 leading-relaxed">
-            Hemos terminado de mostrarte todos los perfiles disponibles. Vuelve más tarde para ver contenido nuevo.
+            Hemos terminado de mostrarte todos los perfiles disponibles en esta categoría. Cambia el filtro de redes o vuelve más tarde para ver contenido nuevo.
           </p>
           <button
             onClick={() => window.location.reload()}
@@ -372,6 +390,20 @@ export default function PrincipalPage() {
             Comprobar de nuevo
           </button>
         </div>
+
+        {/* Modal del selector de redes */}
+        {showNetworkSelector && (
+          <SocialNetworkSelector
+            selectedNetwork={selectedNetwork}
+            onSelect={(network) => {
+              setSelectedNetwork(network);
+              setShowNetworkSelector(false);
+              // Recargar perfiles con el nuevo filtro
+              setTimeout(() => window.location.reload(), 100);
+            }}
+            onClose={() => setShowNetworkSelector(false)}
+          />
+        )}
       </div>
     );
   }
