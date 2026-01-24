@@ -12,11 +12,33 @@ export default function PrincipalPage() {
   const [loading, setLoading] = useState(true);
   const [waitingForNewUsers, setWaitingForNewUsers] = useState(false);
 
+  console.log('🎯 PrincipalPage se ha montado');
+  console.log('👤 Usuario actual:', user ? { id: user.id, username: user.username } : 'No autenticado');
+
+  // Redirigir a login si no está autenticado
   useEffect(() => {
+    if (!user && !loading) {
+      console.log('🚨 Usuario no autenticado, redirigiendo a login...');
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
+    }
+  }, [user, loading]);
+
+  useEffect(() => {
+    if (!user) {
+      console.log('⏳ Esperando autenticación del usuario...');
+      setLoading(false);
+      return;
+    }
+
     const loadData = async () => {
       try {
         setLoading(true);
+        console.log('🔄 Iniciando carga de perfiles para usuario:', user.id);
+
         const response = await profilesAPI.getAll();
+        console.log('📡 Respuesta de API recibida:', response.profiles?.length || 0, 'perfiles');
 
         const tutorialCompleted = typeof window !== 'undefined'
           ? localStorage.getItem('tutorialCompleted') === 'true'
@@ -27,6 +49,12 @@ export default function PrincipalPage() {
         const demosExhausted = typeof window !== 'undefined'
           ? localStorage.getItem('demosExhausted') === 'true'
           : false;
+
+        console.log('🔍 Estado localStorage:', {
+          tutorialCompleted,
+          demoCompleted,
+          demosExhausted
+        });
 
         console.log('🔍 Estado localStorage:', {
           tutorialCompleted,
@@ -98,6 +126,7 @@ export default function PrincipalPage() {
         }
 
         console.log('📋 Perfiles finales a mostrar:', profilesToShow.length);
+        console.log('✅ Carga de perfiles completada');
       } catch (error) {
         console.error('Error cargando perfiles:', error);
         setProfiles([]);
@@ -106,11 +135,7 @@ export default function PrincipalPage() {
       }
     };
 
-    if (user) {
-      loadData();
-    } else {
-      setLoading(false);
-    }
+    loadData();
   }, [user]);
 
   if (waitingForNewUsers) {
@@ -156,6 +181,13 @@ export default function PrincipalPage() {
       </div>
     );
   }
+
+  console.log('🎨 Renderizando componente final - Estado:', {
+    loading,
+    waitingForNewUsers,
+    profilesCount: profiles.length,
+    hasUser: !!user
+  });
 
   return (
     <div className="w-full bg-white flex items-center justify-center px-4 overflow-hidden relative fixed inset-0">
