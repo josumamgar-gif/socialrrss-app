@@ -251,15 +251,24 @@ export default function PrincipalPage() {
   }
 
   if (profiles.length === 0) {
+    // Determinar si es usuario nuevo o existente
+    const viewedKey = user ? `viewedProfiles_${user.id}` : null;
+    const viewedData = viewedKey && typeof window !== 'undefined' ? localStorage.getItem(viewedKey) : null;
+    const viewedProfiles = viewedData ? JSON.parse(viewedData) : [];
+    const isNewUser = viewedProfiles.length === 0;
+
     return (
       <div className="w-full bg-white flex items-center justify-center px-4 overflow-hidden relative fixed inset-0">
         <div className="text-center px-6">
-          <div className="text-6xl mb-6">📭</div>
+          <div className="text-6xl mb-6">{isNewUser ? '📭' : '🔄'}</div>
           <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            No hay perfiles disponibles
+            {isNewUser ? 'No hay perfiles disponibles' : 'No hay perfiles nuevos por el momento'}
           </h2>
           <p className="text-gray-600 mb-6 leading-relaxed">
-            Actualmente no hay perfiles disponibles para mostrar.
+            {isNewUser
+              ? 'Actualmente no hay perfiles disponibles para mostrar.'
+              : 'No hay nuevos perfiles desde tu última visita. Vuelve más tarde para ver contenido nuevo.'
+            }
           </p>
           <button
             onClick={() => {
@@ -268,7 +277,7 @@ export default function PrincipalPage() {
             }}
             className="bg-primary-600 text-white py-3 px-6 rounded-xl hover:bg-primary-700 transition-colors font-medium shadow-lg hover:shadow-xl"
           >
-            Recargar
+            Comprobar de nuevo
           </button>
         </div>
       </div>
