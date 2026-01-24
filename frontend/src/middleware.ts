@@ -8,24 +8,9 @@ export function middleware(request: NextRequest) {
   // En producción, aplicar CSP completo
   const isDevelopment = process.env.NODE_ENV === 'development';
 
-  if (isDevelopment) {
-    // CSP más permisivo en desarrollo para permitir hot reload de Next.js
-    const cspHeaderDev = [
-      "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' *",
-      "style-src 'self' 'unsafe-inline' *",
-      "img-src 'self' data: https: blob: *",
-      "font-src 'self' data: *",
-      "connect-src 'self' * ws: wss:",
-      "frame-src 'self' *",
-      "object-src 'none'",
-      "base-uri 'self'",
-      "form-action 'self'",
-      "worker-src 'self' blob: 'unsafe-eval' *",
-    ].join('; ');
-    
-    response.headers.set('Content-Security-Policy', cspHeaderDev);
-    response.headers.set('X-Content-Security-Policy', cspHeaderDev);
+  // Temporalmente deshabilitar CSP estricto para resolver problemas
+  // TODO: Re-habilitar CSP cuando se resuelvan los problemas de evaluación
+  return response;
   } else {
     // CSP estricto en producción
     const cspHeader = [

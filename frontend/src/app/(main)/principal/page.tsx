@@ -30,21 +30,31 @@ export default function PrincipalPage() {
   const [showNetworkSelector, setShowNetworkSelector] = useState(false);
   const [hasUserChecked, setHasUserChecked] = useState(false);
 
-  // Redirigir si no hay usuario después de un tiempo
+  // Verificar autenticación inicial
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('token');
 
-      // Si no hay token ni usuario después de 3 segundos, redirigir
-      const timer = setTimeout(() => {
-        if (!user && !token) {
-          window.location.href = '/login';
-        } else {
-          setHasUserChecked(true);
-        }
-      }, 3000);
-
-      return () => clearTimeout(timer);
+      // Si hay token, intentar cargar usuario inmediatamente
+      if (token && !user) {
+        // Dar tiempo para que se cargue el usuario del store
+        const timer = setTimeout(() => {
+          if (!user) {
+            // Si después de 2 segundos no hay usuario, considerar sesión expirada
+            console.log('Sesión expirada - redirigiendo a login');
+            window.location.href = '/login';
+          } else {
+            setHasUserChecked(true);
+          }
+        }, 2000);
+        return () => clearTimeout(timer);
+      } else if (!token) {
+        // No hay token, redirigir inmediatamente
+        window.location.href = '/login';
+      } else {
+        // Hay usuario y token
+        setHasUserChecked(true);
+      }
     }
   }, [user]);
 
@@ -263,8 +273,8 @@ export default function PrincipalPage() {
     );
   }
 
-  // Si no hay usuario después de verificar, mostrar mensaje de error
-  if (!user && hasUserChecked) {
+  // Si no hay usuario después de verificar Y no hay token, mostrar mensaje de error
+  if (!user && hasUserChecked && (!localStorage.getItem('token'))) {
     return (
       <div className="w-full bg-white flex items-center justify-center px-4 overflow-hidden relative fixed inset-0">
         <div className="text-center px-6">
