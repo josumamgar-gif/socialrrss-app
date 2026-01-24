@@ -396,43 +396,46 @@ export default function PrincipalPage() {
     );
   }
 
-  // Si no hay perfiles, mostrar mensaje de perfiles agotados Y selector de redes
+  // 🔥 MENSAJE GRANDE Y VISIBLE CUANDO SE AGOTAN LOS PERFILES
   console.log('🎨 RENDER: profiles.length =', profiles.length, 'filteredProfiles.length =', filteredProfiles.length);
   if (profiles.length === 0) {
-    console.log('💬 MOSTRANDO MENSAJE DE PERFILES AGOTADOS');
+    console.log('💬 MOSTRANDO MENSAJE DE PERFILES AGOTADOS - CAMBIOS APLICADOS');
+    alert('¡FUNCIONA! Se agotaron los perfiles demo'); // ALERT PARA QUE VEAS QUE FUNCIONA
     return (
-      <div className="w-full bg-white flex items-center justify-center px-4 overflow-hidden relative fixed inset-0">
-        <div className="text-center px-6 max-w-md mx-auto">
+      <div className="w-full bg-red-500 flex items-center justify-center px-4 overflow-hidden relative fixed inset-0">
+        <div className="text-center px-6 max-w-md mx-auto text-white">
           {/* Selector de red social - SIEMPRE VISIBLE */}
           <div className="mb-8">
             <button
-              onClick={() => setShowNetworkSelector(true)}
-              className="bg-white/90 backdrop-blur-sm text-gray-700 rounded-full p-4 shadow-lg hover:shadow-xl transition-all relative z-50"
-              style={{
-                backdropFilter: 'blur(10px)',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.1)',
-                zIndex: 50
+              onClick={() => {
+                alert('Hiciste clic en el selector de redes');
+                setShowNetworkSelector(true);
               }}
+              className="bg-white text-red-600 rounded-full p-4 shadow-lg hover:shadow-xl transition-all relative z-50 text-2xl"
+              style={{ zIndex: 50 }}
               aria-label="Seleccionar red social"
             >
-              <Squares2X2Icon className="h-7 w-7" />
+              📱
             </button>
-            <p className="text-sm text-gray-600 mt-2">Cambiar filtro de redes</p>
+            <p className="text-lg font-bold mt-2">SOLO ESTE BOTÓN DEBE APARECER</p>
           </div>
 
-          {/* Mensaje de perfiles agotados */}
-          <div className="text-6xl mb-6">🔄</div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            No tenemos más perfiles para mostrar
+          {/* Mensaje gigante de perfiles agotados */}
+          <div className="text-8xl mb-6">🚫</div>
+          <h2 className="text-4xl font-black mb-4 text-yellow-300">
+            ¡PERFILES AGOTADOS!
           </h2>
-          <p className="text-gray-600 mb-6 leading-relaxed">
-            Hemos terminado de mostrarte todos los perfiles disponibles en esta categoría. Cambia el filtro de redes o vuelve más tarde para ver contenido nuevo.
+          <p className="text-xl mb-6 leading-relaxed bg-black/30 p-4 rounded-lg">
+            🎉 ¡FUNCIONA! Has visto todos los perfiles demo. Solo queda el selector de redes arriba.
           </p>
           <button
-            onClick={() => window.location.reload()}
-            className="bg-primary-600 text-white py-3 px-6 rounded-xl hover:bg-primary-700 transition-colors font-medium shadow-lg hover:shadow-xl"
+            onClick={() => {
+              alert('Botón funciona');
+              window.location.reload();
+            }}
+            className="bg-yellow-400 text-black py-4 px-8 rounded-xl hover:bg-yellow-300 transition-colors font-bold text-xl shadow-lg hover:shadow-xl"
           >
-            Comprobar de nuevo
+            🔄 RECARGAR PÁGINA
           </button>
         </div>
 
@@ -441,9 +444,9 @@ export default function PrincipalPage() {
           <SocialNetworkSelector
             selectedNetwork={selectedNetwork}
             onSelect={(network) => {
+              alert('Seleccionaste: ' + network);
               setSelectedNetwork(network);
               setShowNetworkSelector(false);
-              // Recargar perfiles con el nuevo filtro
               setTimeout(() => window.location.reload(), 100);
             }}
             onClose={() => setShowNetworkSelector(false)}
