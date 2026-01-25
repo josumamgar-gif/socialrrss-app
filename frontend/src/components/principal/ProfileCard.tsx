@@ -697,12 +697,12 @@ export default function ProfileCard({
 
   return (
     <>
-      <div ref={containerRef} className="relative w-full max-w-md mx-auto h-full flex items-center justify-center">
+      <div ref={containerRef} className="relative w-full mx-auto h-full flex items-center justify-center" style={{ maxWidth: '100%' }}>
         {/* Overlay cuando se hace clic en botón - 100% opaco */}
         {buttonAction.type && buttonActionConfig && (
           <div 
-            className={`absolute inset-0 rounded-lg ${buttonActionConfig.gradient} z-40 pointer-events-none flex items-center justify-center transition-opacity duration-200`}
-            style={{ opacity: 1 }}
+            className={`absolute inset-0 rounded-3xl ${buttonActionConfig.gradient} z-40 pointer-events-none flex items-center justify-center transition-opacity duration-200`}
+            style={{ opacity: 1, borderRadius: '24px' }}
           >
             <div className="text-center text-white">
               <div className="text-6xl mb-4 animate-pulse">{buttonActionConfig.icon}</div>
@@ -714,8 +714,8 @@ export default function ProfileCard({
         {/* Overlay cuando se arrastra - 100% opaco */}
         {isDragging && dragActionConfig && dragAction.intensity > 0.3 && (
           <div 
-            className={`absolute inset-0 rounded-lg ${dragActionConfig.gradient} z-40 pointer-events-none flex items-center justify-center transition-opacity duration-200`}
-            style={{ opacity: 1 }}
+            className={`absolute inset-0 rounded-3xl ${dragActionConfig.gradient} z-40 pointer-events-none flex items-center justify-center transition-opacity duration-200`}
+            style={{ opacity: 1, borderRadius: '24px' }}
           >
             <div className="text-center text-white">
               <div className="text-6xl mb-4 animate-pulse">{dragActionConfig.icon}</div>
@@ -726,9 +726,9 @@ export default function ProfileCard({
 
         <div
           ref={cardRef}
-          className="relative w-full bg-white overflow-hidden cursor-grab active:cursor-grabbing select-none"
+          className="relative w-full bg-white overflow-hidden cursor-grab active:cursor-grabbing select-none rounded-3xl"
             style={{
-              borderRadius: '20px',
+              borderRadius: '24px',
               border: 'none',
               boxShadow: `
                 0 4px 6px rgba(0, 0, 0, 0.1),
@@ -766,7 +766,7 @@ export default function ProfileCard({
           }}
         >
           {/* Imagen principal - Ocupa todo el espacio disponible estilo Tinder */}
-          <div className="relative w-full h-full bg-gray-200" style={{ height: '100%', minHeight: 'calc(100vh - 12rem)' }}>
+          <div className="relative w-full h-full bg-gray-200 rounded-3xl overflow-hidden" style={{ height: '100%', minHeight: 'calc(100vh - 12rem)' }}>
             {profile.images && profile.images.length > 0 ? (
               <img
                 src={getImageUrl(profile.images[0])}

@@ -539,7 +539,9 @@ export default function PrincipalPage() {
         left: '50%',
         transform: 'translate(-50%, -50%)',
         width: '100%',
-        maxWidth: '28rem',
+        maxWidth: '100%',
+        paddingLeft: '1rem',
+        paddingRight: '1rem',
         height: 'calc(100vh - 10rem)',
         minHeight: 'calc(100vh - 10rem)',
         display: 'flex',
@@ -551,7 +553,16 @@ export default function PrincipalPage() {
 
 
         {filteredProfiles.length > 0 && (
-          <div className="relative w-full max-w-md mx-auto profile-card-container" style={{ overflow: 'visible', touchAction: 'none', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="relative w-full mx-auto profile-card-container" style={{ 
+            overflow: 'visible', 
+            touchAction: 'none', 
+            width: '100%', 
+            maxWidth: 'min(100%, 28rem)',
+            height: '100%', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center' 
+          }}>
             {filteredProfiles.slice(currentIndex, currentIndex + 3).map((profile, idx) => (
               <div
                 key={`${profile._id}-${currentIndex}`}
