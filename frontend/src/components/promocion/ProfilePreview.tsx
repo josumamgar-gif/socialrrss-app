@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Profile } from '@/types';
 import SocialNetworkLogo from '@/components/shared/SocialNetworkLogo';
 import { getImageUrl, placeholderImage } from '@/lib/imageUtils';
@@ -9,6 +10,8 @@ interface ProfilePreviewProps {
 }
 
 export default function ProfilePreview({ profile }: ProfilePreviewProps) {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
   const getNetworkColor = (network: string) => {
     const colors: Record<string, string> = {
       tiktok: 'bg-pink-500',
@@ -30,50 +33,113 @@ export default function ProfilePreview({ profile }: ProfilePreviewProps) {
     </svg>
   );
 
+  const getProfileTitle = () => {
+    return profile.profileData.title ||
+           profile.profileData.username || 
+           profile.profileData.channelName || 
+           profile.profileData.handle || 
+           profile.profileData.streamerName || 
+           profile.profileData.pageName ||
+           profile.profileData.twitterHandle ||
+           'Mi Perfil';
+  };
+
+  const images = profile.images && profile.images.length > 0 ? profile.images : [];
+  const hasMultipleImages = images.length > 1;
+
+  const nextImage = () => {
+    if (hasMultipleImages) {
+      setCurrentImageIndex((prev) => (prev + 1) % images.length);
+    }
+  };
+
+  const prevImage = () => {
+    if (hasMultipleImages) {
+      setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+    }
+  };
+
   return (
     <div className="max-w-md mx-auto">
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden relative">
-        {/* Header con logo */}
-        <div className={`${getNetworkColor(profile.socialNetwork)} h-16 flex items-center justify-center gap-2`}>
-          {profile.socialNetwork === 'otros' ? (
-            <PlanetIcon className="w-6 h-6 text-white" />
-          ) : (
-            <SocialNetworkLogo network={profile.socialNetwork} className="w-6 h-6 text-white" />
-          )}
-          <h2 className="text-white font-bold text-lg">
-            {profile.profileData.title ||
-             profile.profileData.username || 
-             profile.profileData.channelName || 
-             profile.profileData.handle || 
-             profile.profileData.streamerName || 
-             profile.profileData.pageName ||
-             profile.profileData.twitterHandle ||
-             'Mi Perfil'}
+        {/* Header con título centrado */}
+        <div className={`${getNetworkColor(profile.socialNetwork)} h-20 flex items-center justify-center px-4 relative`}>
+          {/* Logo a la izquierda */}
+          <div className="absolute left-4">
+            {profile.socialNetwork === 'otros' ? (
+              <PlanetIcon className="w-7 h-7 text-white" />
+            ) : (
+              <SocialNetworkLogo network={profile.socialNetwork} className="w-7 h-7 text-white" />
+            )}
+          </div>
+          {/* Título centrado */}
+          <h2 className="text-white font-bold text-lg text-center flex-1 px-12">
+            {getProfileTitle()}
           </h2>
         </div>
 
-        {/* Imagen */}
-        <div className="relative h-64 bg-gray-200">
-          {profile.images && profile.images.length > 0 && profile.images[0] ? (
-            <img
-              key={profile.images[0]} // Forzar re-render cuando cambie la imagen
-              src={getImageUrl(profile.images[0])}
-              alt="Preview"
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = placeholderImage;
-              }}
-            />
+        {/* Galería de imágenes */}
+        <div className="relative h-80 bg-gray-200">
+          {images.length > 0 ? (
+            <>
+              <img
+                key={images[currentImageIndex]}
+                src={getImageUrl(images[currentImageIndex])}
+                alt={`Preview ${currentImageIndex + 1}`}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = placeholderImage;
+                }}
+              />
+              
+              {/* Controles de navegación si hay múltiples imágenes */}
+              {hasMultipleImages && (
+                <>
+                  <button
+                    onClick={prevImage}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-all"
+                    aria-label="Imagen anterior"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={nextImage}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-all"
+                    aria-label="Imagen siguiente"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                  
+                  {/* Indicador de imágenes */}
+                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+                    {images.map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setCurrentImageIndex(index)}
+                        className={`h-2 rounded-full transition-all ${
+                          index === currentImageIndex ? 'w-6 bg-white' : 'w-2 bg-white/50'
+                        }`}
+                        aria-label={`Ir a imagen ${index + 1}`}
+                      />
+                    ))}
+                  </div>
+                  
+                  {/* Contador de imágenes */}
+                  <div className="absolute top-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded">
+                    {currentImageIndex + 1} / {images.length}
+                  </div>
+                </>
+              )}
+            </>
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center text-gray-400">
               <span className="text-4xl mb-2">📷</span>
               <p className="text-xs text-gray-500">No hay imágenes disponibles</p>
-              {profile.images && profile.images.length === 0 && (
-                <p className="text-xs text-gray-400 mt-1">Añade imágenes al crear el perfil</p>
-              )}
-              {!profile.images && (
-                <p className="text-xs text-gray-400 mt-1">No se encontraron imágenes en el perfil</p>
-              )}
+              <p className="text-xs text-gray-400 mt-1">Añade imágenes al crear el perfil</p>
             </div>
           )}
         </div>

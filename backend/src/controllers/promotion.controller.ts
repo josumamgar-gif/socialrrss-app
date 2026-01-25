@@ -4,6 +4,7 @@ import Promotion from '../models/Promotion';
 import User from '../models/User';
 import Profile from '../models/Profile';
 import { calculateExpirationDate } from '../constants/pricing';
+import mongoose from 'mongoose';
 
 export const checkPromotionAvailability = async (_req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -38,9 +39,12 @@ export const activateFreePromotion = async (req: AuthRequest, res: Response): Pr
     const userId = req.user.userId;
     const { profileId } = req.body;
 
+    // Convertir userId a ObjectId si es string
+    const userIdObjectId = typeof userId === 'string' ? new mongoose.Types.ObjectId(userId) : userId;
+
     // Verificar si el usuario ya tiene un perfil activo con promoción gratuita
     const existingFreeProfile = await Profile.findOne({ 
-      userId, 
+      userId: userIdObjectId, 
       planType: 'free_trial',
       isActive: true 
     });
@@ -51,7 +55,7 @@ export const activateFreePromotion = async (req: AuthRequest, res: Response): Pr
     }
 
     // Verificar si el usuario ya tiene una promoción registrada
-    let existingPromotion = await Promotion.findOne({ userId });
+    let existingPromotion = await Promotion.findOne({ userId: userIdObjectId });
     
     // Si no tiene promoción, verificar disponibilidad y crear una
     if (!existingPromotion) {
@@ -73,7 +77,7 @@ export const activateFreePromotion = async (req: AuthRequest, res: Response): Pr
 
       // Create promotion record
       existingPromotion = new Promotion({
-        userId,
+        userId: userIdObjectId,
         type: 'free_trial_30_days',
         status: 'active',
         startDate,
@@ -85,7 +89,7 @@ export const activateFreePromotion = async (req: AuthRequest, res: Response): Pr
       await existingPromotion.save();
 
       // Update user record
-      await User.findByIdAndUpdate(userId, {
+      await User.findByIdAndUpdate(userIdObjectId, {
         isOnFreePromotion: true,
         freePromotionStartDate: startDate,
         freePromotionEndDate: endDate,
@@ -95,7 +99,7 @@ export const activateFreePromotion = async (req: AuthRequest, res: Response): Pr
     // Activate profile if profileId is provided
     let activatedProfile = null;
     if (profileId) {
-      const profile = await Profile.findOne({ _id: profileId, userId });
+      const profile = await Profile.findOne({ _id: profileId, userId: userIdObjectId });
       if (profile) {
         profile.isPaid = true;
         profile.isActive = true;
