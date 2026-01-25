@@ -8,6 +8,7 @@ import { demoProfiles } from '@/data/demoProfiles';
 import ProfileCard from '@/components/principal/ProfileCard';
 import ProfileDetail from '@/components/principal/ProfileDetail';
 import SocialNetworkSelector from '@/components/principal/SocialNetworkSelector';
+import SocialNetworkLogo from '@/components/shared/SocialNetworkLogo';
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
@@ -444,14 +445,20 @@ export default function PrincipalPage() {
           <div className="absolute top-6 left-6 z-50">
             <button
               onClick={() => setShowNetworkSelector(true)}
-              className="bg-white/90 backdrop-blur-sm text-gray-700 rounded-full p-3 shadow-lg hover:shadow-xl transition-all"
+              className="bg-white/90 backdrop-blur-sm text-gray-700 rounded-full p-3 shadow-lg hover:shadow-xl transition-all flex items-center justify-center"
               style={{
                 backdropFilter: 'blur(10px)',
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.1)',
               }}
               aria-label="Seleccionar red social"
             >
-              <Squares2X2Icon className="h-6 w-6" />
+              {selectedNetwork === 'all' ? (
+                <Squares2X2Icon className="h-6 w-6" />
+              ) : (
+                <div className="w-6 h-6 flex items-center justify-center">
+                  <SocialNetworkLogo network={selectedNetwork} className="h-6 w-6 text-gray-800" />
+                </div>
+              )}
             </button>
           </div>
 
@@ -602,7 +609,7 @@ export default function PrincipalPage() {
             {/* Botón Selector de Red Social - Extremo izquierdo */}
             <button
               onClick={() => setShowNetworkSelector(true)}
-              className="bg-white/90 backdrop-blur-sm text-gray-700 rounded-full p-3 shadow-lg hover:shadow-xl transition-all relative z-50"
+              className="bg-white/90 backdrop-blur-sm text-gray-700 rounded-full p-3 shadow-lg hover:shadow-xl transition-all relative z-50 flex items-center justify-center"
               style={{
                 backdropFilter: 'blur(10px)',
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.1)',
@@ -610,7 +617,13 @@ export default function PrincipalPage() {
               }}
               aria-label="Seleccionar red social"
             >
-              <Squares2X2Icon className="h-6 w-6" />
+              {selectedNetwork === 'all' ? (
+                <Squares2X2Icon className="h-6 w-6" />
+              ) : (
+                <div className="w-6 h-6 flex items-center justify-center">
+                  <SocialNetworkLogo network={selectedNetwork} className="h-6 w-6 text-gray-800" />
+                </div>
+              )}
             </button>
             {/* Botón Izquierda (No me gusta) */}
             <button
