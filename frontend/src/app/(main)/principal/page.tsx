@@ -45,122 +45,83 @@ export default function PrincipalPage() {
     }
   }, []); // Solo verificar una vez
 
-  // Cargar perfiles - LÓGICA ULTRA-SIMPLE Y GARANTIZADA
+  // Cargar perfiles - Carga desde el backend (demo y reales pagados)
   useEffect(() => {
     console.log('🚀 Iniciando carga de perfiles...');
 
     const loadProfiles = async () => {
       try {
         setLoading(true);
-        console.log('🚀 CREANDO PERFILES DEMO...');
 
-        // PERFILES DEMO FIJOS
-        const demoProfiles: Profile[] = [
-          {
-            _id: 'demo-001',
-            userId: 'demo',
-            socialNetwork: 'instagram' as SocialNetwork,
-            isActive: true,
-            isPaid: false,
-            profileData: { username: 'demo_foto', followers: 1000, posts: 50, description: 'Fotografía profesional 📸' },
-            images: ['https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=600&fit=crop&q=80'],
-            link: 'https://instagram.com/demo',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            paidUntil: null,
-            planType: null,
-          },
-          {
-            _id: 'demo-002',
-            userId: 'demo',
-            socialNetwork: 'tiktok' as SocialNetwork,
-            isActive: true,
-            isPaid: false,
-            profileData: { username: 'demo_tiktok', followers: 500, videos: 20, description: 'Bailes y tendencias 🎵' },
-            images: ['https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=600&fit=crop&q=80'],
-            link: 'https://tiktok.com/@demo',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            paidUntil: null,
-            planType: null,
-          },
-          {
-            _id: 'demo-003',
-            userId: 'demo',
-            socialNetwork: 'youtube' as SocialNetwork,
-            isActive: true,
-            isPaid: false,
-            profileData: { channelName: 'Demo Channel', subscribers: 2000, videoCount: 30, description: 'Contenido variado 📺' },
-            images: ['https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400&h=600&fit=crop&q=80'],
-            link: 'https://youtube.com/demo',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            paidUntil: null,
-            planType: null,
-          }
-        ];
+        // Obtener perfiles ya vistos por este usuario
+        const viewedKey = user ? `viewedProfiles_${user.id}` : 'viewedProfiles_guest';
+        const viewedData = typeof window !== 'undefined' ? localStorage.getItem(viewedKey) : null;
+        const viewedIds = viewedData ? JSON.parse(viewedData) : [];
 
-        console.log('📄 Perfiles demo listos:', demoProfiles.length);
+        console.log('👀 Perfiles ya vistos:', viewedIds.length);
 
-        // FILTRAR PERFILES YA VISTOS POR ESTE USUARIO
-        let availableProfiles = [...demoProfiles];
+        // CARGAR PERFILES DESDE EL BACKEND (ya incluye demo y reales pagados, mezclados aleatoriamente)
+        try {
+          const response = await profilesAPI.getAll();
+          const apiProfiles = response.profiles || [];
 
-        if (user) {
-          const viewedKey = `viewedProfiles_${user.id}`;
-          const viewedData = localStorage.getItem(viewedKey);
-          const viewedIds = viewedData ? JSON.parse(viewedData) : [];
+          console.log('📊 Perfiles recibidos del backend:', apiProfiles.length);
 
-          console.log('👀 Perfiles ya vistos por usuario:', viewedIds.length);
+          // Filtrar perfiles ya vistos
+          const availableProfiles = apiProfiles.filter((p: any) => {
+            return !viewedIds.includes(p._id);
+          });
 
-          availableProfiles = demoProfiles.filter(p => !viewedIds.includes(p._id));
-          console.log('✅ Perfiles demo disponibles:', availableProfiles.length);
+          console.log('✅ Perfiles disponibles (no vistos):', availableProfiles.length);
 
-          // SI YA VIÓ TODOS LOS DEMO, MOSTRAR MENSAJE
+          // Si no hay perfiles disponibles, mostrar mensaje
           if (availableProfiles.length === 0) {
-            console.log('🎯 Todos los perfiles demo han sido vistos - mostrando mensaje');
+            console.log('🎯 No hay perfiles disponibles - mostrando mensaje');
             setProfiles([]);
             setLoading(false);
             return;
           }
 
-          // INTENTAR CARGAR PERFILES REALES
-          try {
-            const response = await profilesAPI.getAll();
-            const apiProfiles = response.profiles || [];
+          // El backend ya los mezcla aleatoriamente, pero podemos hacer una mezcla adicional
+          const shuffled = [...availableProfiles].sort(() => Math.random() - 0.5);
+          setProfiles(shuffled);
+          console.log('🎉 PERFILES FINALES CARGADOS:', shuffled.length);
 
-            if (apiProfiles.length > 0) {
-              const realProfiles = apiProfiles.filter((p: any) => {
-                const isDemo = p._id?.startsWith('demo-') || p.userId?.username === 'demo';
-                return !isDemo && !viewedIds.includes(p._id);
-              });
-
-              if (realProfiles.length > 0) {
-                availableProfiles = [...availableProfiles, ...realProfiles];
-                console.log('➕ Agregados perfiles reales:', realProfiles.length);
-              }
-            }
-          } catch (error) {
-            console.log('⚠️ No se pudieron cargar perfiles reales');
-          }
+        } catch (error) {
+          console.error('❌ Error cargando perfiles del backend:', error);
+          // Fallback: usar perfiles demo locales si falla el backend
+          const demoProfiles: Profile[] = [
+            {
+              _id: 'demo-001',
+              userId: 'demo',
+              socialNetwork: 'instagram' as SocialNetwork,
+              isActive: true,
+              isPaid: false,
+              profileData: { username: 'demo_foto', followers: 1000, posts: 50, description: 'Fotografía profesional 📸' },
+              images: ['https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=600&fit=crop&q=80'],
+              link: 'https://instagram.com/demo',
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              paidUntil: null,
+              planType: null,
+            },
+          ];
+          const availableDemo = demoProfiles.filter(p => !viewedIds.includes(p._id));
+          setProfiles(availableDemo);
+          console.log('⚠️ Usando perfiles demo de fallback:', availableDemo.length);
         }
-
-        // MEZCLAR Y ESTABLECER
-        const shuffled = [...availableProfiles].sort(() => Math.random() - 0.5);
-        setProfiles(shuffled);
-        console.log('🎉 PERFILES FINALES CARGADOS:', shuffled.length);
 
       } catch (error) {
         console.error('❌ Error cargando perfiles:', error);
-        // Fallback mínimo
         setProfiles([]);
       } finally {
         setLoading(false);
       }
     };
 
-    // Cargar perfiles inmediatamente (no esperar usuario)
+    // Cargar perfiles inmediatamente
     loadProfiles();
-  }, [user]); // Pero reactivar si cambia el usuario
+  }, [user]); // Reactivar si cambia el usuario
 
   // Marcar perfil como visto
   const markProfileAsViewed = (profileId: string) => {
