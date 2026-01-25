@@ -1,7 +1,6 @@
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth.middleware';
 import Profile from '../models/Profile';
-import mongoose from 'mongoose';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
@@ -50,19 +49,10 @@ const shuffleArray = <T>(array: T[]): T[] => {
 
 export const getAllProfiles = async (_req: any, res: Response): Promise<void> => {
   try {
-    const DEMO_USER_ID = new mongoose.Types.ObjectId('000000000000000000000000');
+    const DEMO_USER_ID = '000000000000000000000000';
     
-    // Obtener perfiles demo (activos) y perfiles reales pagados
-    // Los perfiles demo tienen userId = DEMO_USER_ID y están activos
-    // Los perfiles reales deben estar pagados (isPaid: true) y activos
-    const allProfiles = await Profile.find({
-      $or: [
-        // Perfiles demo: userId es DEMO_USER_ID y están activos
-        { userId: DEMO_USER_ID, isActive: true },
-        // Perfiles reales: userId NO es DEMO_USER_ID, están pagados y activos
-        { userId: { $ne: DEMO_USER_ID }, isPaid: true, isActive: true }
-      ]
-    })
+    // Obtener todos los perfiles activos (reales y demo)
+    const allProfiles = await Profile.find({ isActive: true })
       .populate({
         path: 'userId',
         select: 'username',
@@ -70,37 +60,37 @@ export const getAllProfiles = async (_req: any, res: Response): Promise<void> =>
       })
       .lean(); // Usar lean() para mejor rendimiento
 
-    // Separar perfiles demo y reales pagados
+    // Separar perfiles demo y reales
     const demoProfiles: any[] = [];
-    const realPaidProfiles: any[] = [];
+    const realProfiles: any[] = [];
 
     allProfiles.forEach((profile: any) => {
-      // Si el userId es null o es DEMO_USER_ID, es un perfil demo
-      if (!profile.userId || profile.userId.toString() === DEMO_USER_ID.toString()) {
+      // Si el userId es null o no se pudo poblar (perfil demo), usar un objeto por defecto
+      if (!profile.userId || profile.userId.toString() === DEMO_USER_ID) {
         demoProfiles.push({
           ...profile,
           userId: {
-            _id: DEMO_USER_ID.toString(),
+            _id: DEMO_USER_ID,
             username: 'demo',
           },
         });
       } else {
-        // Es un perfil real pagado
-        realPaidProfiles.push(profile);
+        realProfiles.push(profile);
       }
     });
 
-    // Mezclar aleatoriamente los perfiles reales pagados
-    const shuffledRealProfiles = shuffleArray(realPaidProfiles);
-    
-    // Mezclar aleatoriamente los perfiles demo
-    const shuffledDemoProfiles = shuffleArray(demoProfiles);
+    // LIMITAR DEMOS A MÁXIMO 10
+    const limitedDemoProfiles = demoProfiles.slice(0, 10);
 
-    // Combinar y mezclar todo junto para que aparezcan en orden aleatorio
+    // Mezclar aleatoriamente los perfiles reales
+    const shuffledRealProfiles = shuffleArray(realProfiles);
+    
+    // Mezclar aleatoriamente los demos limitados
+    const shuffledDemoProfiles = shuffleArray(limitedDemoProfiles);
+
+    // Combinar: primero mezclar todo junto para que los reales pagados aparezcan mezclados con los demos
     const combinedProfiles = [...shuffledRealProfiles, ...shuffledDemoProfiles];
     const finalShuffledProfiles = shuffleArray(combinedProfiles);
-
-    console.log(`📊 Perfiles disponibles: ${finalShuffledProfiles.length} (${realPaidProfiles.length} reales pagados + ${demoProfiles.length} demo)`);
 
     res.json({ profiles: finalShuffledProfiles });
   } catch (error: any) {

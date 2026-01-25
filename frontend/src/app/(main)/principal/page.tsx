@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { profilesAPI } from '@/lib/api';
 import { Profile, SocialNetwork } from '@/types';
+import { demoProfiles } from '@/data/demoProfiles';
 import ProfileCard from '@/components/principal/ProfileCard';
 import ProfileDetail from '@/components/principal/ProfileDetail';
 import SocialNetworkSelector from '@/components/principal/SocialNetworkSelector';
@@ -44,64 +45,113 @@ export default function PrincipalPage() {
     }
   }, []); // Solo verificar una vez
 
-  // Cargar perfiles - Carga desde el backend (demo y reales pagados)
+  // Cargar perfiles - LÓGICA ULTRA-SIMPLE Y GARANTIZADA
   useEffect(() => {
     console.log('🚀 Iniciando carga de perfiles...');
 
     const loadProfiles = async () => {
       try {
         setLoading(true);
+        console.log('🚀 CREANDO PERFILES DEMO...');
 
-        // Obtener perfiles ya vistos por este usuario (usar ID del usuario o 'guest' si no hay usuario)
-        const userId = user?.id || 'guest';
-        const viewedKey = `viewedProfiles_${userId}`;
-        const viewedData = typeof window !== 'undefined' ? localStorage.getItem(viewedKey) : null;
-        const viewedIds = viewedData ? JSON.parse(viewedData) : [];
-
-        console.log('👀 Usuario:', userId, '- Perfiles ya vistos:', viewedIds.length);
-
-        // CARGAR PERFILES DESDE EL BACKEND (ya incluye demo y reales pagados, mezclados aleatoriamente)
-        try {
-          const response = await profilesAPI.getAll();
-          const apiProfiles = response.profiles || [];
-
-          console.log('📊 Perfiles recibidos del backend:', apiProfiles.length);
-
-          if (apiProfiles.length === 0) {
-            console.log('⚠️ No hay perfiles en el backend');
-            setProfiles([]);
-            setLoading(false);
-            return;
+        // PERFILES DEMO FIJOS
+        const demoProfiles: Profile[] = [
+          {
+            _id: 'demo-001',
+            userId: 'demo',
+            socialNetwork: 'instagram' as SocialNetwork,
+            isActive: true,
+            isPaid: false,
+            profileData: { username: 'demo_foto', followers: 1000, posts: 50, description: 'Fotografía profesional 📸' },
+            images: ['https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=600&fit=crop&q=80'],
+            link: 'https://instagram.com/demo',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            paidUntil: null,
+            planType: null,
+          },
+          {
+            _id: 'demo-002',
+            userId: 'demo',
+            socialNetwork: 'tiktok' as SocialNetwork,
+            isActive: true,
+            isPaid: false,
+            profileData: { username: 'demo_tiktok', followers: 500, videos: 20, description: 'Bailes y tendencias 🎵' },
+            images: ['https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=600&fit=crop&q=80'],
+            link: 'https://tiktok.com/@demo',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            paidUntil: null,
+            planType: null,
+          },
+          {
+            _id: 'demo-003',
+            userId: 'demo',
+            socialNetwork: 'youtube' as SocialNetwork,
+            isActive: true,
+            isPaid: false,
+            profileData: { channelName: 'Demo Channel', subscribers: 2000, videoCount: 30, description: 'Contenido variado 📺' },
+            images: ['https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400&h=600&fit=crop&q=80'],
+            link: 'https://youtube.com/demo',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            paidUntil: null,
+            planType: null,
           }
+        ];
 
-          // Filtrar perfiles ya vistos
-          const availableProfiles = apiProfiles.filter((p: any) => {
-            const profileId = p._id?.toString() || p._id;
-            return !viewedIds.includes(profileId);
-          });
+        console.log('📄 Perfiles demo listos:', demoProfiles.length);
 
-          console.log('✅ Perfiles disponibles (no vistos):', availableProfiles.length);
+        // FILTRAR PERFILES YA VISTOS POR ESTE USUARIO
+        let availableProfiles = [...demoProfiles];
 
-          // Si no hay perfiles disponibles, mostrar mensaje
+        if (user) {
+          const viewedKey = `viewedProfiles_${user.id}`;
+          const viewedData = localStorage.getItem(viewedKey);
+          const viewedIds = viewedData ? JSON.parse(viewedData) : [];
+
+          console.log('👀 Perfiles ya vistos por usuario:', viewedIds.length);
+
+          availableProfiles = demoProfiles.filter(p => !viewedIds.includes(p._id));
+          console.log('✅ Perfiles demo disponibles:', availableProfiles.length);
+
+          // SI YA VIÓ TODOS LOS DEMO, MOSTRAR MENSAJE
           if (availableProfiles.length === 0) {
-            console.log('🎯 No hay perfiles disponibles - mostrando mensaje');
+            console.log('🎯 Todos los perfiles demo han sido vistos - mostrando mensaje');
             setProfiles([]);
             setLoading(false);
             return;
           }
 
-          // El backend ya los mezcla aleatoriamente, pero podemos hacer una mezcla adicional
-          const shuffled = [...availableProfiles].sort(() => Math.random() - 0.5);
-          setProfiles(shuffled);
-          console.log('🎉 PERFILES FINALES CARGADOS:', shuffled.length);
+          // INTENTAR CARGAR PERFILES REALES
+          try {
+            const response = await profilesAPI.getAll();
+            const apiProfiles = response.profiles || [];
 
-        } catch (error) {
-          console.error('❌ Error cargando perfiles del backend:', error);
-          setProfiles([]);
+            if (apiProfiles.length > 0) {
+              const realProfiles = apiProfiles.filter((p: any) => {
+                const isDemo = p._id?.startsWith('demo-') || p.userId?.username === 'demo';
+                return !isDemo && !viewedIds.includes(p._id);
+              });
+
+              if (realProfiles.length > 0) {
+                availableProfiles = [...availableProfiles, ...realProfiles];
+                console.log('➕ Agregados perfiles reales:', realProfiles.length);
+              }
+            }
+          } catch (error) {
+            console.log('⚠️ No se pudieron cargar perfiles reales');
+          }
         }
+
+        // MEZCLAR Y ESTABLECER
+        const shuffled = [...availableProfiles].sort(() => Math.random() - 0.5);
+        setProfiles(shuffled);
+        console.log('🎉 PERFILES FINALES CARGADOS:', shuffled.length);
 
       } catch (error) {
         console.error('❌ Error cargando perfiles:', error);
+        // Fallback mínimo
         setProfiles([]);
       } finally {
         setLoading(false);
@@ -110,19 +160,17 @@ export default function PrincipalPage() {
 
     // Cargar perfiles inmediatamente (no esperar usuario)
     loadProfiles();
-  }, [user]); // Reactivar si cambia el usuario
+  }, [user]); // Pero reactivar si cambia el usuario
 
   // Marcar perfil como visto
   const markProfileAsViewed = (profileId: string) => {
-    if (typeof window !== 'undefined') {
-      const userId = user?.id || 'guest';
-      const viewedKey = `viewedProfiles_${userId}`;
+    if (typeof window !== 'undefined' && user) {
+      const viewedKey = `viewedProfiles_${user.id}`;
       const viewedData = localStorage.getItem(viewedKey);
       const viewedProfiles = viewedData ? JSON.parse(viewedData) : [];
 
-      const profileIdStr = profileId?.toString() || profileId;
-      if (!viewedProfiles.includes(profileIdStr)) {
-        viewedProfiles.push(profileIdStr);
+      if (!viewedProfiles.includes(profileId)) {
+        viewedProfiles.push(profileId);
         localStorage.setItem(viewedKey, JSON.stringify(viewedProfiles));
       }
     }
@@ -130,23 +178,23 @@ export default function PrincipalPage() {
 
   // Filtrar perfiles por red social seleccionada Y excluir vistos
   const filteredProfiles = useMemo(() => {
-    // Obtener ID del usuario
-    const userId = user?.id || 'guest';
-    const viewedKey = `viewedProfiles_${userId}`;
+    if (!user) {
+      console.log('🚫 No hay usuario - filteredProfiles vacío');
+      return [];
+    }
+
+    // Obtener perfiles ya vistos por este usuario
+    const viewedKey = `viewedProfiles_${user.id}`;
     const viewedData = typeof window !== 'undefined' ? localStorage.getItem(viewedKey) : null;
     const viewedProfiles = viewedData ? JSON.parse(viewedData) : [];
 
     console.log('🔍 FILTRANDO PERFILES:');
-    console.log('   Usuario:', userId);
     console.log('   Total perfiles en state:', profiles.length);
     console.log('   Perfiles ya vistos:', viewedProfiles.length);
     console.log('   Red social seleccionada:', selectedNetwork);
 
     // Filtrar perfiles no vistos
-    let availableProfiles = profiles.filter(p => {
-      const profileId = p._id?.toString() || p._id;
-      return !viewedProfiles.includes(profileId);
-    });
+    let availableProfiles = profiles.filter(p => !viewedProfiles.includes(p._id));
 
     console.log('✅ Perfiles disponibles (no vistos):', availableProfiles.length);
 
