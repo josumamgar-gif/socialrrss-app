@@ -39,8 +39,23 @@ export const activateFreePromotion = async (req: AuthRequest, res: Response): Pr
     const userId = req.user.userId;
     const { profileId } = req.body;
 
+    console.log('🔍 Activando promoción gratuita:', { userId, profileId });
+
+    // Validar que userId sea válido
+    if (!userId) {
+      res.status(400).json({ error: 'ID de usuario no válido' });
+      return;
+    }
+
     // Convertir userId a ObjectId si es string
-    const userIdObjectId = typeof userId === 'string' ? new mongoose.Types.ObjectId(userId) : userId;
+    let userIdObjectId: mongoose.Types.ObjectId;
+    try {
+      userIdObjectId = typeof userId === 'string' ? new mongoose.Types.ObjectId(userId) : userId;
+    } catch (error) {
+      console.error('❌ Error convirtiendo userId a ObjectId:', error);
+      res.status(400).json({ error: 'ID de usuario inválido' });
+      return;
+    }
 
     // Verificar si el usuario ya tiene un perfil activo con promoción gratuita
     const existingFreeProfile = await Profile.findOne({ 
@@ -87,6 +102,7 @@ export const activateFreePromotion = async (req: AuthRequest, res: Response): Pr
       });
 
       await existingPromotion.save();
+      console.log('✅ Promoción creada:', existingPromotion._id);
 
       // Update user record
       await User.findByIdAndUpdate(userIdObjectId, {
@@ -94,24 +110,53 @@ export const activateFreePromotion = async (req: AuthRequest, res: Response): Pr
         freePromotionStartDate: startDate,
         freePromotionEndDate: endDate,
       });
+      console.log('✅ Usuario actualizado con promoción');
+    } else {
+      console.log('✅ Promoción existente encontrada:', existingPromotion._id);
     }
 
     // Activate profile if profileId is provided
     let activatedProfile = null;
     if (profileId) {
-      const profile = await Profile.findOne({ _id: profileId, userId: userIdObjectId });
-      if (profile) {
+      try {
+        // Convertir profileId a ObjectId si es string
+        const profileIdObjectId = typeof profileId === 'string' 
+          ? new mongoose.Types.ObjectId(profileId) 
+          : profileId;
+
+        const profile = await Profile.findOne({ _id: profileIdObjectId, userId: userIdObjectId });
+        
+        if (!profile) {
+          console.error('❌ Perfil no encontrado:', { profileId, userId: userIdObjectId });
+          res.status(404).json({ error: 'Perfil no encontrado o no pertenece al usuario' });
+          return;
+        }
+
         profile.isPaid = true;
         profile.isActive = true;
         profile.planType = 'free_trial';
         profile.paidUntil = calculateExpirationDate('free_trial');
         await profile.save();
+        
+        console.log('✅ Perfil activado:', profile._id);
+        
         activatedProfile = {
-          id: profile._id,
+          id: profile._id.toString(),
           isActive: profile.isActive,
           paidUntil: profile.paidUntil,
         };
+      } catch (profileError: any) {
+        console.error('❌ Error activando perfil:', profileError);
+        res.status(400).json({ error: `Error al activar el perfil: ${profileError.message}` });
+        return;
       }
+    }
+
+    // Verificar que existingPromotion existe antes de usarlo
+    if (!existingPromotion) {
+      console.error('❌ Error: existingPromotion es null');
+      res.status(500).json({ error: 'Error interno: promoción no encontrada' });
+      return;
     }
 
     // Get updated remaining spots count
@@ -133,8 +178,12 @@ export const activateFreePromotion = async (req: AuthRequest, res: Response): Pr
       remainingFreeSpots: Math.max(0, 100 - updatedUsedPromotionsCount),
     });
   } catch (error: any) {
-    console.error('Error activating promotion:', error);
-    res.status(500).json({ error: 'Error al activar la promoción' });
+    console.error('❌ Error activating promotion:', error);
+    console.error('❌ Stack trace:', error.stack);
+    res.status(500).json({ 
+      error: 'Error al activar la promoción',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 };
 
