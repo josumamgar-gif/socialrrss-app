@@ -71,6 +71,11 @@ export const PRICING_PLANS: PricingPlan[] = [
 ];
 
 export function getPlan(planType: PlanType): PricingPlan {
+  // Si es free_trial, retornar FREE_PROMOTION_PLAN
+  if (planType === 'free_trial') {
+    return FREE_PROMOTION_PLAN;
+  }
+  
   const plan = PRICING_PLANS.find((p) => p.type === planType);
   if (!plan) {
     throw new Error(`Plan no encontrado: ${planType}`);
