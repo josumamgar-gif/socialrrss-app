@@ -159,9 +159,12 @@ export default function ProfileDetail({ profile, onClose }: ProfileDetailProps) 
                       }`}
                     >
                       <img
-                        src={img.startsWith('http') ? img : `http://localhost:5000${img}`}
+                        src={getImageUrl(img)}
                         alt={`Thumbnail ${idx + 1}`}
                         className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = placeholderImage;
+                        }}
                       />
                     </button>
                   ))}
@@ -176,9 +179,12 @@ export default function ProfileDetail({ profile, onClose }: ProfileDetailProps) 
                 <div className="w-32 h-32 rounded-full border-4 border-white shadow-lg overflow-hidden">
                   {images.length > 0 ? (
                     <img
-                      src={images[0].startsWith('http') ? images[0] : `http://localhost:5000${images[0]}`}
+                      src={getImageUrl(images[0])}
                       alt="Profile"
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = placeholderImage;
+                      }}
                     />
                   ) : (
                     <div className="w-full h-full bg-gray-200 flex items-center justify-center">
