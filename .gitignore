@@ -40,4 +40,8 @@ Thumbs.db
 # Misc
 .DS_Store
 *.pem
+
+# Imágenes promocionales generadas
+promo-images/
+promo-images-carrusel.zip
 ```
