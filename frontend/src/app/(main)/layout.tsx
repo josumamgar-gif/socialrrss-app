@@ -115,9 +115,13 @@ export default function MainLayout({
   return (
     <div className="min-h-screen bg-white flex flex-col" style={{ minHeight: '-webkit-fill-available' } as React.CSSProperties}>
       <WelcomeTutorial
+        tutorialCompleted={tutorialCompleted}
         onClose={() => {
           console.log('📚 Tutorial cerrado, actualizando estado');
           setTutorialCompleted(true);
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('tutorialCompleted', 'true');
+          }
         }}
       />
       

@@ -103,27 +103,55 @@ export default function PrincipalPage() {
         console.log('📄 Perfiles demo listos:', demoProfiles.length);
 
         // FILTRAR PERFILES YA VISTOS POR ESTE USUARIO
-        let availableProfiles = [...demoProfiles];
+        // Usar ID del usuario si existe, o 'guest' si no está cargado aún
+        const userId = user?.id || 'guest';
+        const viewedKey = `viewedProfiles_${userId}`;
+        const viewedData = typeof window !== 'undefined' ? localStorage.getItem(viewedKey) : null;
+        const viewedIds = viewedData ? JSON.parse(viewedData) : [];
 
-        if (user) {
-          const viewedKey = `viewedProfiles_${user.id}`;
-          const viewedData = localStorage.getItem(viewedKey);
-          const viewedIds = viewedData ? JSON.parse(viewedData) : [];
+        console.log('👀 Usuario:', userId, '- Perfiles ya vistos:', viewedIds.length);
 
-          console.log('👀 Perfiles ya vistos por usuario:', viewedIds.length);
+        let availableProfiles = demoProfiles.filter(p => !viewedIds.includes(p._id));
+        console.log('✅ Perfiles demo disponibles:', availableProfiles.length);
 
-          availableProfiles = demoProfiles.filter(p => !viewedIds.includes(p._id));
-          console.log('✅ Perfiles demo disponibles:', availableProfiles.length);
+        // SI YA VIÓ TODOS LOS DEMO, INTENTAR CARGAR PERFILES REALES
+        if (availableProfiles.length === 0) {
+          console.log('🎯 Todos los perfiles demo han sido vistos - intentando cargar reales');
+          
+          // INTENTAR CARGAR PERFILES REALES
+          try {
+            const response = await profilesAPI.getAll();
+            const apiProfiles = response.profiles || [];
 
-          // SI YA VIÓ TODOS LOS DEMO, MOSTRAR MENSAJE
-          if (availableProfiles.length === 0) {
-            console.log('🎯 Todos los perfiles demo han sido vistos - mostrando mensaje');
+            if (apiProfiles.length > 0) {
+              const realProfiles = apiProfiles.filter((p: any) => {
+                const isDemo = p._id?.startsWith('demo-') || p.userId?.username === 'demo';
+                return !isDemo && !viewedIds.includes(p._id);
+              });
+
+              if (realProfiles.length > 0) {
+                availableProfiles = [...availableProfiles, ...realProfiles];
+                console.log('➕ Agregados perfiles reales:', realProfiles.length);
+              } else {
+                console.log('🎯 No hay más perfiles disponibles - mostrando mensaje');
+                setProfiles([]);
+                setLoading(false);
+                return;
+              }
+            } else {
+              console.log('🎯 No hay perfiles en el backend - mostrando mensaje');
+              setProfiles([]);
+              setLoading(false);
+              return;
+            }
+          } catch (error) {
+            console.log('⚠️ No se pudieron cargar perfiles reales - mostrando mensaje');
             setProfiles([]);
             setLoading(false);
             return;
           }
-
-          // INTENTAR CARGAR PERFILES REALES
+        } else {
+          // Si hay perfiles demo disponibles, intentar agregar reales también
           try {
             const response = await profilesAPI.getAll();
             const apiProfiles = response.profiles || [];
@@ -164,8 +192,9 @@ export default function PrincipalPage() {
 
   // Marcar perfil como visto
   const markProfileAsViewed = (profileId: string) => {
-    if (typeof window !== 'undefined' && user) {
-      const viewedKey = `viewedProfiles_${user.id}`;
+    if (typeof window !== 'undefined') {
+      const userId = user?.id || 'guest';
+      const viewedKey = `viewedProfiles_${userId}`;
       const viewedData = localStorage.getItem(viewedKey);
       const viewedProfiles = viewedData ? JSON.parse(viewedData) : [];
 
@@ -178,13 +207,9 @@ export default function PrincipalPage() {
 
   // Filtrar perfiles por red social seleccionada Y excluir vistos
   const filteredProfiles = useMemo(() => {
-    if (!user) {
-      console.log('🚫 No hay usuario - filteredProfiles vacío');
-      return [];
-    }
-
-    // Obtener perfiles ya vistos por este usuario
-    const viewedKey = `viewedProfiles_${user.id}`;
+    // Usar ID del usuario si existe, o 'guest' si no está cargado aún
+    const userId = user?.id || 'guest';
+    const viewedKey = `viewedProfiles_${userId}`;
     const viewedData = typeof window !== 'undefined' ? localStorage.getItem(viewedKey) : null;
     const viewedProfiles = viewedData ? JSON.parse(viewedData) : [];
 
