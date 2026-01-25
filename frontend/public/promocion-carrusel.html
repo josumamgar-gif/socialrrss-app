@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explora - Carrusel Promocional</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #000;
+            overflow: hidden;
+        }
+
+        .carousel-container {
+            width: 1080px;
+            height: 1080px;
+            margin: 0 auto;
+            position: relative;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .slide {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 80px;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .slide.active {
+            opacity: 1;
+        }
+
+        /* Slide 1: Portada */
+        .slide-1 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            color: white;
+        }
+
+        .logo {
+            font-size: 120px;
+            font-weight: 900;
+            margin-bottom: 40px;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .tagline {
+            font-size: 64px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 60px;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            font-size: 36px;
+            text-align: center;
+            opacity: 0.95;
+            line-height: 1.4;
+        }
+
+        /* Slide 2: Descubre Perfiles */
+        .slide-2 {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .icon-large {
+            font-size: 200px;
+            margin-bottom: 50px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .feature-title {
+            font-size: 72px;
+            font-weight: 800;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .feature-list {
+            font-size: 42px;
+            line-height: 1.8;
+            text-align: center;
+        }
+
+        .feature-item {
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        /* Slide 3: Swipe y Explora */
+        .slide-3 {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .gestures-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 40px;
+            width: 100%;
+            max-width: 800px;
+            margin: 40px 0;
+        }
+
+        .gesture-card {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            padding: 40px;
+            text-align: center;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .gesture-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        .gesture-text {
+            font-size: 32px;
+            font-weight: 600;
+        }
+
+        /* Slide 4: Promociona tu Perfil */
+        .slide-4 {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+        }
+
+        .stats-container {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            max-width: 900px;
+            margin: 60px 0;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 100px;
+            font-weight: 900;
+            margin-bottom: 20px;
+        }
+
+        .stat-label {
+            font-size: 36px;
+            opacity: 0.9;
+        }
+
+        /* Slide 5: Call to Action */
+        .slide-5 {
+            background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+            color: white;
+        }
+
+        .cta-button {
+            background: white;
+            color: #667eea;
+            font-size: 48px;
+            font-weight: 800;
+            padding: 30px 80px;
+            border-radius: 50px;
+            margin-top: 60px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .cta-button:hover {
+            transform: scale(1.05);
+        }
+
+        .networks-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 30px;
+            width: 100%;
+            max-width: 800px;
+            margin: 50px 0;
+        }
+
+        .network-icon {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            font-size: 60px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .highlight {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 30px;
+            border-radius: 50px;
+            display: inline-block;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="carousel-container">
+        <!-- Slide 1: Portada -->
+        <div class="slide slide-1 active">
+            <div class="logo">📱 EXPLORA</div>
+            <div class="tagline">Descubre Perfiles<br>Únicos</div>
+            <div class="subtitle">La nueva forma de explorar<br>y promocionar perfiles<br>en redes sociales</div>
+        </div>
+
+        <!-- Slide 2: Descubre Perfiles -->
+        <div class="slide slide-2">
+            <div class="icon-large">🔍</div>
+            <div class="feature-title">Descubre Perfiles</div>
+            <div class="feature-list">
+                <div class="feature-item">✨ Perfiles de todas las redes</div>
+                <div class="feature-item">🎯 Instagram, TikTok, YouTube...</div>
+                <div class="feature-item">🚀 Contenido actualizado</div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Swipe y Explora -->
+        <div class="slide slide-3">
+            <div class="feature-title">Swipe y Explora</div>
+            <div class="gestures-container">
+                <div class="gesture-card">
+                    <div class="gesture-icon">👈</div>
+                    <div class="gesture-text">Siguiente</div>
+                </div>
+                <div class="gesture-card">
+                    <div class="gesture-icon">👉</div>
+                    <div class="gesture-text">Visitar</div>
+                </div>
+                <div class="gesture-card">
+                    <div class="gesture-icon">👆</div>
+                    <div class="gesture-text">Detalles</div>
+                </div>
+                <div class="gesture-card">
+                    <div class="gesture-icon">↩️</div>
+                    <div class="gesture-text">Volver</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Promociona tu Perfil -->
+        <div class="slide slide-4">
+            <div class="feature-title">Promociona tu Perfil</div>
+            <div class="subtitle" style="font-size: 42px; margin-bottom: 40px;">
+                Llega a miles de usuarios
+            </div>
+            <div class="stats-container">
+                <div class="stat-item">
+                    <div class="stat-number">100%</div>
+                    <div class="stat-label">Gratis</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">∞</div>
+                    <div class="stat-label">Alcance</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">⚡</div>
+                    <div class="stat-label">Rápido</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Call to Action -->
+        <div class="slide slide-5">
+            <div class="feature-title">¡Empieza Ahora!</div>
+            <div class="subtitle" style="font-size: 48px; margin: 40px 0;">
+                Disponible en todas las redes
+            </div>
+            <div class="networks-grid">
+                <div class="network-icon">📷</div>
+                <div class="network-icon">🎵</div>
+                <div class="network-icon">📺</div>
+                <div class="network-icon">🎮</div>
+                <div class="network-icon">💼</div>
+                <div class="network-icon">📘</div>
+                <div class="network-icon">🐦</div>
+                <div class="network-icon">➕</div>
+            </div>
+            <div class="cta-button">EXPLORAR AHORA</div>
+        </div>
+    </div>
+
+    <script>
+        // Auto-avance del carrusel (opcional, para preview)
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        function showSlide(index) {
+            slides.forEach((slide, i) => {
+                slide.classList.toggle('active', i === index);
+            });
+        }
+
+        function nextSlide() {
+            currentSlide = (currentSlide + 1) % totalSlides;
+            showSlide(currentSlide);
+        }
+
+        // Para capturas individuales, comenta esta línea:
+        // setInterval(nextSlide, 3000);
+
+        // Instrucciones para capturar:
+        // 1. Abre este archivo en un navegador
+        // 2. Para cada slide, cambia la clase 'active' a la slide que quieras
+        // 3. Usa herramientas como:
+        //    - Screenshot (extensión del navegador)
+        //    - Snipping Tool (Windows)
+        //    - O herramientas online como htmlcsstoimage.com
+    </script>
+</body>
+</html>
