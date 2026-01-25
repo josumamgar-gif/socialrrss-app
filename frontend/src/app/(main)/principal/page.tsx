@@ -4,7 +4,6 @@ import { useEffect, useState, useMemo } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { profilesAPI } from '@/lib/api';
 import { Profile, SocialNetwork } from '@/types';
-import { demoProfiles } from '@/data/demoProfiles';
 import ProfileCard from '@/components/principal/ProfileCard';
 import ProfileDetail from '@/components/principal/ProfileDetail';
 import SocialNetworkSelector from '@/components/principal/SocialNetworkSelector';
