@@ -15,6 +15,8 @@ export interface IUser extends Document {
   isOnFreePromotion?: boolean;
   freePromotionStartDate?: Date;
   freePromotionEndDate?: Date;
+  // Favorites
+  favoriteProfiles?: mongoose.Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -84,6 +86,12 @@ const UserSchema: Schema = new Schema(
     freePromotionEndDate: {
       type: Date,
       default: null,
+    },
+    // Favorites - Array de IDs de perfiles favoritos
+    favoriteProfiles: {
+      type: [Schema.Types.ObjectId],
+      ref: 'Profile',
+      default: [],
     },
   },
   {

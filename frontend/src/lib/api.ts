@@ -331,5 +331,28 @@ export const paymentsAPI = {
   },
 };
 
+// API de favoritos
+export const favoritesAPI = {
+  addFavorite: async (profileId: string): Promise<{ message: string; favoriteProfiles: string[] }> => {
+    const response = await api.post<{ message: string; favoriteProfiles: string[] }>('/favorites/add', { profileId });
+    return response.data;
+  },
+
+  removeFavorite: async (profileId: string): Promise<{ message: string; favoriteProfiles: string[] }> => {
+    const response = await api.post<{ message: string; favoriteProfiles: string[] }>('/favorites/remove', { profileId });
+    return response.data;
+  },
+
+  getFavorites: async (): Promise<{ profiles: Profile[]; count: number }> => {
+    const response = await api.get<{ profiles: Profile[]; count: number }>('/favorites');
+    return response.data;
+  },
+
+  checkFavorite: async (profileId: string): Promise<{ isFavorite: boolean }> => {
+    const response = await api.get<{ isFavorite: boolean }>(`/favorites/check?profileId=${profileId}`);
+    return response.data;
+  },
+};
+
 export default api;
 

@@ -7,9 +7,13 @@ import {
   ArrowRightIcon,
   ArrowUpIcon,
   ArrowUturnLeftIcon,
+  StarIcon,
 } from '@heroicons/react/24/outline';
+import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import SocialNetworkLogo from '@/components/shared/SocialNetworkLogo';
 import { getImageUrl, placeholderImage } from '@/lib/imageUtils';
+import { favoritesAPI } from '@/lib/api';
+import { useAuthStore } from '@/store/authStore';
 
 interface ProfileCardProps {
   profile: Profile;
@@ -61,7 +65,10 @@ export default function ProfileCard({
   canGoBack = false,
   currentProfileIndex,
 }: ProfileCardProps) {
+  const user = useAuthStore((state) => state.user);
   const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
   
   // Detectar si es un perfil demo
   const isDemoProfile = (() => {
@@ -126,6 +133,44 @@ export default function ProfileCard({
     backUsedRef.current = backUsed;
     onShowDetailRef.current = onShowDetail;
   }, [onSwipeLeft, onSwipeRight, onSwipeUp, onGoBack, onShowDetail, canGoBack, backUsed]);
+
+  // Verificar si el perfil está en favoritos
+  useEffect(() => {
+    const checkFavoriteStatus = async () => {
+      if (!user || isDemoProfile || !profile._id) return;
+      
+      try {
+        const response = await favoritesAPI.checkFavorite(profile._id);
+        setIsFavorite(response.isFavorite);
+      } catch (error) {
+        console.error('Error verificando favorito:', error);
+      }
+    };
+
+    checkFavoriteStatus();
+  }, [user, profile._id, isDemoProfile]);
+
+  // Manejar toggle de favorito
+  const handleToggleFavorite = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevenir que se active el swipe
+    
+    if (!user || isDemoProfile || !profile._id || isTogglingFavorite) return;
+
+    setIsTogglingFavorite(true);
+    try {
+      if (isFavorite) {
+        await favoritesAPI.removeFavorite(profile._id);
+        setIsFavorite(false);
+      } else {
+        await favoritesAPI.addFavorite(profile._id);
+        setIsFavorite(true);
+      }
+    } catch (error) {
+      console.error('Error al cambiar favorito:', error);
+    } finally {
+      setIsTogglingFavorite(false);
+    }
+  };
 
   const getActionForPosition = (x: number, y: number, width: number, height: number): DragAction => {
     const threshold = 30; // Threshold reducido para mayor sensibilidad
@@ -806,8 +851,30 @@ export default function ProfileCard({
               )}
             </div>
 
-            {/* Datos de redes sociales - Pastillas blancas superpuestas en la parte superior derecha */}
-            <div className="absolute top-4 right-4 flex flex-wrap gap-2 z-10 justify-end">
+            {/* Botón de favorito - Parte superior derecha */}
+            {user && !isDemoProfile && (
+              <div className="absolute top-4 right-4 z-30">
+                <button
+                  onClick={handleToggleFavorite}
+                  disabled={isTogglingFavorite}
+                  className={`p-2.5 rounded-full shadow-lg transition-all ${
+                    isFavorite
+                      ? 'bg-yellow-400 hover:bg-yellow-500 text-yellow-900'
+                      : 'bg-white/90 hover:bg-white text-gray-700 backdrop-blur-sm'
+                  } ${isTogglingFavorite ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                  title={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+                >
+                  {isFavorite ? (
+                    <StarIconSolid className="w-6 h-6" />
+                  ) : (
+                    <StarIcon className="w-6 h-6" />
+                  )}
+                </button>
+              </div>
+            )}
+
+            {/* Datos de redes sociales - Pastillas blancas superpuestas en la parte superior derecha (debajo del botón de favorito) */}
+            <div className="absolute top-16 right-4 flex flex-wrap gap-2 z-10 justify-end">
               {profile.profileData.followers && (
                 <span className="px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-full text-xs font-semibold text-black shadow-lg">
                   👥 {profile.profileData.followers.toLocaleString()}

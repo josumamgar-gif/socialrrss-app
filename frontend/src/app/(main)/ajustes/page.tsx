@@ -43,6 +43,7 @@ export default function AjustesPage() {
     { path: '/ajustes/configuracion', name: 'Configuración', icon: '⚙️' },
     { path: '/ajustes/soporte', name: 'Soporte', icon: '💬' },
     { path: '/ajustes/perfiles', name: 'Comprueba tus Perfiles', icon: '📋' },
+    { path: '/ajustes/favoritos', name: 'Perfiles Favoritos', icon: '⭐' },
   ];
 
   const handleNavigate = (path: string) => {
