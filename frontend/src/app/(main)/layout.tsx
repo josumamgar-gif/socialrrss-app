@@ -60,17 +60,18 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   const [pathname, setPathname] = useState('');
-  const [tutorialCompleted, setTutorialCompleted] = useState(false);
+  const [tutorialCompleted, setTutorialCompleted] = useState<boolean | undefined>(undefined);
   const { setUser, isAuthenticated, user } = useAuthStore();
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setPathname(window.location.pathname);
 
-      // Verificar estado del tutorial - FORZAR mostrar si no está completado
+      // Verificar estado del tutorial - mostrar si no está completado o no existe
       const tutorialDone = localStorage.getItem('tutorialCompleted') === 'true';
       console.log('📚 Tutorial completado:', tutorialDone, '- Mostrar tutorial:', !tutorialDone);
-      setTutorialCompleted(tutorialDone);
+      // Establecer como false si no está completado (para usuarios nuevos)
+      setTutorialCompleted(tutorialDone ? true : false);
 
       // Solo intentar cargar usuario si hay token y no está autenticado
       const token = getAuthToken();
@@ -115,9 +116,13 @@ export default function MainLayout({
   return (
     <div className="min-h-screen bg-white flex flex-col" style={{ minHeight: '-webkit-fill-available' } as React.CSSProperties}>
       <WelcomeTutorial
+        tutorialCompleted={tutorialCompleted}
         onClose={() => {
           console.log('📚 Tutorial cerrado, actualizando estado');
           setTutorialCompleted(true);
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('tutorialCompleted', 'true');
+          }
         }}
       />
       
