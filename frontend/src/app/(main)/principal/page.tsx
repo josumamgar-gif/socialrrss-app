@@ -53,7 +53,7 @@ export default function PrincipalPage() {
         setLoading(true);
 
         // Obtener perfiles ya vistos por este usuario (usar ID del usuario o 'guest' si no hay usuario)
-        const userId = user?.id || user?._id || 'guest';
+        const userId = user?.id || 'guest';
         const viewedKey = `viewedProfiles_${userId}`;
         const viewedData = typeof window !== 'undefined' ? localStorage.getItem(viewedKey) : null;
         const viewedIds = viewedData ? JSON.parse(viewedData) : [];
@@ -115,7 +115,7 @@ export default function PrincipalPage() {
   // Marcar perfil como visto
   const markProfileAsViewed = (profileId: string) => {
     if (typeof window !== 'undefined') {
-      const userId = user?.id || user?._id || 'guest';
+      const userId = user?.id || 'guest';
       const viewedKey = `viewedProfiles_${userId}`;
       const viewedData = localStorage.getItem(viewedKey);
       const viewedProfiles = viewedData ? JSON.parse(viewedData) : [];
@@ -130,8 +130,8 @@ export default function PrincipalPage() {
 
   // Filtrar perfiles por red social seleccionada Y excluir vistos
   const filteredProfiles = useMemo(() => {
-    // Obtener ID del usuario (puede ser id o _id)
-    const userId = user?.id || user?._id || 'guest';
+    // Obtener ID del usuario
+    const userId = user?.id || 'guest';
     const viewedKey = `viewedProfiles_${userId}`;
     const viewedData = typeof window !== 'undefined' ? localStorage.getItem(viewedKey) : null;
     const viewedProfiles = viewedData ? JSON.parse(viewedData) : [];
