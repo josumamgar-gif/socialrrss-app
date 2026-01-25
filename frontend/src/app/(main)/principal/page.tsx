@@ -587,7 +587,7 @@ export default function PrincipalPage() {
 
         {/* Controles de navegación - Parte inferior - Solo se muestran cuando hay perfiles */}
         {filteredProfiles.length > 0 && (
-          <div className="absolute bottom-6 left-6 right-6 flex justify-between items-center z-50">
+          <div className="absolute bottom-20 md:bottom-24 left-6 right-6 flex justify-between items-center z-50">
             {/* Botón Selector de Red Social - Extremo izquierdo */}
             <button
               onClick={() => setShowNetworkSelector(true)}
