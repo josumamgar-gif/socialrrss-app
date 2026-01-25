@@ -215,9 +215,13 @@ export default function PrincipalPage() {
     setHistory([]);
   }, [selectedNetwork]);
 
-  // Ajustar índice si es necesario
+  // Ajustar índice si es necesario o detectar cuando no hay más perfiles
   useEffect(() => {
-    if (filteredProfiles.length > 0 && currentIndex >= filteredProfiles.length) {
+    if (filteredProfiles.length === 0 && currentIndex > 0) {
+      // No hay perfiles disponibles, el índice se ajustará automáticamente
+      setCurrentIndex(0);
+      setHistory([]);
+    } else if (filteredProfiles.length > 0 && currentIndex >= filteredProfiles.length) {
       setCurrentIndex(0);
       setHistory([]);
     }
@@ -396,47 +400,57 @@ export default function PrincipalPage() {
     );
   }
 
-  // 🔥 MENSAJE GRANDE Y VISIBLE CUANDO SE AGOTAN LOS PERFILES
-  console.log('🎨 RENDER: profiles.length =', profiles.length, 'filteredProfiles.length =', filteredProfiles.length);
-  if (profiles.length === 0) {
-    console.log('💬 MOSTRANDO MENSAJE DE PERFILES AGOTADOS - CAMBIOS APLICADOS');
-    alert('¡FUNCIONA! Se agotaron los perfiles demo'); // ALERT PARA QUE VEAS QUE FUNCIONA
+  // Mostrar mensaje cuando no hay perfiles disponibles
+  if (filteredProfiles.length === 0 && !loading) {
     return (
-      <div className="w-full bg-red-500 flex items-center justify-center px-4 overflow-hidden relative fixed inset-0">
-        <div className="text-center px-6 max-w-md mx-auto text-white">
-          {/* Selector de red social - SIEMPRE VISIBLE */}
-          <div className="mb-8">
+      <div 
+        className="w-full bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center px-4 overflow-hidden relative fixed inset-0"
+        style={{
+          height: '-webkit-fill-available',
+          width: '100vw',
+          paddingTop: 'env(safe-area-inset-top)',
+          paddingBottom: 'env(safe-area-inset-bottom)',
+          paddingLeft: 'env(safe-area-inset-left)',
+          paddingRight: 'env(safe-area-inset-right)'
+        }}
+      >
+        <div className="text-center px-6 max-w-md mx-auto">
+          {/* Selector de red social - Parte superior */}
+          <div className="absolute top-6 left-6 z-50">
             <button
-              onClick={() => {
-                alert('Hiciste clic en el selector de redes');
-                setShowNetworkSelector(true);
+              onClick={() => setShowNetworkSelector(true)}
+              className="bg-white/90 backdrop-blur-sm text-gray-700 rounded-full p-3 shadow-lg hover:shadow-xl transition-all"
+              style={{
+                backdropFilter: 'blur(10px)',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.1)',
               }}
-              className="bg-white text-red-600 rounded-full p-4 shadow-lg hover:shadow-xl transition-all relative z-50 text-2xl"
-              style={{ zIndex: 50 }}
               aria-label="Seleccionar red social"
             >
-              📱
+              <Squares2X2Icon className="h-6 w-6" />
             </button>
-            <p className="text-lg font-bold mt-2">SOLO ESTE BOTÓN DEBE APARECER</p>
           </div>
 
-          {/* Mensaje gigante de perfiles agotados */}
-          <div className="text-8xl mb-6">🚫</div>
-          <h2 className="text-4xl font-black mb-4 text-yellow-300">
-            ¡PERFILES AGOTADOS!
-          </h2>
-          <p className="text-xl mb-6 leading-relaxed bg-black/30 p-4 rounded-lg">
-            🎉 ¡FUNCIONA! Has visto todos los perfiles demo. Solo queda el selector de redes arriba.
-          </p>
-          <button
-            onClick={() => {
-              alert('Botón funciona');
-              window.location.reload();
-            }}
-            className="bg-yellow-400 text-black py-4 px-8 rounded-xl hover:bg-yellow-300 transition-colors font-bold text-xl shadow-lg hover:shadow-xl"
-          >
-            🔄 RECARGAR PÁGINA
-          </button>
+          {/* Mensaje principal */}
+          <div className="mb-8">
+            <div className="text-7xl mb-6">📭</div>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-4">
+              No hay perfiles disponibles
+            </h2>
+            <p className="text-lg sm:text-xl text-gray-600 leading-relaxed mb-6">
+              Has visto todos los perfiles disponibles en este momento.
+            </p>
+            <p className="text-base sm:text-lg text-gray-500 mb-8">
+              Vuelve más tarde para descubrir nuevos perfiles
+            </p>
+            
+            {/* Botón para cambiar filtro */}
+            <button
+              onClick={() => setShowNetworkSelector(true)}
+              className="bg-primary-600 hover:bg-primary-700 text-white py-3 px-6 rounded-xl transition-colors font-semibold text-base shadow-lg hover:shadow-xl"
+            >
+              Cambiar filtro de red social
+            </button>
+          </div>
         </div>
 
         {/* Modal del selector de redes */}
@@ -444,10 +458,8 @@ export default function PrincipalPage() {
           <SocialNetworkSelector
             selectedNetwork={selectedNetwork}
             onSelect={(network) => {
-              alert('Seleccionaste: ' + network);
               setSelectedNetwork(network);
               setShowNetworkSelector(false);
-              setTimeout(() => window.location.reload(), 100);
             }}
             onClose={() => setShowNetworkSelector(false)}
           />
@@ -548,109 +560,111 @@ export default function PrincipalPage() {
           </div>
         )}
 
-        {/* Controles de navegación - Parte inferior - AL FRENTE DE TODO */}
-        <div className="absolute bottom-6 left-6 right-6 flex justify-between items-center z-50">
-          {/* Botón Selector de Red Social - Extremo izquierdo */}
-          <button
-            onClick={() => setShowNetworkSelector(true)}
-            className="bg-white/90 backdrop-blur-sm text-gray-700 rounded-full p-3 shadow-lg hover:shadow-xl transition-all relative z-50"
-            style={{
-              backdropFilter: 'blur(10px)',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.1)',
-              zIndex: 50
-            }}
-            aria-label="Seleccionar red social"
-          >
-            <Squares2X2Icon className="h-6 w-6" />
-          </button>
-          {/* Botón Izquierda (No me gusta) */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-              if (!isAnimating) {
-                setIsAnimating(true);
-                handleSwipeLeft();
-                setTimeout(() => setIsAnimating(false), 300);
-              }
-            }}
-            disabled={isAnimating}
-            className="bg-red-500 hover:bg-red-600 text-white rounded-full transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none w-16 h-16 sm:w-18 sm:w-18 flex items-center justify-center transform hover:scale-110 active:scale-95 relative z-50"
-            style={{
-              boxShadow: '0 8px 16px rgba(239, 68, 68, 0.5), 0 4px 8px rgba(239, 68, 68, 0.4)',
-              zIndex: 50
-            }}
-            aria-label="No me gusta"
-          >
-            <ArrowLeftIcon className="h-7 w-7 sm:h-8 sm:w-8" />
-          </button>
+        {/* Controles de navegación - Parte inferior - Solo se muestran cuando hay perfiles */}
+        {filteredProfiles.length > 0 && (
+          <div className="absolute bottom-6 left-6 right-6 flex justify-between items-center z-50">
+            {/* Botón Selector de Red Social - Extremo izquierdo */}
+            <button
+              onClick={() => setShowNetworkSelector(true)}
+              className="bg-white/90 backdrop-blur-sm text-gray-700 rounded-full p-3 shadow-lg hover:shadow-xl transition-all relative z-50"
+              style={{
+                backdropFilter: 'blur(10px)',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.1)',
+                zIndex: 50
+              }}
+              aria-label="Seleccionar red social"
+            >
+              <Squares2X2Icon className="h-6 w-6" />
+            </button>
+            {/* Botón Izquierda (No me gusta) */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                if (!isAnimating) {
+                  setIsAnimating(true);
+                  handleSwipeLeft();
+                  setTimeout(() => setIsAnimating(false), 300);
+                }
+              }}
+              disabled={isAnimating}
+              className="bg-red-500 hover:bg-red-600 text-white rounded-full transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none w-16 h-16 sm:w-18 sm:w-18 flex items-center justify-center transform hover:scale-110 active:scale-95 relative z-50"
+              style={{
+                boxShadow: '0 8px 16px rgba(239, 68, 68, 0.5), 0 4px 8px rgba(239, 68, 68, 0.4)',
+                zIndex: 50
+              }}
+              aria-label="No me gusta"
+            >
+              <ArrowLeftIcon className="h-7 w-7 sm:h-8 sm:w-8" />
+            </button>
 
-          {/* Botón Abajo (Volver) */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-              if (!isAnimating && !backUsed && history.length > 0) {
-                setIsAnimating(true);
-                handleGoBack();
-                setTimeout(() => setIsAnimating(false), 300);
-              }
-            }}
-            disabled={isAnimating || backUsed || history.length === 0}
-            className="bg-gray-500 hover:bg-gray-600 text-white rounded-full transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center transform hover:scale-110 active:scale-95 relative z-50"
-            style={{
-              boxShadow: '0 6px 12px rgba(107, 114, 128, 0.5), 0 3px 6px rgba(107, 114, 128, 0.4)',
-              zIndex: 50
-            }}
-            aria-label="Volver al perfil anterior"
-          >
-            <ArrowUturnLeftIcon className="h-6 w-6 sm:h-7 sm:w-7" />
-          </button>
+            {/* Botón Abajo (Volver) */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                if (!isAnimating && !backUsed && history.length > 0) {
+                  setIsAnimating(true);
+                  handleGoBack();
+                  setTimeout(() => setIsAnimating(false), 300);
+                }
+              }}
+              disabled={isAnimating || backUsed || history.length === 0}
+              className="bg-gray-500 hover:bg-gray-600 text-white rounded-full transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center transform hover:scale-110 active:scale-95 relative z-50"
+              style={{
+                boxShadow: '0 6px 12px rgba(107, 114, 128, 0.5), 0 3px 6px rgba(107, 114, 128, 0.4)',
+                zIndex: 50
+              }}
+              aria-label="Volver al perfil anterior"
+            >
+              <ArrowUturnLeftIcon className="h-6 w-6 sm:h-7 sm:w-7" />
+            </button>
 
-          {/* Botón Arriba (Ver Detalles) */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-              if (!isAnimating) {
-                setIsAnimating(true);
-                handleSwipeUp();
-                setTimeout(() => setIsAnimating(false), 300);
-              }
-            }}
-            disabled={isAnimating}
-            className="bg-yellow-500 hover:bg-yellow-600 text-white rounded-full transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center transform hover:scale-110 active:scale-95 relative z-50"
-            style={{
-              boxShadow: '0 6px 12px rgba(234, 179, 8, 0.5), 0 3px 6px rgba(234, 179, 8, 0.4)',
-              zIndex: 50
-            }}
-            aria-label="Ver detalles del perfil"
-          >
-            <ArrowUpIcon className="h-6 w-6 sm:h-7 sm:w-7" />
-          </button>
+            {/* Botón Arriba (Ver Detalles) */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                if (!isAnimating) {
+                  setIsAnimating(true);
+                  handleSwipeUp();
+                  setTimeout(() => setIsAnimating(false), 300);
+                }
+              }}
+              disabled={isAnimating}
+              className="bg-yellow-500 hover:bg-yellow-600 text-white rounded-full transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center transform hover:scale-110 active:scale-95 relative z-50"
+              style={{
+                boxShadow: '0 6px 12px rgba(234, 179, 8, 0.5), 0 3px 6px rgba(234, 179, 8, 0.4)',
+                zIndex: 50
+              }}
+              aria-label="Ver detalles del perfil"
+            >
+              <ArrowUpIcon className="h-6 w-6 sm:h-7 sm:w-7" />
+            </button>
 
-          {/* Botón Derecha (Me gusta/Ir al enlace) */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-              if (!isAnimating) {
-                setIsAnimating(true);
-                handleSwipeRight();
-                setTimeout(() => setIsAnimating(false), 300);
-              }
-            }}
-            disabled={isAnimating}
-            className="bg-blue-500 hover:bg-blue-600 text-white rounded-full transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none w-16 h-16 sm:w-18 sm:h-18 flex items-center justify-center transform hover:scale-110 active:scale-95 relative z-50"
-            style={{
-              boxShadow: '0 8px 16px rgba(59, 130, 246, 0.5), 0 4px 8px rgba(59, 130, 246, 0.4)',
-              zIndex: 50
-            }}
-            aria-label="Ir al Enlace"
-          >
-            <ArrowRightIcon className="h-7 w-7 sm:h-8 sm:w-8" />
-          </button>
-        </div>
+            {/* Botón Derecha (Me gusta/Ir al enlace) */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                if (!isAnimating) {
+                  setIsAnimating(true);
+                  handleSwipeRight();
+                  setTimeout(() => setIsAnimating(false), 300);
+                }
+              }}
+              disabled={isAnimating}
+              className="bg-blue-500 hover:bg-blue-600 text-white rounded-full transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none w-16 h-16 sm:w-18 sm:h-18 flex items-center justify-center transform hover:scale-110 active:scale-95 relative z-50"
+              style={{
+                boxShadow: '0 8px 16px rgba(59, 130, 246, 0.5), 0 4px 8px rgba(59, 130, 246, 0.4)',
+                zIndex: 50
+              }}
+              aria-label="Ir al Enlace"
+            >
+              <ArrowRightIcon className="h-7 w-7 sm:h-8 sm:w-8" />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Modal de detalles del perfil */}
