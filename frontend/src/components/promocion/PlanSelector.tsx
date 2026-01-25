@@ -132,7 +132,15 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
     try {
       // Handle free promotion activation
       if (selectedPlan === 'free_trial') {
-        const promotionResponse = await promotionAPI.activateFreePromotion();
+        const promotionResponse = await promotionAPI.activateFreePromotion(profileId);
+
+        // Update remaining spots counter
+        if (promotionResponse.remainingFreeSpots !== undefined) {
+          setRemainingFreeSpots(promotionResponse.remainingFreeSpots);
+        }
+
+        // Reload plans to get updated counter
+        await loadPlans();
 
         // Create a mock payment record for the free promotion
         const freePlanData = plans.find(p => p.type === 'free_trial');

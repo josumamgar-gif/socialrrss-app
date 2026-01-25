@@ -198,7 +198,7 @@ export const promotionAPI = {
     return response.data;
   },
 
-  activateFreePromotion: async (): Promise<{
+  activateFreePromotion: async (profileId?: string): Promise<{
     message: string;
     promotion: {
       type: string;
@@ -207,6 +207,12 @@ export const promotionAPI = {
       endDate: string;
       remainingDays: number;
     };
+    profile?: {
+      id: string;
+      isActive: boolean;
+      paidUntil: string;
+    };
+    remainingFreeSpots?: number;
   }> => {
     const response = await api.post<{
       message: string;
@@ -217,7 +223,13 @@ export const promotionAPI = {
         endDate: string;
         remainingDays: number;
       };
-    }>('/promotion/activate');
+      profile?: {
+        id: string;
+        isActive: boolean;
+        paidUntil: string;
+      };
+      remainingFreeSpots?: number;
+    }>('/promotion/activate', { profileId });
     return response.data;
   },
 

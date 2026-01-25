@@ -3,6 +3,7 @@ import { AuthRequest } from '../middleware/auth.middleware';
 import Promotion from '../models/Promotion';
 import User from '../models/User';
 import Profile from '../models/Profile';
+import { calculateExpirationDate } from '../constants/pricing';
 
 export const checkPromotionAvailability = async (_req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -35,6 +36,7 @@ export const activateFreePromotion = async (req: AuthRequest, res: Response): Pr
     }
 
     const userId = req.user.userId;
+    const { profileId } = req.body;
 
     // Check if user already has a promotion
     const existingPromotion = await Promotion.findOne({ userId });
@@ -79,6 +81,30 @@ export const activateFreePromotion = async (req: AuthRequest, res: Response): Pr
       freePromotionEndDate: endDate,
     });
 
+    // Activate profile if profileId is provided
+    let activatedProfile = null;
+    if (profileId) {
+      const profile = await Profile.findOne({ _id: profileId, userId });
+      if (profile) {
+        profile.isPaid = true;
+        profile.isActive = true;
+        profile.planType = 'free_trial';
+        profile.paidUntil = calculateExpirationDate('free_trial');
+        await profile.save();
+        activatedProfile = {
+          id: profile._id,
+          isActive: profile.isActive,
+          paidUntil: profile.paidUntil,
+        };
+      }
+    }
+
+    // Get updated remaining spots count
+    const updatedUsedPromotionsCount = await Promotion.countDocuments({
+      type: 'free_trial_30_days',
+      status: { $in: ['active', 'expired', 'converted'] }
+    });
+
     res.json({
       message: 'Promoción gratuita activada exitosamente',
       promotion: {
@@ -87,7 +113,9 @@ export const activateFreePromotion = async (req: AuthRequest, res: Response): Pr
         startDate: promotion.startDate,
         endDate: promotion.endDate,
         remainingDays: 30,
-      }
+      },
+      profile: activatedProfile,
+      remainingFreeSpots: Math.max(0, 100 - updatedUsedPromotionsCount),
     });
   } catch (error: any) {
     console.error('Error activating promotion:', error);
