@@ -308,7 +308,7 @@
     </div>
 
     <script>
-        // Auto-avance del carrusel (opcional, para preview)
+        // Control manual de slides para capturas
         let currentSlide = 0;
         const slides = document.querySelectorAll('.slide');
         const totalSlides = slides.length;
@@ -317,6 +317,8 @@
             slides.forEach((slide, i) => {
                 slide.classList.toggle('active', i === index);
             });
+            currentSlide = index;
+            console.log(`Slide ${index + 1} de ${totalSlides} activo`);
         }
 
         function nextSlide() {
@@ -324,16 +326,26 @@
             showSlide(currentSlide);
         }
 
-        // Para capturas individuales, comenta esta línea:
-        // setInterval(nextSlide, 3000);
+        function prevSlide() {
+            currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+            showSlide(currentSlide);
+        }
 
-        // Instrucciones para capturar:
-        // 1. Abre este archivo en un navegador
-        // 2. Para cada slide, cambia la clase 'active' a la slide que quieras
-        // 3. Usa herramientas como:
-        //    - Screenshot (extensión del navegador)
-        //    - Snipping Tool (Windows)
-        //    - O herramientas online como htmlcsstoimage.com
+        // Navegación con teclado
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+        });
+
+        // Mostrar instrucciones en consola
+        console.log('%c🎨 CARRUSEL PROMOCIONAL', 'font-size: 20px; font-weight: bold; color: #667eea;');
+        console.log('%cUsa las flechas ← → para navegar entre slides', 'font-size: 14px; color: #666;');
+        console.log('%cO ejecuta: showSlide(0-4) en la consola', 'font-size: 14px; color: #666;');
+        
+        // Exponer funciones globalmente para uso en consola
+        window.showSlide = showSlide;
+        window.nextSlide = nextSlide;
+        window.prevSlide = prevSlide;
     </script>
 </body>
 </html>
