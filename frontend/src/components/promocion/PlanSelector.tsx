@@ -327,7 +327,7 @@ export default function PlanSelector({ profileId, profile, onPaymentSuccess }: P
             <div className="absolute -top-2 left-4 flex gap-2">
               {plan.type === 'free_trial' && remainingFreeSpots > 0 && (
                 <span className="bg-emerald-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg whitespace-nowrap">
-                  GRATIS • {remainingFreeSpots} DISPONIBLES
+                  GRATIS • 100 DISPONIBLES
                 </span>
               )}
               {plan.price === 10 && plan.durationDays === 365 && (

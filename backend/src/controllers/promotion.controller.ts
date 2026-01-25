@@ -38,48 +38,59 @@ export const activateFreePromotion = async (req: AuthRequest, res: Response): Pr
     const userId = req.user.userId;
     const { profileId } = req.body;
 
-    // Check if user already has a promotion
-    const existingPromotion = await Promotion.findOne({ userId });
-    if (existingPromotion) {
-      res.status(400).json({ error: 'El usuario ya tiene una promoción activa' });
+    // Verificar si el usuario ya tiene un perfil activo con promoción gratuita
+    const existingFreeProfile = await Profile.findOne({ 
+      userId, 
+      planType: 'free_trial',
+      isActive: true 
+    });
+
+    if (existingFreeProfile) {
+      res.status(400).json({ error: 'Ya has usado tu promoción gratuita para activar un perfil' });
       return;
     }
 
-    // Check availability
-    const usedPromotionsCount = await Promotion.countDocuments({
-      type: 'free_trial_30_days',
-      status: { $in: ['active', 'expired', 'converted'] }
-    });
+    // Verificar si el usuario ya tiene una promoción registrada
+    let existingPromotion = await Promotion.findOne({ userId });
+    
+    // Si no tiene promoción, verificar disponibilidad y crear una
+    if (!existingPromotion) {
+      // Check availability
+      const usedPromotionsCount = await Promotion.countDocuments({
+        type: 'free_trial_30_days',
+        status: { $in: ['active', 'expired', 'converted'] }
+      });
 
-    if (usedPromotionsCount >= 100) {
-      res.status(400).json({ error: 'La promoción gratuita ya no está disponible' });
-      return;
+      if (usedPromotionsCount >= 100) {
+        res.status(400).json({ error: 'La promoción gratuita ya no está disponible' });
+        return;
+      }
+
+      // Calculate end date (30 days from now)
+      const startDate = new Date();
+      const endDate = new Date();
+      endDate.setDate(endDate.getDate() + 30);
+
+      // Create promotion record
+      existingPromotion = new Promotion({
+        userId,
+        type: 'free_trial_30_days',
+        status: 'active',
+        startDate,
+        endDate,
+        usageCount: usedPromotionsCount + 1,
+        maxUsage: 100,
+      });
+
+      await existingPromotion.save();
+
+      // Update user record
+      await User.findByIdAndUpdate(userId, {
+        isOnFreePromotion: true,
+        freePromotionStartDate: startDate,
+        freePromotionEndDate: endDate,
+      });
     }
-
-    // Calculate end date (30 days from now)
-    const startDate = new Date();
-    const endDate = new Date();
-    endDate.setDate(endDate.getDate() + 30);
-
-    // Create promotion record
-    const promotion = new Promotion({
-      userId,
-      type: 'free_trial_30_days',
-      status: 'active',
-      startDate,
-      endDate,
-      usageCount: usedPromotionsCount + 1,
-      maxUsage: 100,
-    });
-
-    await promotion.save();
-
-    // Update user record
-    await User.findByIdAndUpdate(userId, {
-      isOnFreePromotion: true,
-      freePromotionStartDate: startDate,
-      freePromotionEndDate: endDate,
-    });
 
     // Activate profile if profileId is provided
     let activatedProfile = null;
@@ -108,10 +119,10 @@ export const activateFreePromotion = async (req: AuthRequest, res: Response): Pr
     res.json({
       message: 'Promoción gratuita activada exitosamente',
       promotion: {
-        type: promotion.type,
-        status: promotion.status,
-        startDate: promotion.startDate,
-        endDate: promotion.endDate,
+        type: existingPromotion.type,
+        status: existingPromotion.status,
+        startDate: existingPromotion.startDate,
+        endDate: existingPromotion.endDate,
         remainingDays: 30,
       },
       profile: activatedProfile,

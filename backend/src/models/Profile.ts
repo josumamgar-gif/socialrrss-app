@@ -53,7 +53,7 @@ const ProfileSchema: Schema = new Schema(
     },
     planType: {
       type: String,
-      enum: ['monthly', 'yearly', 'lifetime', null],
+      enum: ['monthly', 'yearly', 'lifetime', 'free_trial', null],
       default: null,
     },
     paidUntil: {

@@ -17,6 +17,7 @@ const SLIDES = [
     { name: '03-swipe', selector: '.slide-3', title: 'Swipe y Explora' },
     { name: '04-promociona', selector: '.slide-4', title: 'Promociona tu Perfil' },
     { name: '05-cta', selector: '.slide-5', title: '¡Empieza Ahora!' },
+    { name: '06-promocion', selector: '.slide-6', title: 'Oferta Especial' },
 ];
 
 async function generateImages() {
