@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useAuthStore } from '@/store/authStore';
+import { userAPI } from '@/lib/api';
 import {
   XMarkIcon,
   ArrowLeftIcon,
@@ -140,7 +142,7 @@ export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange,
     },
   ];
 
-  const handleClose = () => {
+  const handleClose = async () => {
     console.log('🎯 Tutorial terminando...');
     setIsVisible(false);
     if (typeof window !== 'undefined') {
@@ -148,6 +150,16 @@ export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange,
       if (!forceOpen) {
         console.log('✅ Marcando tutorial como completado');
         localStorage.setItem('tutorialCompleted', 'true');
+        
+        // Sincronizar con backend si el usuario está autenticado
+        if (user?.id) {
+          try {
+            await userAPI.markTutorialCompleted();
+            console.log('✅ Tutorial marcado como completado en backend');
+          } catch (error) {
+            console.error('❌ Error marcando tutorial como completado en backend:', error);
+          }
+        }
       } else {
         console.log('ℹ️ Tutorial forzado - no marcar como completado');
       }
@@ -157,7 +169,7 @@ export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange,
     }
     if (onClose) {
       console.log('📞 Ejecutando callback onClose');
-      onClose();
+      await onClose();
     }
     console.log('🏁 Tutorial cerrado completamente');
   };
@@ -335,9 +347,9 @@ export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange,
           <button
             onClick={handlePrev}
             disabled={currentStep === 0}
-            className="px-3 sm:px-4 py-2 text-gray-600 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
+            className="px-4 sm:px-6 py-3 text-gray-600 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm sm:text-base font-medium"
           >
-            <ArrowLeftIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+            <ArrowLeftIcon className="h-5 w-5 sm:h-6 sm:w-6" />
             <span className="hidden sm:inline">Anterior</span>
           </button>
           
@@ -354,10 +366,10 @@ export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange,
 
           <button
             onClick={handleNext}
-            className="px-4 sm:px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium"
+            className="px-6 sm:px-8 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors flex items-center gap-2 text-base sm:text-lg font-semibold"
           >
             {currentStep === steps.length - 1 ? 'Comenzar' : 'Siguiente'}
-            {currentStep < steps.length - 1 && <ArrowRightIcon className="h-3 w-3 sm:h-4 sm:w-4" />}
+            {currentStep < steps.length - 1 && <ArrowRightIcon className="h-5 w-5 sm:h-6 sm:w-6" />}
           </button>
         </div>
       </div>

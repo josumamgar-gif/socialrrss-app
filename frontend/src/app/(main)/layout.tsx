@@ -67,10 +67,34 @@ export default function MainLayout({
     if (typeof window !== 'undefined') {
       setPathname(window.location.pathname);
 
-      // Verificar estado del tutorial - FORZAR mostrar si no está completado
-      const tutorialDone = localStorage.getItem('tutorialCompleted') === 'true';
-      console.log('📚 Tutorial completado:', tutorialDone, '- Mostrar tutorial:', !tutorialDone);
-      setTutorialCompleted(tutorialDone);
+      // Cargar estado del tutorial desde backend si el usuario está autenticado
+      const loadTutorialStatus = async () => {
+        const token = getAuthToken();
+        if (token && user?.id) {
+          try {
+            const { userAPI } = await import('@/lib/api');
+            const response = await userAPI.getTutorialStatus();
+            setTutorialCompleted(response.tutorialCompleted);
+            // Sincronizar con localStorage como fallback
+            if (response.tutorialCompleted) {
+              localStorage.setItem('tutorialCompleted', 'true');
+            }
+            console.log('✅ Estado del tutorial cargado desde backend:', response.tutorialCompleted);
+          } catch (error) {
+            console.error('❌ Error cargando estado del tutorial desde backend:', error);
+            // Fallback a localStorage
+            const tutorialDone = localStorage.getItem('tutorialCompleted') === 'true';
+            setTutorialCompleted(tutorialDone);
+          }
+        } else {
+          // Si no hay usuario, usar localStorage
+          const tutorialDone = localStorage.getItem('tutorialCompleted') === 'true';
+          console.log('📚 Tutorial completado (localStorage):', tutorialDone, '- Mostrar tutorial:', !tutorialDone);
+          setTutorialCompleted(tutorialDone);
+        }
+      };
+
+      loadTutorialStatus();
 
       // Solo intentar cargar usuario si hay token y no está autenticado
       const token = getAuthToken();
@@ -116,11 +140,22 @@ export default function MainLayout({
     <div className="min-h-screen bg-white flex flex-col" style={{ minHeight: '-webkit-fill-available' } as React.CSSProperties}>
       <WelcomeTutorial
         tutorialCompleted={tutorialCompleted}
-        onClose={() => {
+        onClose={async () => {
           console.log('📚 Tutorial cerrado, actualizando estado');
           setTutorialCompleted(true);
           if (typeof window !== 'undefined') {
             localStorage.setItem('tutorialCompleted', 'true');
+          }
+          // Sincronizar con backend si el usuario está autenticado
+          const token = getAuthToken();
+          if (token && user?.id) {
+            try {
+              const { userAPI } = await import('@/lib/api');
+              await userAPI.markTutorialCompleted();
+              console.log('✅ Tutorial marcado como completado en backend');
+            } catch (error) {
+              console.error('❌ Error marcando tutorial como completado en backend:', error);
+            }
           }
         }}
       />

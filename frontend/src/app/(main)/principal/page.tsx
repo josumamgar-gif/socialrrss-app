@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { useAuthStore } from '@/store/authStore';
-import { profilesAPI } from '@/lib/api';
+import { profilesAPI, userAPI } from '@/lib/api';
 import { Profile, SocialNetwork } from '@/types';
 import { demoProfiles } from '@/data/demoProfiles';
 import ProfileCard from '@/components/principal/ProfileCard';
@@ -29,6 +29,7 @@ export default function PrincipalPage() {
   const [backUsed, setBackUsed] = useState(false);
   const [selectedNetwork, setSelectedNetwork] = useState<'all' | SocialNetwork>('all');
   const [showNetworkSelector, setShowNetworkSelector] = useState(false);
+  const [discardedProfiles, setDiscardedProfiles] = useState<string[]>([]);
 
   // Verificar autenticación básica
   useEffect(() => {
@@ -103,16 +104,11 @@ export default function PrincipalPage() {
 
         console.log('📄 Perfiles demo listos:', demoProfiles.length);
 
-        // FILTRAR PERFILES YA VISTOS POR ESTE USUARIO
-        // Usar ID del usuario si existe, o 'guest' si no está cargado aún
-        const userId = user?.id || 'guest';
-        const viewedKey = `viewedProfiles_${userId}`;
-        const viewedData = typeof window !== 'undefined' ? localStorage.getItem(viewedKey) : null;
-        const viewedIds = viewedData ? JSON.parse(viewedData) : [];
+        // FILTRAR PERFILES YA DESCARTADOS POR ESTE USUARIO
+        // Usar el estado discardedProfiles que se carga desde el backend o localStorage
+        console.log('👀 Usuario:', user?.id || 'guest', '- Perfiles ya descartados:', discardedProfiles.length);
 
-        console.log('👀 Usuario:', userId, '- Perfiles ya vistos:', viewedIds.length);
-
-        let availableProfiles = demoProfiles.filter(p => !viewedIds.includes(p._id));
+        let availableProfiles = demoProfiles.filter(p => !discardedProfiles.includes(p._id));
         console.log('✅ Perfiles demo disponibles:', availableProfiles.length);
 
         // SI YA VIÓ TODOS LOS DEMO, INTENTAR CARGAR PERFILES REALES
@@ -127,7 +123,7 @@ export default function PrincipalPage() {
             if (apiProfiles.length > 0) {
               const realProfiles = apiProfiles.filter((p: any) => {
                 const isDemo = p._id?.startsWith('demo-') || p.userId?.username === 'demo';
-                return !isDemo && !viewedIds.includes(p._id);
+                return !isDemo && !discardedProfiles.includes(p._id);
               });
 
               if (realProfiles.length > 0) {
@@ -160,7 +156,7 @@ export default function PrincipalPage() {
             if (apiProfiles.length > 0) {
               const realProfiles = apiProfiles.filter((p: any) => {
                 const isDemo = p._id?.startsWith('demo-') || p.userId?.username === 'demo';
-                return !isDemo && !viewedIds.includes(p._id);
+                return !isDemo && !discardedProfiles.includes(p._id);
               });
 
               if (realProfiles.length > 0) {
@@ -187,42 +183,93 @@ export default function PrincipalPage() {
       }
     };
 
-    // Cargar perfiles inmediatamente (no esperar usuario)
+    // Cargar perfiles cuando cambie el usuario o los perfiles descartados
     loadProfiles();
-  }, [user]); // Pero reactivar si cambia el usuario
+  }, [user, discardedProfiles]); // Reactivar si cambia el usuario o los perfiles descartados
 
-  // Marcar perfil como visto
-  const markProfileAsViewed = (profileId: string) => {
+  // Cargar perfiles descartados desde el backend cuando el usuario esté autenticado
+  useEffect(() => {
+    const loadDiscardedProfiles = async () => {
+      if (user?.id) {
+        try {
+          const response = await userAPI.getDiscardedProfiles();
+          setDiscardedProfiles(response.discardedProfiles || []);
+          console.log('✅ Perfiles descartados cargados desde backend:', response.discardedProfiles.length);
+        } catch (error) {
+          console.error('❌ Error cargando perfiles descartados:', error);
+          // Si falla, usar localStorage como fallback
+          if (typeof window !== 'undefined') {
+            const viewedKey = `viewedProfiles_${user.id}`;
+            const viewedData = localStorage.getItem(viewedKey);
+            const viewedProfiles = viewedData ? JSON.parse(viewedData) : [];
+            setDiscardedProfiles(viewedProfiles);
+          }
+        }
+      } else {
+        // Si no hay usuario, usar localStorage como fallback
+        if (typeof window !== 'undefined') {
+          const viewedKey = 'viewedProfiles_guest';
+          const viewedData = localStorage.getItem(viewedKey);
+          const viewedProfiles = viewedData ? JSON.parse(viewedData) : [];
+          setDiscardedProfiles(viewedProfiles);
+        }
+      }
+    };
+
+    loadDiscardedProfiles();
+  }, [user?.id]);
+
+  // Marcar perfil como visto (sincronizar con backend si está autenticado)
+  const markProfileAsViewed = async (profileId: string) => {
     if (typeof window !== 'undefined') {
       const userId = user?.id || 'guest';
-      const viewedKey = `viewedProfiles_${userId}`;
-      const viewedData = localStorage.getItem(viewedKey);
-      const viewedProfiles = viewedData ? JSON.parse(viewedData) : [];
-
-      if (!viewedProfiles.includes(profileId)) {
-        viewedProfiles.push(profileId);
-        localStorage.setItem(viewedKey, JSON.stringify(viewedProfiles));
+      
+      // Si el usuario está autenticado, sincronizar con backend
+      if (user?.id) {
+        try {
+          await userAPI.discardProfile(profileId);
+          // Actualizar estado local
+          if (!discardedProfiles.includes(profileId)) {
+            setDiscardedProfiles([...discardedProfiles, profileId]);
+          }
+          console.log('✅ Perfil descartado sincronizado con backend:', profileId);
+        } catch (error) {
+          console.error('❌ Error descartando perfil en backend:', error);
+          // Fallback a localStorage si falla el backend
+          const viewedKey = `viewedProfiles_${userId}`;
+          const viewedData = localStorage.getItem(viewedKey);
+          const viewedProfiles = viewedData ? JSON.parse(viewedData) : [];
+          if (!viewedProfiles.includes(profileId)) {
+            viewedProfiles.push(profileId);
+            localStorage.setItem(viewedKey, JSON.stringify(viewedProfiles));
+            setDiscardedProfiles([...discardedProfiles, profileId]);
+          }
+        }
+      } else {
+        // Si no hay usuario, usar solo localStorage
+        const viewedKey = `viewedProfiles_${userId}`;
+        const viewedData = localStorage.getItem(viewedKey);
+        const viewedProfiles = viewedData ? JSON.parse(viewedData) : [];
+        if (!viewedProfiles.includes(profileId)) {
+          viewedProfiles.push(profileId);
+          localStorage.setItem(viewedKey, JSON.stringify(viewedProfiles));
+          setDiscardedProfiles([...discardedProfiles, profileId]);
+        }
       }
     }
   };
 
-  // Filtrar perfiles por red social seleccionada Y excluir vistos
+  // Filtrar perfiles por red social seleccionada Y excluir descartados
   const filteredProfiles = useMemo(() => {
-    // Usar ID del usuario si existe, o 'guest' si no está cargado aún
-    const userId = user?.id || 'guest';
-    const viewedKey = `viewedProfiles_${userId}`;
-    const viewedData = typeof window !== 'undefined' ? localStorage.getItem(viewedKey) : null;
-    const viewedProfiles = viewedData ? JSON.parse(viewedData) : [];
-
     console.log('🔍 FILTRANDO PERFILES:');
     console.log('   Total perfiles en state:', profiles.length);
-    console.log('   Perfiles ya vistos:', viewedProfiles.length);
+    console.log('   Perfiles descartados:', discardedProfiles.length);
     console.log('   Red social seleccionada:', selectedNetwork);
 
-    // Filtrar perfiles no vistos
-    let availableProfiles = profiles.filter(p => !viewedProfiles.includes(p._id));
+    // Filtrar perfiles no descartados (usar estado del backend o localStorage)
+    let availableProfiles = profiles.filter(p => !discardedProfiles.includes(p._id));
 
-    console.log('✅ Perfiles disponibles (no vistos):', availableProfiles.length);
+    console.log('✅ Perfiles disponibles (no descartados):', availableProfiles.length);
 
     // Filtrar por red social si es necesario
     if (selectedNetwork !== 'all') {
@@ -233,7 +280,7 @@ export default function PrincipalPage() {
     console.log('🎯 RESULTADO FINAL filteredProfiles:', availableProfiles.length);
 
     return availableProfiles;
-  }, [profiles, selectedNetwork, user]);
+  }, [profiles, selectedNetwork, discardedProfiles]);
 
   // Resetear índice cuando cambia el filtro
   useEffect(() => {
@@ -260,7 +307,7 @@ export default function PrincipalPage() {
   };
 
   // Handlers simples - MARCAN COMO VISTOS Y AVANZAN
-  const handleSwipeLeft = () => {
+  const handleSwipeLeft = async () => {
     const currentProfile = filteredProfiles[currentIndex];
     if (!currentProfile) {
       console.log('⚠️ No hay perfil actual para swipe left');
@@ -268,7 +315,7 @@ export default function PrincipalPage() {
     }
 
     // Marcar como visto ANTES de avanzar
-    markProfileAsViewed(currentProfile._id);
+    await markProfileAsViewed(currentProfile._id);
     console.log('👎 Swipe left - perfil descartado:', currentProfile._id);
 
     // Resetear historial al hacer swipe (no se puede volver atrás)
@@ -284,14 +331,11 @@ export default function PrincipalPage() {
       console.log('🎯 Último perfil visto - verificando estado');
 
       // Verificar si quedan perfiles disponibles después del filtro
-      const viewedKey = user ? `viewedProfiles_${user.id}` : '';
-      const viewedData = viewedKey && typeof window !== 'undefined' ? localStorage.getItem(viewedKey) : null;
-      const viewedProfiles = viewedData ? JSON.parse(viewedData) : [];
-      const unseenProfiles = profiles.filter(p => !viewedProfiles.includes(p._id));
+      const unseenProfiles = profiles.filter(p => !discardedProfiles.includes(p._id));
 
       console.log('📊 Análisis final:');
       console.log('   Total perfiles:', profiles.length);
-      console.log('   Perfiles vistos:', viewedProfiles.length);
+      console.log('   Perfiles descartados:', discardedProfiles.length);
       console.log('   Perfiles sin ver:', unseenProfiles.length);
 
       if (unseenProfiles.length === 0) {
@@ -308,7 +352,7 @@ export default function PrincipalPage() {
     }
   };
 
-  const handleSwipeRight = () => {
+  const handleSwipeRight = async () => {
     const currentProfile = filteredProfiles[currentIndex];
     if (!currentProfile) {
       console.log('⚠️ No hay perfil actual para swipe right');
@@ -316,7 +360,7 @@ export default function PrincipalPage() {
     }
 
     // Marcar como visto SIEMPRE
-    markProfileAsViewed(currentProfile._id);
+    await markProfileAsViewed(currentProfile._id);
 
     const userIdObj = currentProfile.userId as any;
     const isDemo =
@@ -346,14 +390,11 @@ export default function PrincipalPage() {
       console.log('🎯 Último perfil visto - verificando estado');
 
       // Verificar si quedan perfiles disponibles después del filtro
-      const viewedKey = user ? `viewedProfiles_${user.id}` : '';
-      const viewedData = viewedKey && typeof window !== 'undefined' ? localStorage.getItem(viewedKey) : null;
-      const viewedProfiles = viewedData ? JSON.parse(viewedData) : [];
-      const unseenProfiles = profiles.filter(p => !viewedProfiles.includes(p._id));
+      const unseenProfiles = profiles.filter(p => !discardedProfiles.includes(p._id));
 
       console.log('📊 Análisis final:');
       console.log('   Total perfiles:', profiles.length);
-      console.log('   Perfiles vistos:', viewedProfiles.length);
+      console.log('   Perfiles descartados:', discardedProfiles.length);
       console.log('   Perfiles sin ver:', unseenProfiles.length);
 
       if (unseenProfiles.length === 0) {
@@ -501,7 +542,7 @@ export default function PrincipalPage() {
 
   return (
     <div
-      className="w-full bg-white flex items-center justify-center px-4 overflow-hidden relative fixed inset-0"
+      className="w-full bg-white flex items-center justify-center px-0 sm:px-4 overflow-hidden relative fixed inset-0"
       style={{
         height: '-webkit-fill-available',
         width: '100vw',
@@ -546,8 +587,8 @@ export default function PrincipalPage() {
         transform: 'translate(-50%, -50%)',
         width: '100%',
         maxWidth: '100%',
-        paddingLeft: '1rem',
-        paddingRight: '1rem',
+        paddingLeft: '0.5rem',
+        paddingRight: '0.5rem',
         height: 'calc(100vh - 10rem)',
         minHeight: 'calc(100vh - 10rem)',
         display: 'flex',
@@ -563,7 +604,7 @@ export default function PrincipalPage() {
             overflow: 'visible', 
             touchAction: 'none', 
             width: '100%', 
-            maxWidth: 'min(100%, 36rem)',
+            maxWidth: '100%',
             height: '100%', 
             display: 'flex', 
             alignItems: 'center', 

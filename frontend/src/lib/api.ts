@@ -331,25 +331,27 @@ export const paymentsAPI = {
   },
 };
 
-// API de favoritos
-export const favoritesAPI = {
-  addFavorite: async (profileId: string): Promise<{ message: string; favoriteProfiles: string[] }> => {
-    const response = await api.post<{ message: string; favoriteProfiles: string[] }>('/favorites/add', { profileId });
+// API de usuario (perfiles descartados y tutorial)
+export const userAPI = {
+  discardProfile: async (profileId: string): Promise<{ success: boolean; discardedProfiles: string[] }> => {
+    const response = await api.post<{ success: boolean; discardedProfiles: string[] }>('/user/discard-profile', {
+      profileId,
+    });
     return response.data;
   },
 
-  removeFavorite: async (profileId: string): Promise<{ message: string; favoriteProfiles: string[] }> => {
-    const response = await api.post<{ message: string; favoriteProfiles: string[] }>('/favorites/remove', { profileId });
+  getDiscardedProfiles: async (): Promise<{ discardedProfiles: string[] }> => {
+    const response = await api.get<{ discardedProfiles: string[] }>('/user/discarded-profiles');
     return response.data;
   },
 
-  getFavorites: async (): Promise<{ profiles: Profile[]; count: number }> => {
-    const response = await api.get<{ profiles: Profile[]; count: number }>('/favorites');
+  markTutorialCompleted: async (): Promise<{ success: boolean; tutorialCompleted: boolean }> => {
+    const response = await api.post<{ success: boolean; tutorialCompleted: boolean }>('/user/tutorial-completed');
     return response.data;
   },
 
-  checkFavorite: async (profileId: string): Promise<{ isFavorite: boolean }> => {
-    const response = await api.get<{ isFavorite: boolean }>(`/favorites/check?profileId=${profileId}`);
+  getTutorialStatus: async (): Promise<{ tutorialCompleted: boolean }> => {
+    const response = await api.get<{ tutorialCompleted: boolean }>('/user/tutorial-status');
     return response.data;
   },
 };
