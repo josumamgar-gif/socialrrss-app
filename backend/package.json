@@ -12,12 +12,18 @@
     "seed-demo": "ts-node scripts/seed-demo-profiles.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["api", "express", "mongodb", "payments"],
+  "keywords": [
+    "api",
+    "express",
+    "mongodb",
+    "payments"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@paypal/checkout-server-sdk": "^1.0.3",
     "bcrypt": "^5.1.1",
+    "cloudinary": "^2.9.0",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
@@ -41,4 +47,3 @@
     "typescript": "^5.3.3"
   }
 }
-

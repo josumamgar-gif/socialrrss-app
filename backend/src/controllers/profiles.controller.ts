@@ -3,23 +3,10 @@ import { AuthRequest } from '../middleware/auth.middleware';
 import Profile from '../models/Profile';
 import multer from 'multer';
 import path from 'path';
-import fs from 'fs';
+import { uploadMultipleImagesToCloudinary, deleteImageFromCloudinary } from '../utils/cloudinary';
 
-// Configurar multer para subir imágenes
-const uploadDir = path.join(__dirname, '../../uploads');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
-    cb(null, uploadDir);
-  },
-  filename: (_req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, 'images-' + uniqueSuffix + path.extname(file.originalname));
-  },
-});
+// Configurar multer para almacenar en memoria (luego subiremos a Cloudinary)
+const storage = multer.memoryStorage();
 
 const upload = multer({
   storage,
@@ -204,10 +191,27 @@ export const updateProfile = async (req: AuthRequest, res: Response): Promise<vo
 
     // Actualizar imágenes si se proporcionan nuevas
     if (files && files.length > 0) {
-      const imagePaths = files.map((file) => `/uploads/${file.filename}`);
-      // Si hay nuevas imágenes, reemplazar las existentes o añadirlas según la lógica
-      // Por ahora, reemplazamos todas
-      profile.images = imagePaths;
+      try {
+        // Eliminar imágenes antiguas de Cloudinary si existen
+        if (profile.images && profile.images.length > 0) {
+          const deletePromises = profile.images
+            .filter((img: string) => img.startsWith('http'))
+            .map((img: string) => deleteImageFromCloudinary(img).catch(err => {
+              console.error('Error eliminando imagen antigua:', err);
+              // Continuar aunque falle la eliminación
+            }));
+          await Promise.all(deletePromises);
+        }
+
+        // Subir nuevas imágenes a Cloudinary
+        const buffers = files.map((file) => file.buffer);
+        const cloudinaryUrls = await uploadMultipleImagesToCloudinary(buffers, 'profiles');
+        profile.images = cloudinaryUrls;
+      } catch (uploadError: any) {
+        console.error('Error subiendo imágenes a Cloudinary:', uploadError);
+        res.status(500).json({ error: 'Error al subir imágenes: ' + uploadError.message });
+        return;
+      }
     }
 
     await profile.save();
@@ -306,25 +310,25 @@ export const createProfile = async (req: AuthRequest, res: Response): Promise<vo
       filesCount: files ? files.length : 0,
       files: files ? files.map(f => ({
         originalname: f.originalname,
-        filename: f.filename,
         mimetype: f.mimetype,
         size: f.size,
-        path: f.path
+        bufferSize: f.buffer ? f.buffer.length : 0
       })) : []
     });
 
-    const images = files && Array.isArray(files) && files.length > 0
-      ? files.map((file) => {
-          const imagePath = `/uploads/${file.filename}`;
-          console.log('💾 Guardando imagen:', {
-            originalname: file.originalname,
-            filename: file.filename,
-            path: imagePath,
-            exists: fs.existsSync(file.path)
-          });
-          return imagePath;
-        })
-      : [];
+    // Subir imágenes a Cloudinary
+    let images: string[] = [];
+    if (files && Array.isArray(files) && files.length > 0) {
+      try {
+        const buffers = files.map((file) => file.buffer);
+        images = await uploadMultipleImagesToCloudinary(buffers, 'profiles');
+        console.log('✅ Imágenes subidas a Cloudinary:', images);
+      } catch (uploadError: any) {
+        console.error('Error subiendo imágenes a Cloudinary:', uploadError);
+        res.status(500).json({ error: 'Error al subir imágenes: ' + uploadError.message });
+        return;
+      }
+    }
 
     console.log('📦 Datos a guardar:', {
       userId: req.user.userId,
