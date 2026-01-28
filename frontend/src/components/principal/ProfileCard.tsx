@@ -7,9 +7,7 @@ import {
   ArrowRightIcon,
   ArrowUpIcon,
   ArrowUturnLeftIcon,
-  StarIcon,
 } from '@heroicons/react/24/outline';
-import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import SocialNetworkLogo from '@/components/shared/SocialNetworkLogo';
 import { getImageUrl, placeholderImage } from '@/lib/imageUtils';
 import { favoritesAPI } from '@/lib/api';
@@ -782,8 +780,8 @@ export default function ProfileCard({
               `,
               height: '100%',
               width: '100%',
-              minHeight: 'calc(100vh - 12rem)',
-              maxHeight: 'calc(100vh - 12rem)',
+              minHeight: 'calc(100vh - 10rem)',
+              maxHeight: 'calc(100vh - 10rem)',
             transform: buttonAction.type 
               ? undefined // La transformación de botones se maneja con style inline
               : `translate(${position.x}px, ${position.y}px) rotate(${rotation}deg)`,
@@ -811,7 +809,7 @@ export default function ProfileCard({
           }}
         >
           {/* Imagen principal - Ocupa todo el espacio disponible estilo Tinder */}
-          <div className="relative w-full h-full bg-gray-200 rounded-3xl overflow-hidden" style={{ height: '100%', minHeight: 'calc(100vh - 12rem)' }}>
+          <div className="relative w-full h-full bg-gray-200 rounded-3xl overflow-hidden" style={{ height: '100%', minHeight: 'calc(100vh - 10rem)' }}>
             {profile.images && profile.images.length > 0 ? (
               <img
                 src={getImageUrl(profile.images[0])}
@@ -857,18 +855,21 @@ export default function ProfileCard({
                 <button
                   onClick={handleToggleFavorite}
                   disabled={isTogglingFavorite}
-                  className={`p-2.5 rounded-full shadow-lg transition-all ${
+                  className={`w-12 h-12 rounded-full shadow-lg transition-all flex items-center justify-center ${
                     isFavorite
-                      ? 'bg-yellow-400 hover:bg-yellow-500 text-yellow-900'
-                      : 'bg-white/90 hover:bg-white text-gray-700 backdrop-blur-sm'
+                      ? 'bg-yellow-400 hover:bg-yellow-500'
+                      : 'bg-white/90 hover:bg-white backdrop-blur-sm'
                   } ${isTogglingFavorite ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                   title={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
                 >
-                  {isFavorite ? (
-                    <StarIconSolid className="w-6 h-6" />
-                  ) : (
-                    <StarIcon className="w-6 h-6" />
-                  )}
+                  <span
+                    className={`text-xl leading-none select-none ${
+                      isFavorite ? 'text-yellow-900' : 'text-gray-900'
+                    }`}
+                    aria-hidden="true"
+                  >
+                    ⭐
+                  </span>
                 </button>
               </div>
             )}

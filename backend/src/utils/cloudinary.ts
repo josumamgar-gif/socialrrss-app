@@ -75,18 +75,38 @@ export const deleteImageFromCloudinary = async (
   imageUrl: string
 ): Promise<void> => {
   try {
+    // Las URLs de Cloudinary tienen el formato:
+    // https://res.cloudinary.com/{cloud_name}/image/upload/{folder}/{public_id}.{format}
+    // o
+    // https://res.cloudinary.com/{cloud_name}/image/upload/{public_id}.{format}
+    
     // Extraer el public_id de la URL
     const urlParts = imageUrl.split('/');
-    const filename = urlParts[urlParts.length - 1];
-    const publicId = filename.split('.')[0];
-    const folder = urlParts[urlParts.length - 2];
-    const fullPublicId = folder ? `${folder}/${publicId}` : publicId;
+    
+    // Buscar el índice de 'upload' en la URL
+    const uploadIndex = urlParts.findIndex(part => part === 'upload');
+    
+    if (uploadIndex === -1) {
+      console.warn('⚠️ URL de Cloudinary no válida:', imageUrl);
+      return;
+    }
+    
+    // Todo después de 'upload' es el path completo
+    const pathAfterUpload = urlParts.slice(uploadIndex + 1).join('/');
+    
+    // Remover la extensión del archivo para obtener el public_id
+    const publicId = pathAfterUpload.replace(/\.[^/.]+$/, '');
+    
+    if (!publicId) {
+      console.warn('⚠️ No se pudo extraer public_id de la URL:', imageUrl);
+      return;
+    }
 
-    const result = await cloudinary.uploader.destroy(fullPublicId);
+    const result = await cloudinary.uploader.destroy(publicId);
     console.log('🗑️ Imagen eliminada de Cloudinary:', result);
   } catch (error) {
     console.error('Error eliminando imagen de Cloudinary:', error);
-    throw error;
+    // No lanzar error para no interrumpir el flujo si falla la eliminación
   }
 };
 

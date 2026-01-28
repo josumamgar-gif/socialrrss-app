@@ -223,8 +223,8 @@ export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange,
 
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[9999] flex items-center justify-center p-4 sm:p-4 overflow-y-auto">
-      <div className="bg-white rounded-lg max-w-3xl w-full h-auto max-h-[95vh] shadow-lg border border-gray-200 animate-fadeIn flex flex-col overflow-hidden my-auto">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[9999] flex items-center justify-center p-0 sm:p-0 overflow-hidden">
+      <div className="bg-white rounded-none sm:rounded-lg w-full h-full sm:max-w-3xl sm:h-auto sm:max-h-[95vh] shadow-lg border border-gray-200 animate-fadeIn flex flex-col overflow-hidden">
         {/* Header - Fixed */}
         <div className="bg-gradient-to-r from-primary-600 via-primary-500 to-primary-700 text-white px-4 py-3 sm:px-6 sm:py-5 flex items-center justify-between flex-shrink-0 shadow-xl">
           <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
@@ -245,8 +245,8 @@ export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange,
           </button>
         </div>
 
-        {/* Content - Scrollable */}
-        <div className="px-4 py-3 sm:px-6 sm:py-6 flex-1 overflow-y-auto overscroll-contain scroll-smooth">
+        {/* Content - Sin scroll (debe caber en pantalla) */}
+        <div className="px-4 py-3 sm:px-6 sm:py-6 flex-1 overflow-hidden">
           {/* Información principal */}
           <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
             {currentStepData.content.map((text, idx) => (
@@ -270,33 +270,29 @@ export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange,
             </div>
           )}
 
-          {/* Gestos */}
+          {/* Gestos (compacto para evitar scroll) */}
           {currentStepData.gestures && (
-            <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
-              <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 mb-3 sm:mb-4">Acciones Disponibles:</h3>
-              {currentStepData.gestures.map((gesture, idx) => {
-                const Icon = gesture.icon;
-                const colors = getColorClasses(gesture.color);
-                return (
-                  <div key={idx} className={`${colors.bg} rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 ${colors.border}`}>
-                    <div className="flex items-start gap-3 sm:gap-4">
-                      <div className={`${colors.icon} flex-shrink-0`}>
-                        <Icon className="h-6 w-6 sm:h-8 sm:w-8" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className={`${colors.text} font-bold text-base sm:text-lg mb-1`}>{gesture.title}</h4>
-                        <p className="text-sm sm:text-base text-gray-700 mb-2">{gesture.text}</p>
-                        <p className="text-xs sm:text-sm text-gray-600 mb-2">{gesture.description}</p>
-                        {gesture.action && (
-                          <div className="mt-2 p-2 bg-white/50 rounded-lg">
-                            <p className="text-xs font-semibold text-gray-700">💡 {gesture.action}</p>
-                          </div>
-                        )}
+            <div className="mb-4 sm:mb-6">
+              <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3">Acciones Disponibles:</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+                {currentStepData.gestures.map((gesture, idx) => {
+                  const Icon = gesture.icon;
+                  const colors = getColorClasses(gesture.color);
+                  return (
+                    <div key={idx} className={`${colors.bg} rounded-lg p-3 border ${colors.border}`}>
+                      <div className="flex items-center gap-3">
+                        <div className={`${colors.icon} flex-shrink-0`}>
+                          <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
+                        </div>
+                        <div className="min-w-0">
+                          <div className={`${colors.text} font-bold text-sm sm:text-base leading-tight`}>{gesture.title}</div>
+                          <div className="text-xs sm:text-sm text-gray-700 leading-snug">{gesture.text}</div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
           )}
 

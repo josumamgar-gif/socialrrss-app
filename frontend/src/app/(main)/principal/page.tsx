@@ -464,7 +464,6 @@ export default function PrincipalPage() {
 
           {/* Mensaje principal */}
           <div className="mb-8">
-            <div className="text-7xl mb-6">📭</div>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-4">
               No hay perfiles disponibles
             </h2>
@@ -564,7 +563,7 @@ export default function PrincipalPage() {
             overflow: 'visible', 
             touchAction: 'none', 
             width: '100%', 
-            maxWidth: 'min(100%, 28rem)',
+            maxWidth: 'min(100%, 36rem)',
             height: '100%', 
             display: 'flex', 
             alignItems: 'center', 
