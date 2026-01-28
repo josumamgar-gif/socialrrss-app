@@ -9,7 +9,7 @@ import { AuthRequest } from '../middleware/auth.middleware';
 export const discardProfile = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { profileId } = req.body;
-    const userId = req.user?.id;
+    const userId = req.user?.userId;
 
     if (!userId) {
       res.status(401).json({ error: 'Usuario no autenticado' });
@@ -45,7 +45,7 @@ export const discardProfile = async (req: AuthRequest, res: Response): Promise<v
 
     res.json({ 
       success: true, 
-      discardedProfiles: user.discardedProfiles 
+      discardedProfiles: (user.discardedProfiles || []).map(id => id.toString())
     });
   } catch (error: any) {
     console.error('Error descartando perfil:', error);
@@ -58,7 +58,7 @@ export const discardProfile = async (req: AuthRequest, res: Response): Promise<v
  */
 export const getDiscardedProfiles = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const userId = req.user?.id;
+    const userId = req.user?.userId;
 
     if (!userId) {
       res.status(401).json({ error: 'Usuario no autenticado' });
@@ -85,7 +85,7 @@ export const getDiscardedProfiles = async (req: AuthRequest, res: Response): Pro
  */
 export const markTutorialCompleted = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const userId = req.user?.id;
+    const userId = req.user?.userId;
 
     if (!userId) {
       res.status(401).json({ error: 'Usuario no autenticado' });
@@ -116,7 +116,7 @@ export const markTutorialCompleted = async (req: AuthRequest, res: Response): Pr
  */
 export const getTutorialStatus = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const userId = req.user?.id;
+    const userId = req.user?.userId;
 
     if (!userId) {
       res.status(401).json({ error: 'Usuario no autenticado' });
