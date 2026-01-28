@@ -45,6 +45,7 @@ interface StepData {
 export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange, tutorialCompleted }: WelcomeTutorialProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
+  const user = useAuthStore((state) => state.user);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
