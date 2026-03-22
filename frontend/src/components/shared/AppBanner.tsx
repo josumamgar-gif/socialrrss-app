@@ -1,36 +1,16 @@
 'use client';
 
+import SocialBrandMark from '@/components/shared/SocialBrandMark';
+
 export default function AppBanner() {
   return (
-    <div className="w-full bg-white border-b border-gray-200">
-      <div className="max-w-7xl mx-auto px-4 py-3 sm:py-4">
-        <div className="flex items-center justify-center">
-          {/* Logo Explora - SVG adaptado del logo original */}
-          <svg 
-            viewBox="0 0 200 60" 
-            className="h-8 sm:h-10 w-auto"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <text
-              x="50%"
-              y="50%"
-              dominantBaseline="middle"
-              textAnchor="middle"
-              fontSize="48"
-              fontWeight="bold"
-              fill="#374151"
-              stroke="#000000"
-              strokeWidth="1.5"
-              style={{
-                fontFamily: 'system-ui, -apple-system, sans-serif',
-                letterSpacing: '-0.02em',
-              }}
-            >
-              Explora
-            </text>
-          </svg>
-        </div>
+    <div className="w-full bg-white">
+      <div className="mx-auto flex max-w-7xl items-center justify-center gap-3 px-4 py-4 sm:gap-4 sm:py-5">
+        <SocialBrandMark className="h-9 w-9 sm:h-10 sm:w-10" aria-hidden />
+        <p className="text-xl font-semibold tracking-tight sm:text-2xl">
+          <span className="text-gray-900">Social</span>
+          <span className="text-primary-600">RRSS</span>
+        </p>
       </div>
     </div>
   );

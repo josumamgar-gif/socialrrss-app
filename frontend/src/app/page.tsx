@@ -10,13 +10,10 @@ export default function Home() {
   const [checkingAuth, setCheckingAuth] = useState(true);
 
   useEffect(() => {
-    // Pequeño delay para asegurar que el componente esté completamente montado
     const timer = setTimeout(() => {
       if (typeof window !== 'undefined') {
-        // Verificar si hay sesión activa antes de mostrar la pantalla de bienvenida
         const token = getAuthToken();
         if (token) {
-          // Si hay token, redirigir a la página principal
           window.location.href = '/principal';
           return;
         }
@@ -27,59 +24,50 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Mostrar loading mientras se verifica la autenticación
   if (checkingAuth) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
+      <div className="flex min-h-screen items-center justify-center bg-white">
+        <div
+          className="h-10 w-10 animate-spin rounded-full border-2 border-neutral-200 border-t-primary-600"
+          aria-label="Cargando"
+        />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-100 px-4 py-8">
-      <div className="w-full max-w-md mx-auto text-center">
-        {/* Logo */}
-        <div className="mb-8">
-          <AppLogo size="xl" showText={true} />
-        </div>
+    <div className="min-h-screen bg-white px-5 py-10 sm:py-12">
+      <div className="mx-auto flex min-h-[calc(100vh-6rem)] max-w-lg flex-col items-center justify-center">
+        <AppLogo
+          size="xl"
+          showText
+          showMark
+          showTagline
+          showSubline
+          align="center"
+          className="mb-6 w-full max-w-md items-center"
+        />
 
-        {/* Título y descripción */}
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4">
-          Bienvenido
-        </h1>
-        <p className="text-base sm:text-lg text-gray-600 mb-12">
-          Descubre perfiles increíbles y promociona los tuyos
-        </p>
+        <h1 className="sr-only">SocialRRSS — inicio</h1>
 
-        {/* Botones de acción */}
-        <div className="space-y-4">
+        <div className="w-full max-w-sm space-y-2">
           <button
+            type="button"
             onClick={() => router.push('/login')}
-            className="w-full bg-primary-600 text-white py-4 px-6 rounded-xl hover:bg-primary-700 font-semibold text-lg transition-all transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl"
+            className="w-full rounded-xl bg-neutral-100 py-2.5 text-[15px] font-medium text-gray-900 transition hover:bg-neutral-200/80"
           >
-            Iniciar Sesión
+            Iniciar sesión
           </button>
 
           <button
+            type="button"
             onClick={() => router.push('/register')}
-            className="w-full bg-white text-primary-600 border-2 border-primary-600 py-4 px-6 rounded-xl hover:bg-primary-50 font-semibold text-lg transition-all transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl"
+            className="w-full rounded-xl bg-gray-900 py-2.5 text-[15px] font-medium text-white transition hover:bg-gray-800"
           >
-            Crear Cuenta
+            Crear cuenta
           </button>
-        </div>
-
-        {/* Enlace de prueba */}
-        <div className="mt-8">
-          <a
-            href="/test"
-            className="text-sm text-primary-600 hover:text-primary-800 underline"
-          >
-            Ir a página de prueba
-          </a>
         </div>
       </div>
     </div>
   );
 }
-

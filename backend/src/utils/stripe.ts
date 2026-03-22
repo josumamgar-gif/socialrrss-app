@@ -1,6 +1,16 @@
 import Stripe from 'stripe';
 
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY || '';
+// En desarrollo, una clave ficticia evita que el SDK falle al importar el módulo (los pagos reales siguen necesitando STRIPE_SECRET_KEY).
+const stripeSecretKey =
+  process.env.STRIPE_SECRET_KEY ||
+  (process.env.NODE_ENV === 'development'
+    ? 'sk_test_dev_placeholder_only_local_not_for_real_charges'
+    : '');
+
+if (!stripeSecretKey) {
+  throw new Error('STRIPE_SECRET_KEY es obligatoria en producción');
+}
+
 const stripe = new Stripe(stripeSecretKey, {
   apiVersion: '2025-12-15.clover',
 });

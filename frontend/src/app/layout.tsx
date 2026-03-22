@@ -2,8 +2,8 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Promoción RRSS',
-  description: 'Plataforma de promoción de redes sociales',
+  title: 'SocialRRSS',
+  description: 'Conecta perfiles y promociona tu presencia en redes sociales',
 };
 
 export const viewport: Viewport = {

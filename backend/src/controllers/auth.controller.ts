@@ -24,8 +24,18 @@ export const register = async (req: any, res: Response): Promise<void> => {
       return;
     }
 
-    if (password.length < 6) {
-      res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres' });
+    if (password.length < 8) {
+      res.status(400).json({ error: 'La contraseña debe tener al menos 8 caracteres' });
+      return;
+    }
+
+    if (!/[a-zA-Z]/.test(password)) {
+      res.status(400).json({ error: 'La contraseña debe incluir al menos una letra' });
+      return;
+    }
+
+    if (!/[0-9]/.test(password)) {
+      res.status(400).json({ error: 'La contraseña debe incluir al menos un número' });
       return;
     }
 
@@ -320,8 +330,18 @@ export const changePassword = async (req: AuthRequest, res: Response): Promise<v
       return;
     }
 
-    if (newPassword.length < 6) {
-      res.status(400).json({ error: 'La nueva contraseña debe tener al menos 6 caracteres' });
+    if (newPassword.length < 8) {
+      res.status(400).json({ error: 'La nueva contraseña debe tener al menos 8 caracteres' });
+      return;
+    }
+
+    if (!/[a-zA-Z]/.test(newPassword)) {
+      res.status(400).json({ error: 'La nueva contraseña debe incluir al menos una letra' });
+      return;
+    }
+
+    if (!/[0-9]/.test(newPassword)) {
+      res.status(400).json({ error: 'La nueva contraseña debe incluir al menos un número' });
       return;
     }
 

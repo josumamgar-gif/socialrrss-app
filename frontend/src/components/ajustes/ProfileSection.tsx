@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { authAPI } from '@/lib/api';
+import { validatePasswordStrength } from '@/lib/passwordValidation';
 import { CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 const INTERESTS_OPTIONS = [
@@ -98,8 +99,9 @@ export default function ProfileSection() {
       return;
     }
 
-    if (newPassword.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres');
+    const strength = validatePasswordStrength(newPassword);
+    if (!strength.valid) {
+      setError(strength.message || 'Contraseña no válida');
       return;
     }
 

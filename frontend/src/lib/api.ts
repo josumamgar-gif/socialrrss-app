@@ -10,6 +10,7 @@ if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
 
 const api = axios.create({
   baseURL: API_URL,
+  timeout: 20000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -90,7 +91,7 @@ export const authAPI = {
   },
 
   getMe: async (): Promise<{ user: User }> => {
-    const response = await api.get<{ user: User }>('/auth/me');
+    const response = await api.get<{ user: User }>('/auth/me', { timeout: 8000 });
     return response.data;
   },
 

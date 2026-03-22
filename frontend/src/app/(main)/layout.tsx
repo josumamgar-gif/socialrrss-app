@@ -161,7 +161,7 @@ export default function MainLayout({
       />
       
       {/* Pestañas de navegación - Parte superior FIJAS (solo desktop) */}
-      <nav className={`hidden md:flex fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-40`}>
+      <nav className={`hidden md:flex fixed top-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-sm`}>
         <div className="max-w-7xl mx-auto px-4 w-full">
           <div className="flex justify-center space-x-1 md:space-x-2">
             {tabs.map((tab) => {
@@ -201,7 +201,7 @@ export default function MainLayout({
 
       {/* Navegación móvil - Parte inferior FIJA (solo móvil) */}
       <div 
-        className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40" 
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-sm" 
         style={{ 
           paddingBottom: 'env(safe-area-inset-bottom)'
         } as React.CSSProperties}
@@ -284,7 +284,7 @@ export default function MainLayout({
       </div>
 
       {/* Botón de ajustes - Parte inferior FIJA (solo desktop) */}
-      <div className="hidden md:flex fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40">
+      <div className="hidden md:flex fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 w-full">
           <Link
             href="/ajustes"

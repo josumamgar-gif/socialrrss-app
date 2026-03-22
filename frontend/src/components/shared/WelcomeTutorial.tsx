@@ -76,9 +76,9 @@ export default function WelcomeTutorial({ onClose, forceOpen, onForceOpenChange,
 
   const steps: StepData[] = [
     {
-      title: 'Bienvenido a Explora',
+      title: 'Bienvenido a SocialRRSS',
       content: [
-        'Explora perfiles y promociona los tuyos. Arrastra las tarjetas en cualquier dirección para interactuar.',
+        'Descubre perfiles y promociona los tuyos. Arrastra las tarjetas en cualquier dirección para interactuar.',
       ],
       icon: 'home',
       highlight: null,
