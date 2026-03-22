@@ -12,7 +12,7 @@ export interface IPromotion extends Document {
   convertedAt?: Date;
   convertedToPlan?: string;
   usageCount: number; // Track how many times promotion was used
-  maxUsage: number; // Maximum allowed usage (e.g., 100 for free trial)
+  maxUsage: number; // Límite global de la campaña (FREE_TRIAL_GLOBAL_SPOTS)
   createdAt: Date;
   updatedAt: Date;
 }
