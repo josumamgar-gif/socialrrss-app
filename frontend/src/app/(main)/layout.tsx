@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import WelcomeTutorial from '@/components/shared/WelcomeTutorial';
+import FreeProfileModal from '@/components/shared/FreeProfileModal';
 import { useAuthStore } from '@/store/authStore';
 import { getAuthToken } from '@/lib/auth';
 import { authAPI } from '@/lib/api';
@@ -43,6 +44,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const router = useRouter();
   const currentPathname = usePathname();
   const [tutorialCompleted, setTutorialCompleted] = useState(true);
+  const [showFreeModal, setShowFreeModal] = useState(false);
+  const [freeSpots, setFreeSpots] = useState(200);
   const { setUser, isAuthenticated, user } = useAuthStore();
 
   useEffect(() => {
@@ -69,6 +72,25 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     };
 
     loadTutorialStatus();
+
+    // Mostrar modal de perfil gratis si el usuario se acaba de registrar
+    if (localStorage.getItem('showFreeProfileModal') === 'true') {
+      // Pequeño delay para que el tutorial no colisione
+      const modalTimer = setTimeout(async () => {
+        try {
+          const { pricingAPI } = await import('@/lib/api');
+          const data = await pricingAPI.getPlans();
+          if (data.freePromotionAvailable) {
+            setFreeSpots(data.remainingFreeSpots ?? 200);
+            setShowFreeModal(true);
+          }
+        } catch {
+          setShowFreeModal(true);
+        }
+        localStorage.removeItem('showFreeProfileModal');
+      }, 1200);
+      return () => clearTimeout(modalTimer);
+    }
 
     const token = getAuthToken();
     if (token && !isAuthenticated && !user) {
@@ -118,6 +140,14 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           }
         }}
       />
+
+      {showFreeModal && (
+        <FreeProfileModal
+          username={user?.username || 'nuevo usuario'}
+          remainingSpots={freeSpots}
+          onClose={() => setShowFreeModal(false)}
+        />
+      )}
 
       {/* Content — no overflow-hidden so pages can scroll freely */}
       <main className="flex-1">

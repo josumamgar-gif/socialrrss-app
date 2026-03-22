@@ -93,6 +93,7 @@ export default function RegisterPage() {
         localStorage.removeItem('demoCompleted');
         localStorage.removeItem('demosExhausted');
         localStorage.removeItem('tutorialCompleted');
+        localStorage.setItem('showFreeProfileModal', 'true');
         sessionStorage.clear();
         router.replace('/principal');
       }

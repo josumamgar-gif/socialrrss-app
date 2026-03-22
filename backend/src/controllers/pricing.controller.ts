@@ -58,15 +58,5 @@ export const getPlans = async (req: OptionalAuthRequest, res: Response): Promise
   }
 };
 
-// ─── Admin: resetear contador de pruebas gratuitas ───────────────────────────
-export const adminResetFreeTrials = async (req: any, res: Response): Promise<void> => {
-  const ADMIN_SECRET = process.env.ADMIN_SECRET || 'socialrrss-admin-2026';
-  if (req.headers['x-admin-secret'] !== ADMIN_SECRET) {
-    res.status(403).json({ error: 'No autorizado' });
-    return;
-  }
-  const result = await Promotion.deleteMany({});
-  res.json({ deleted: result.deletedCount, message: 'Contador de pruebas gratuitas reseteado' });
-};
 
 
