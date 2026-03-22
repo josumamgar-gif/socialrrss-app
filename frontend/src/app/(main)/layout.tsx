@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import WelcomeTutorial from '@/components/shared/WelcomeTutorial';
 import FreeProfileModal from '@/components/shared/FreeProfileModal';
+import { FREE_TRIAL_GLOBAL_SPOTS } from '@/constants/promotion';
 import { useAuthStore } from '@/store/authStore';
 import { getAuthToken } from '@/lib/auth';
 import { authAPI } from '@/lib/api';
@@ -45,7 +46,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const currentPathname = usePathname();
   const [tutorialCompleted, setTutorialCompleted] = useState(true);
   const [showFreeModal, setShowFreeModal] = useState(false);
-  const [freeSpots, setFreeSpots] = useState(200);
+  const [freeSpots, setFreeSpots] = useState(FREE_TRIAL_GLOBAL_SPOTS);
   const { setUser, isAuthenticated, user } = useAuthStore();
 
   useEffect(() => {
@@ -81,7 +82,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           const { pricingAPI } = await import('@/lib/api');
           const data = await pricingAPI.getPlans();
           if (data.freePromotionAvailable) {
-            setFreeSpots(data.remainingFreeSpots ?? 200);
+            setFreeSpots(data.remainingFreeSpots ?? FREE_TRIAL_GLOBAL_SPOTS);
             setShowFreeModal(true);
           }
         } catch {

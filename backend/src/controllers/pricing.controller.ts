@@ -1,10 +1,8 @@
 import { Response } from 'express';
 import { OptionalAuthRequest } from '../middleware/optionalAuth.middleware';
-import { PRICING_PLANS, FREE_PROMOTION_PLAN } from '../constants/pricing';
+import { PRICING_PLANS, FREE_PROMOTION_PLAN, FREE_TRIAL_GLOBAL_SPOTS } from '../constants/pricing';
 import Promotion from '../models/Promotion';
 import Profile from '../models/Profile';
-
-const FREE_SPOTS_TOTAL = 200;
 
 export const getPlans = async (req: OptionalAuthRequest, res: Response): Promise<void> => {
   try {
@@ -14,7 +12,7 @@ export const getPlans = async (req: OptionalAuthRequest, res: Response): Promise
       status: { $in: ['active', 'expired', 'converted'] }
     });
 
-    const isFreePromotionAvailableGlobally = usedPromotionsCount < FREE_SPOTS_TOTAL;
+    const isFreePromotionAvailableGlobally = usedPromotionsCount < FREE_TRIAL_GLOBAL_SPOTS;
 
     let plansToReturn = [...PRICING_PLANS];
     let isFreePromotionAvailableForUser = false;
@@ -45,12 +43,12 @@ export const getPlans = async (req: OptionalAuthRequest, res: Response): Promise
       }
     }
 
-    const remaining = Math.max(0, FREE_SPOTS_TOTAL - usedPromotionsCount);
+    const remaining = Math.max(0, FREE_TRIAL_GLOBAL_SPOTS - usedPromotionsCount);
     res.json({
       plans: plansToReturn,
       freePromotionAvailable: isFreePromotionAvailableForUser,
       remainingFreeSpots: remaining,
-      totalFreeSpots: FREE_SPOTS_TOTAL,
+      totalFreeSpots: FREE_TRIAL_GLOBAL_SPOTS,
     });
   } catch (error: any) {
     console.error('Error obteniendo planes:', error);

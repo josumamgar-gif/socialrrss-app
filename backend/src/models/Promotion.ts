@@ -59,7 +59,7 @@ const PromotionSchema: Schema = new Schema(
     },
     maxUsage: {
       type: Number,
-      default: 100, // First 100 users get free trial
+      default: 200, // Límite global de la campaña (ver FREE_TRIAL_GLOBAL_SPOTS en pricing.ts)
     },
   },
   {

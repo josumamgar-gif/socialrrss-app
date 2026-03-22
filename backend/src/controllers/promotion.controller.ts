@@ -3,7 +3,7 @@ import { AuthRequest } from '../middleware/auth.middleware';
 import Promotion from '../models/Promotion';
 import User from '../models/User';
 import Profile from '../models/Profile';
-import { calculateExpirationDate } from '../constants/pricing';
+import { calculateExpirationDate, FREE_TRIAL_GLOBAL_SPOTS } from '../constants/pricing';
 import mongoose from 'mongoose';
 
 export const checkPromotionAvailability = async (_req: AuthRequest, res: Response): Promise<void> => {
@@ -78,7 +78,7 @@ export const activateFreePromotion = async (req: AuthRequest, res: Response): Pr
         status: { $in: ['active', 'expired', 'converted'] }
       });
 
-      if (usedPromotionsCount >= 100) {
+      if (usedPromotionsCount >= FREE_TRIAL_GLOBAL_SPOTS) {
         res.status(400).json({ error: 'La promoción gratuita ya no está disponible' });
         return;
       }
@@ -96,7 +96,7 @@ export const activateFreePromotion = async (req: AuthRequest, res: Response): Pr
         startDate,
         endDate,
         usageCount: usedPromotionsCount + 1,
-        maxUsage: 100,
+        maxUsage: FREE_TRIAL_GLOBAL_SPOTS,
       });
 
       await existingPromotion.save();
@@ -166,7 +166,7 @@ export const activateFreePromotion = async (req: AuthRequest, res: Response): Pr
         remainingDays: 30,
       },
       profile: activatedProfile,
-      remainingFreeSpots: Math.max(0, 100 - updatedUsedPromotionsCount),
+      remainingFreeSpots: Math.max(0, FREE_TRIAL_GLOBAL_SPOTS - updatedUsedPromotionsCount),
     });
   } catch (error: any) {
     console.error('❌ Error activating promotion:', error);
@@ -292,7 +292,7 @@ export const getPromotionStats = async (_req: AuthRequest, res: Response): Promi
       activePromotions,
       expiredPromotions,
       convertedPromotions,
-      remainingSpots: Math.max(0, 100 - totalPromotions),
+      remainingSpots: Math.max(0, FREE_TRIAL_GLOBAL_SPOTS - totalPromotions),
     });
   } catch (error: any) {
     console.error('Error getting promotion stats:', error);

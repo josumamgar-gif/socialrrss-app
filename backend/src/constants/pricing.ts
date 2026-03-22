@@ -1,5 +1,8 @@
 export type PlanType = 'monthly' | 'yearly' | 'lifetime' | 'free_trial';
 
+/** Plazas globales de la promoción gratuita (debe coincidir con marketing / anuncios) */
+export const FREE_TRIAL_GLOBAL_SPOTS = 200;
+
 export interface PricingPlan {
   type: PlanType;
   name: string;

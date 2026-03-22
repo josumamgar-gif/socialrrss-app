@@ -3,6 +3,7 @@ import { AuthRequest } from '../middleware/auth.middleware';
 import User from '../models/User';
 import Promotion from '../models/Promotion';
 import { generateToken } from '../utils/jwt';
+import { FREE_TRIAL_GLOBAL_SPOTS } from '../constants/pricing';
 
 export const register = async (req: any, res: Response): Promise<void> => {
   try {
@@ -69,7 +70,7 @@ export const register = async (req: any, res: Response): Promise<void> => {
 
     await user.save();
 
-    // Check and apply free promotion automatically for first 100 users
+    // Check and apply free promotion automatically hasta FREE_TRIAL_GLOBAL_SPOTS usuarios
     let promotionActivated = false;
     let promotionData = null;
 
@@ -80,9 +81,9 @@ export const register = async (req: any, res: Response): Promise<void> => {
         status: { $in: ['active', 'expired', 'converted'] }
       });
 
-      console.log(`📊 Promociones usadas: ${usedPromotionsCount}/100`);
+      console.log(`📊 Promociones usadas: ${usedPromotionsCount}/${FREE_TRIAL_GLOBAL_SPOTS}`);
 
-      if (usedPromotionsCount < 100) {
+      if (usedPromotionsCount < FREE_TRIAL_GLOBAL_SPOTS) {
         console.log('✅ Aplicando promoción gratuita...');
 
         // Calculate promotion dates
@@ -98,7 +99,7 @@ export const register = async (req: any, res: Response): Promise<void> => {
           startDate,
           endDate,
           usageCount: usedPromotionsCount + 1,
-          maxUsage: 100,
+          maxUsage: FREE_TRIAL_GLOBAL_SPOTS,
         });
 
         await promotion.save();
