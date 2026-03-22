@@ -4,6 +4,8 @@ import { PRICING_PLANS, FREE_PROMOTION_PLAN } from '../constants/pricing';
 import Promotion from '../models/Promotion';
 import Profile from '../models/Profile';
 
+const FREE_SPOTS_TOTAL = 200;
+
 export const getPlans = async (req: OptionalAuthRequest, res: Response): Promise<void> => {
   try {
     // Check if free promotion is still available globally
@@ -12,7 +14,7 @@ export const getPlans = async (req: OptionalAuthRequest, res: Response): Promise
       status: { $in: ['active', 'expired', 'converted'] }
     });
 
-    const isFreePromotionAvailableGlobally = usedPromotionsCount < 100;
+    const isFreePromotionAvailableGlobally = usedPromotionsCount < FREE_SPOTS_TOTAL;
 
     let plansToReturn = [...PRICING_PLANS];
     let isFreePromotionAvailableForUser = false;
@@ -43,16 +45,28 @@ export const getPlans = async (req: OptionalAuthRequest, res: Response): Promise
       }
     }
 
+    const remaining = Math.max(0, FREE_SPOTS_TOTAL - usedPromotionsCount);
     res.json({
       plans: plansToReturn,
       freePromotionAvailable: isFreePromotionAvailableForUser,
-      remainingFreeSpots: 100, // Mostrar siempre 100 como total disponible
-      totalFreeSpots: 100
+      remainingFreeSpots: remaining,
+      totalFreeSpots: FREE_SPOTS_TOTAL,
     });
   } catch (error: any) {
     console.error('Error obteniendo planes:', error);
     res.status(500).json({ error: 'Error al obtener planes de precios' });
   }
+};
+
+// ─── Admin: resetear contador de pruebas gratuitas ───────────────────────────
+export const adminResetFreeTrials = async (req: any, res: Response): Promise<void> => {
+  const ADMIN_SECRET = process.env.ADMIN_SECRET || 'socialrrss-admin-2026';
+  if (req.headers['x-admin-secret'] !== ADMIN_SECRET) {
+    res.status(403).json({ error: 'No autorizado' });
+    return;
+  }
+  const result = await Promotion.deleteMany({});
+  res.json({ deleted: result.deletedCount, message: 'Contador de pruebas gratuitas reseteado' });
 };
 
 
