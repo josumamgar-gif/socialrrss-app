@@ -13,6 +13,7 @@ import SocialNetworkLogo from '@/components/shared/SocialNetworkLogo';
 import UndoSubscriptionModal from '@/components/principal/UndoSubscriptionModal';
 
 const FAVORITES_KEY = (userId: string) => `favorites_${userId}`;
+const DISCARDED_KEY = (userId: string) => `discarded_${userId}`;
 const UNDO_KEY = 'undoSubscribed';
 
 export default function PrincipalPage() {
@@ -25,7 +26,6 @@ export default function PrincipalPage() {
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
   const [cornerEffects, setCornerEffects] = useState({ left: 0, right: 0, top: 0, bottom: 0 });
   const [isAnimating, setIsAnimating] = useState(false);
-  const [backUsed, setBackUsed] = useState(false);
   const [selectedNetwork, setSelectedNetwork] = useState<'all' | SocialNetwork>('all');
   const [showNetworkSelector, setShowNetworkSelector] = useState(false);
   const [discardedProfiles, setDiscardedProfiles] = useState<string[]>([]);
@@ -41,12 +41,14 @@ export default function PrincipalPage() {
     }
   }, [router]);
 
-  // Load favorites + undo subscription from localStorage
+  // Load favorites, discarded + undo subscription from localStorage
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const key = FAVORITES_KEY(user?.id || 'guest');
-      const stored = localStorage.getItem(key);
-      setFavorites(stored ? JSON.parse(stored) : []);
+      const uid = user?.id || 'guest';
+      const storedFavs = localStorage.getItem(FAVORITES_KEY(uid));
+      setFavorites(storedFavs ? JSON.parse(storedFavs) : []);
+      const storedDisc = localStorage.getItem(DISCARDED_KEY(uid));
+      setDiscardedProfiles(storedDisc ? JSON.parse(storedDisc) : []);
       setUndoSubscribed(localStorage.getItem(UNDO_KEY) === 'true');
     }
   }, [user?.id]);
@@ -83,32 +85,19 @@ export default function PrincipalPage() {
     loadProfiles();
   }, [user, discardedProfiles]);
 
-  useEffect(() => {
-    const load = async () => {
-      if (user?.id) {
-        try {
-          const r = await userAPI.getDiscardedProfiles();
-          setDiscardedProfiles(r.discardedProfiles || []);
-        } catch {
-          const stored = localStorage.getItem(`viewedProfiles_${user.id}`);
-          setDiscardedProfiles(stored ? JSON.parse(stored) : []);
-        }
+  const markViewed = (profileId: string) => {
+    setDiscardedProfiles((prev) => {
+      if (prev.includes(profileId)) return prev;
+      const next = [...prev, profileId];
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(DISCARDED_KEY(user?.id || 'guest'), JSON.stringify(next));
       }
-    };
-    load();
-  }, [user?.id]);
-
-  const markViewed = async (profileId: string) => {
-    if (user?.id) {
-      try { await userAPI.discardProfile(profileId); } catch { /* silent */ }
-    }
-    if (typeof window !== 'undefined') {
-      const key = `viewedProfiles_${user?.id || 'guest'}`;
-      const stored = localStorage.getItem(key);
-      const arr: string[] = stored ? JSON.parse(stored) : [];
-      if (!arr.includes(profileId)) localStorage.setItem(key, JSON.stringify([...arr, profileId]));
-    }
-    setDiscardedProfiles(prev => prev.includes(profileId) ? prev : [...prev, profileId]);
+      // Persistir en backend (fire-and-forget)
+      if (user?.id && !profileId.startsWith('demo-')) {
+        userAPI.discardProfile(profileId).catch(() => {});
+      }
+      return next;
+    });
   };
 
   const filteredProfiles = useMemo(() => {
@@ -125,31 +114,20 @@ export default function PrincipalPage() {
     }
   }, [filteredProfiles.length, currentIndex]);
 
-  const advance = () => {
-    const remaining = profiles.filter(p => !discardedProfiles.includes(p._id));
-    if (remaining.length === 0) { setProfiles([]); return; }
-    if (currentIndex < filteredProfiles.length - 1) setCurrentIndex(c => c + 1);
-    else setCurrentIndex(0);
-  };
-
-  const handleSwipeLeft = async () => {
+  const handleSwipeLeft = () => {
     const p = filteredProfiles[currentIndex];
     if (!p) return;
-    await markViewed(p._id);
-    setHistory([]);
-    setBackUsed(false);
-    advance();
+    setHistory((h) => [...h, currentIndex]);
+    markViewed(p._id);
   };
 
-  const handleSwipeRight = async () => {
+  const handleSwipeRight = () => {
     const p = filteredProfiles[currentIndex];
     if (!p) return;
-    await markViewed(p._id);
+    setHistory((h) => [...h, currentIndex]);
+    markViewed(p._id);
     const isDemo = p._id?.startsWith('demo-') || (p.userId as any)?.username === 'demo';
     if (!isDemo && p.link) window.open(p.link, '_blank');
-    setHistory([]);
-    setBackUsed(false);
-    advance();
   };
 
   const handleSwipeUp = () => {
@@ -157,14 +135,23 @@ export default function PrincipalPage() {
     if (p) setSelectedProfile(p);
   };
 
+  const undoLastDiscard = () => {
+    if (history.length === 0) return;
+    setHistory((prev) => prev.slice(0, -1));
+    setDiscardedProfiles((prev) => {
+      const next = prev.length > 0 ? prev.slice(0, -1) : prev;
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(DISCARDED_KEY(user?.id || 'guest'), JSON.stringify(next));
+      }
+      return next;
+    });
+  };
+
   const handleGoBack = () => {
     if (history.length === 0) return;
     if (undoSubscribed) {
-      // Ya suscrito → deshacer directamente
-      setCurrentIndex(history[history.length - 1]);
-      setHistory(prev => prev.slice(0, -1));
+      undoLastDiscard();
     } else {
-      // Siempre mostrar modal de pago si no está suscrito
       setShowUndoModal(true);
     }
   };
@@ -386,11 +373,7 @@ export default function PrincipalPage() {
           onSubscribe={() => {
             setUndoSubscribed(true);
             setShowUndoModal(false);
-            // Execute the undo action after subscribing
-            if (history.length > 0) {
-              setCurrentIndex(history[history.length - 1]);
-              setHistory(prev => prev.slice(0, -1));
-            }
+            undoLastDiscard();
           }}
           onClose={() => setShowUndoModal(false)}
         />
