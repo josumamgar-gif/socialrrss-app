@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
-import { profilesAPI } from '@/lib/api';
+import { TUTORIAL_DEMO_PROFILES } from '@/data/tutorialDemos';
 import { Profile } from '@/types';
 import SocialNetworkLogo from '@/components/shared/SocialNetworkLogo';
 import { getImageUrl, placeholderImage } from '@/lib/imageUtils';
@@ -37,19 +37,7 @@ export default function FavoritosPage() {
     const load = async () => {
       setLoading(true);
       try {
-        const demoProfiles: Profile[] = [
-          { _id: 'demo-001', userId: 'demo', socialNetwork: 'instagram', isActive: true, isPaid: false, profileData: { username: 'demo_foto', followers: 12400, posts: 87, description: 'Fotografía de viajes y naturaleza.' }, images: ['https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=600&fit=crop&q=80'], link: 'https://instagram.com/demo', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), paidUntil: null, planType: null },
-          { _id: 'demo-002', userId: 'demo', socialNetwork: 'tiktok', isActive: true, isPaid: false, profileData: { username: 'demo_dance', followers: 48200, videos: 134, description: 'Bailes y tendencias.' }, images: ['https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=600&fit=crop&q=80'], link: 'https://tiktok.com/@demo', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), paidUntil: null, planType: null },
-          { _id: 'demo-003', userId: 'demo', socialNetwork: 'youtube', isActive: true, isPaid: false, profileData: { channelName: 'TechReviews ES', subscribers: 95000, videoCount: 312, description: 'Reviews de tecnología.' }, images: ['https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400&h=600&fit=crop&q=80'], link: 'https://youtube.com/demo', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), paidUntil: null, planType: null },
-        ];
-
-        let all = [...demoProfiles];
-        try {
-          const r = await profilesAPI.getAll();
-          const real = (r.profiles || []).filter((p: Profile) => !p._id?.startsWith('demo-'));
-          all = [...all, ...real];
-        } catch { /* silent */ }
-
+        const all = [...TUTORIAL_DEMO_PROFILES];
         setProfiles(all.filter((p) => favoriteIds.includes(p._id)));
       } catch { /* silent */ } finally {
         setLoading(false);
