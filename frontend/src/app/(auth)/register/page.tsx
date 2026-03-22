@@ -2,16 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { authAPI } from '@/lib/api';
 import { setAuthToken, getAuthToken } from '@/lib/auth';
 import { useAuthStore } from '@/store/authStore';
-import AppLogo from '@/components/shared/AppLogo';
 import { validatePasswordStrength, passwordRequirementsMet } from '@/lib/passwordValidation';
 
-const inputClass =
-  'w-full rounded-xl border-0 bg-neutral-100 px-3 py-2.5 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:bg-white focus:ring-2 focus:ring-primary-500/15 sm:text-base';
-
 export default function RegisterPage() {
+  const router = useRouter();
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -39,8 +37,7 @@ export default function RegisterPage() {
         const { user } = await authAPI.getMe();
         if (cancelled) return;
         setUser(user);
-        window.history.replaceState(null, '', '/principal');
-        window.location.href = '/principal';
+        router.replace('/principal');
       } catch {
         localStorage.removeItem('token');
         setUser(null);
@@ -49,15 +46,13 @@ export default function RegisterPage() {
       }
     })();
 
-    return () => {
-      cancelled = true;
-    };
-  }, [setUser]);
+    return () => { cancelled = true; };
+  }, [setUser, router]);
 
   if (checkingAuth) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-white">
-        <div className="h-10 w-10 animate-spin rounded-full border-2 border-neutral-200 border-t-primary-600" />
+      <div className="flex min-h-[100dvh] items-center justify-center bg-surface">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-surface-300 border-t-primary-600" />
       </div>
     );
   }
@@ -99,10 +94,7 @@ export default function RegisterPage() {
         localStorage.removeItem('demosExhausted');
         localStorage.removeItem('tutorialCompleted');
         sessionStorage.clear();
-
-        setTimeout(() => {
-          window.location.href = '/principal';
-        }, 100);
+        router.replace('/principal');
       }
     } catch (err: unknown) {
       const ax = err as { response?: { data?: { error?: string } } };
@@ -111,28 +103,39 @@ export default function RegisterPage() {
     }
   };
 
+  const CheckIcon = ({ ok }: { ok: boolean }) => (
+    <svg className={`h-3.5 w-3.5 ${ok ? 'text-emerald-500' : 'text-ink-faint'}`} viewBox="0 0 16 16" fill="currentColor">
+      {ok
+        ? <path d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z" />
+        : <circle cx="8" cy="8" r="3" />
+      }
+    </svg>
+  );
+
   return (
-    <div className="min-h-screen bg-white px-4 py-6 sm:px-6 sm:py-10">
-      <div className="mx-auto grid max-w-5xl items-start gap-6 md:grid-cols-2 md:gap-10">
-        <div className="hidden md:block">
-          <AppLogo
-            size="xl"
-            showText
-            showMark
-            showTagline
-            showSubline
-            className="items-start"
-          />
-        </div>
+    <div className="flex min-h-[100dvh] flex-col bg-surface px-6 pb-8 pt-[max(2rem,env(safe-area-inset-top))]">
+      {/* Back */}
+      <div className="mb-6">
+        <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-medium text-ink-light hover:text-ink transition">
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+          Volver
+        </Link>
+      </div>
 
-        <div className="mb-4 md:hidden">
-          <AppLogo size="lg" showText showMark showTagline align="center" className="items-center" />
-        </div>
+      <div className="flex flex-1 flex-col justify-center">
+        <div className="mx-auto w-full max-w-sm">
+          {/* Header */}
+          <div className="mb-7">
+            <h1 className="text-2xl font-bold tracking-tight text-ink">Crea tu cuenta</h1>
+            <p className="mt-1.5 text-[15px] text-ink-light">Empieza a descubrir y promocionar perfiles</p>
+          </div>
 
-        <div className="mx-auto w-full max-w-[400px]">
-          <form onSubmit={handleSubmit} className="space-y-3">
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="username" className="mb-1 block text-sm font-medium text-gray-700">
+              <label htmlFor="username" className="mb-1.5 block text-[13px] font-medium text-ink-light">
                 Usuario
               </label>
               <input
@@ -145,13 +148,13 @@ export default function RegisterPage() {
                 required
                 minLength={3}
                 maxLength={30}
-                className={inputClass}
+                className="w-full rounded-xl border border-surface-300 bg-white px-4 py-3 text-[15px] text-ink outline-none transition placeholder:text-ink-muted focus:border-primary-400 focus:ring-2 focus:ring-primary-100"
                 placeholder="tu_usuario"
               />
             </div>
 
             <div>
-              <label htmlFor="email" className="mb-1 block text-sm font-medium text-gray-700">
+              <label htmlFor="email" className="mb-1.5 block text-[13px] font-medium text-ink-light">
                 Email
               </label>
               <input
@@ -162,13 +165,13 @@ export default function RegisterPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className={inputClass}
+                className="w-full rounded-xl border border-surface-300 bg-white px-4 py-3 text-[15px] text-ink outline-none transition placeholder:text-ink-muted focus:border-primary-400 focus:ring-2 focus:ring-primary-100"
                 placeholder="tu@email.com"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="mb-1 block text-sm font-medium text-gray-700">
+              <label htmlFor="password" className="mb-1.5 block text-[13px] font-medium text-ink-light">
                 Contraseña
               </label>
               <input
@@ -179,24 +182,25 @@ export default function RegisterPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className={inputClass}
+                className="w-full rounded-xl border border-surface-300 bg-white px-4 py-3 text-[15px] text-ink outline-none transition placeholder:text-ink-muted focus:border-primary-400 focus:ring-2 focus:ring-primary-100"
                 placeholder="Mínimo 8 caracteres"
               />
-              <ul className="mt-1.5 space-y-0.5 text-xs text-gray-500">
-                <li className={req.length ? 'text-emerald-600' : ''}>
-                  {req.length ? '✓' : '·'} Al menos 8 caracteres
-                </li>
-                <li className={req.letter ? 'text-emerald-600' : ''}>
-                  {req.letter ? '✓' : '·'} Una letra
-                </li>
-                <li className={req.number ? 'text-emerald-600' : ''}>
-                  {req.number ? '✓' : '·'} Un número
-                </li>
-              </ul>
+              <div className="mt-2 flex flex-col gap-1">
+                {[
+                  { ok: req.length, label: 'Al menos 8 caracteres' },
+                  { ok: req.letter, label: 'Una letra' },
+                  { ok: req.number, label: 'Un número' },
+                ].map((r) => (
+                  <div key={r.label} className="flex items-center gap-1.5">
+                    <CheckIcon ok={r.ok} />
+                    <span className={`text-xs ${r.ok ? 'text-emerald-600' : 'text-ink-muted'}`}>{r.label}</span>
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="mb-1 block text-sm font-medium text-gray-700">
+              <label htmlFor="confirmPassword" className="mb-1.5 block text-[13px] font-medium text-ink-light">
                 Repetir contraseña
               </label>
               <input
@@ -207,30 +211,34 @@ export default function RegisterPage() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
-                className={`${inputClass} ${
-                  confirmPassword.length > 0 && password !== confirmPassword ? 'ring-2 ring-red-500/20' : ''
+                className={`w-full rounded-xl border bg-white px-4 py-3 text-[15px] text-ink outline-none transition placeholder:text-ink-muted focus:border-primary-400 focus:ring-2 focus:ring-primary-100 ${
+                  confirmPassword.length > 0 && password !== confirmPassword
+                    ? 'border-red-300'
+                    : 'border-surface-300'
                 }`}
                 placeholder="Misma contraseña"
               />
-              {confirmPassword.length > 0 && password !== confirmPassword ? (
-                <p className="mt-1.5 text-xs text-red-600">Las contraseñas no coinciden.</p>
-              ) : null}
+              {confirmPassword.length > 0 && password !== confirmPassword && (
+                <p className="mt-1.5 text-xs text-red-500">Las contraseñas no coinciden.</p>
+              )}
             </div>
 
-            {error ? (
-              <div className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>
-            ) : null}
+            {error && (
+              <div className="rounded-xl bg-red-50 px-4 py-3 text-[13px] text-red-700 ring-1 ring-red-100">
+                {error}
+              </div>
+            )}
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-xl bg-gray-900 py-2.5 text-sm font-medium text-white transition hover:bg-gray-800 disabled:opacity-50 sm:text-base"
+              className="w-full rounded-xl bg-primary-600 py-3.5 text-[15px] font-semibold text-white shadow-soft transition hover:bg-primary-700 active:scale-[0.98] disabled:opacity-50"
             >
               {loading ? 'Creando cuenta…' : 'Crear cuenta'}
             </button>
           </form>
 
-          <p className="mt-4 text-center text-sm text-gray-500">
+          <p className="mt-6 text-center text-[13px] text-ink-muted">
             ¿Ya tienes cuenta?{' '}
             <Link href="/login" className="font-medium text-primary-600 hover:text-primary-700">
               Inicia sesión

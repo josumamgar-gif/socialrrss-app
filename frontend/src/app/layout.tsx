@@ -3,7 +3,13 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'SocialRRSS',
-  description: 'Conecta perfiles y promociona tu presencia en redes sociales',
+  description: 'Descubre perfiles y promociona tu presencia en redes sociales',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'SocialRRSS',
+  },
 };
 
 export const viewport: Viewport = {
@@ -11,7 +17,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  viewportFit: 'cover', // Para soportar safe areas en iOS PWA
+  viewportFit: 'cover',
+  themeColor: '#FAFAF8',
 };
 
 export default function RootLayout({
@@ -21,9 +28,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <body>{children}</body>
+      <body className="bg-surface text-ink antialiased">{children}</body>
     </html>
   );
 }
-
-

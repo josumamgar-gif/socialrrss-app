@@ -15,22 +15,41 @@ export interface User {
 export interface ProfileData {
   username?: string;
   followers?: number;
+  following?: number;
   videos?: number;
   channelName?: string;
   subscribers?: number;
   videoCount?: number;
+  totalViews?: number;
+  avgViews?: number;
   streamerName?: string;
   game?: string;
+  avgViewers?: number;
+  hoursStreamed?: number;
   handle?: string;
   posts?: number;
   pageName?: string;
   likes?: number;
   twitterHandle?: string;
   tweets?: number;
+  totalLikes?: number;
+  engagementRate?: number;
+  verified?: boolean;
+  accountType?: string;
+  industry?: string;
   websiteUrl?: string;
+  website?: string;
+  contactEmail?: string;
+  category?: string;
+  language?: string;
+  country?: string;
+  targetAudience?: string;
+  acceptsSponsorships?: boolean;
+  priceRange?: string;
   customFields?: Record<string, any>;
   title?: string;
   description?: string;
+  [key: string]: any;
 }
 
 export type PlanType = 'monthly' | 'yearly' | 'lifetime' | 'free_trial';

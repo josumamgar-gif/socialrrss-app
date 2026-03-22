@@ -2,313 +2,151 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { 
-  HomeIcon, 
-  FireIcon, 
-  Cog6ToothIcon 
-} from '@heroicons/react/24/outline';
-import { 
-  HomeIcon as HomeIconSolid, 
-  FireIcon as FireIconSolid 
-} from '@heroicons/react/24/solid';
+import { useRouter, usePathname } from 'next/navigation';
 import WelcomeTutorial from '@/components/shared/WelcomeTutorial';
 import { useAuthStore } from '@/store/authStore';
 import { getAuthToken } from '@/lib/auth';
 import { authAPI } from '@/lib/api';
 
-// Icono de radar personalizado (círculos concéntricos con línea de barrido)
-const RadarIcon = ({ className }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <circle cx="12" cy="12" r="9" strokeDasharray="2 2" />
-    <circle cx="12" cy="12" r="6" strokeDasharray="2 2" />
-    <circle cx="12" cy="12" r="3" />
-    <circle cx="12" cy="12" r="1.5" fill="currentColor" />
-    <line x1="12" y1="12" x2="12" y2="3" strokeLinecap="round" />
-    <line x1="12" y1="12" x2="21" y2="12" strokeLinecap="round" />
+const CompassIcon = ({ active }: { active: boolean }) => (
+  <svg className={`h-6 w-6 ${active ? 'text-primary-600' : 'text-ink-muted'}`} fill={active ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={active ? 0 : 1.5}>
+    {active ? (
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm3.36 5.64l-2.05 5.47-5.47 2.05 2.05-5.47 5.47-2.05z" />
+    ) : (
+      <>
+        <circle cx="12" cy="12" r="9" />
+        <polygon points="16.24,7.76 14.12,14.12 7.76,16.24 9.88,9.88" fill="currentColor" opacity="0.6" />
+      </>
+    )}
   </svg>
 );
 
-const RadarIconSolid = ({ className }: { className?: string }) => (
-  <svg className={className} fill="currentColor" viewBox="0 0 24 24">
-    <circle cx="12" cy="12" r="9" fillOpacity="0.1" />
-    <circle cx="12" cy="12" r="6" fillOpacity="0.2" />
-    <circle cx="12" cy="12" r="3" fillOpacity="0.3" />
-    <circle cx="12" cy="12" r="1.5" />
-    <line x1="12" y1="12" x2="12" y2="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    <line x1="12" y1="12" x2="21" y2="12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+const RocketIcon = ({ active }: { active: boolean }) => (
+  <svg className={`h-6 w-6 ${active ? 'text-primary-600' : 'text-ink-muted'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={active ? 2 : 1.5}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.63 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 00-2.58 5.841m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
   </svg>
 );
 
-// Icono de tuerca típica de ajustes
-const CogIcon = ({ className }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+const UserIcon = ({ active }: { active: boolean }) => (
+  <svg className={`h-6 w-6 ${active ? 'text-primary-600' : 'text-ink-muted'}`} fill={active ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke={active ? 'none' : 'currentColor'} strokeWidth={1.5}>
+    {active ? (
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
+    ) : (
+      <>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+      </>
+    )}
   </svg>
 );
 
-const CogIconSolid = ({ className }: { className?: string }) => (
-  <svg className={className} fill="currentColor" viewBox="0 0 24 24">
-    <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-    <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-  </svg>
-);
-
-export default function MainLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const [pathname, setPathname] = useState('');
-  const [tutorialCompleted, setTutorialCompleted] = useState(false);
+export default function MainLayout({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+  const currentPathname = usePathname();
+  const [tutorialCompleted, setTutorialCompleted] = useState(true);
   const { setUser, isAuthenticated, user } = useAuthStore();
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setPathname(window.location.pathname);
+    if (typeof window === 'undefined') return;
 
-      // Cargar estado del tutorial desde backend si el usuario está autenticado
-      const loadTutorialStatus = async () => {
-        const token = getAuthToken();
-        if (token && user?.id) {
-          try {
-            const { userAPI } = await import('@/lib/api');
-            const response = await userAPI.getTutorialStatus();
-            setTutorialCompleted(response.tutorialCompleted);
-            // Sincronizar con localStorage como fallback
-            if (response.tutorialCompleted) {
-              localStorage.setItem('tutorialCompleted', 'true');
-            }
-            console.log('✅ Estado del tutorial cargado desde backend:', response.tutorialCompleted);
-          } catch (error) {
-            console.error('❌ Error cargando estado del tutorial desde backend:', error);
-            // Fallback a localStorage
-            const tutorialDone = localStorage.getItem('tutorialCompleted') === 'true';
-            setTutorialCompleted(tutorialDone);
+    const loadTutorialStatus = async () => {
+      const token = getAuthToken();
+      if (token && user?.id) {
+        try {
+          const { userAPI } = await import('@/lib/api');
+          const response = await userAPI.getTutorialStatus();
+          setTutorialCompleted(response.tutorialCompleted);
+          if (response.tutorialCompleted) {
+            localStorage.setItem('tutorialCompleted', 'true');
           }
-        } else {
-          // Si no hay usuario, usar localStorage
+        } catch {
           const tutorialDone = localStorage.getItem('tutorialCompleted') === 'true';
-          console.log('📚 Tutorial completado (localStorage):', tutorialDone, '- Mostrar tutorial:', !tutorialDone);
           setTutorialCompleted(tutorialDone);
         }
-      };
-
-      loadTutorialStatus();
-
-      // Solo intentar cargar usuario si hay token y no está autenticado
-      const token = getAuthToken();
-      if (token && !isAuthenticated && !user) {
-        console.log('🔄 Cargando usuario desde token en MainLayout');
-
-        authAPI.getMe()
-          .then((response) => {
-            console.log('✅ Usuario cargado correctamente:', response.user.username);
-            setUser(response.user);
-          })
-          .catch((error) => {
-            console.error('❌ Error cargando usuario, limpiando token:', error);
-            localStorage.removeItem('token');
-            window.location.href = '/login';
-          });
+      } else {
+        const tutorialDone = localStorage.getItem('tutorialCompleted') === 'true';
+        setTutorialCompleted(tutorialDone);
       }
+    };
+
+    loadTutorialStatus();
+
+    const token = getAuthToken();
+    if (token && !isAuthenticated && !user) {
+      authAPI.getMe()
+        .then((response) => {
+          setUser(response.user);
+        })
+        .catch(() => {
+          localStorage.removeItem('token');
+          router.replace('/login');
+        });
     }
-  }, [isAuthenticated, user, setUser]);
+  }, [isAuthenticated, user, setUser, router]);
+
+  const TrophyIcon = ({ active }: { active: boolean }) => (
+    <svg className={`h-6 w-6 ${active ? 'text-primary-600' : 'text-ink-muted'}`} fill={active ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke={active ? 'none' : 'currentColor'} strokeWidth={1.5}>
+      {active ? (
+        <path d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.562.562 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+      ) : (
+        <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 01-.982-3.172M9.497 14.25a7.454 7.454 0 00.981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 007.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 002.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.492a46.32 46.32 0 012.916.52 6.003 6.003 0 01-5.395 4.972m0 0a6.726 6.726 0 01-2.749 1.35m0 0a6.772 6.772 0 01-3.044 0" />
+      )}
+    </svg>
+  );
 
   const tabs = [
-    {
-      name: 'Principal',
-      href: '/principal',
-      icon: HomeIcon,
-      iconSolid: HomeIconSolid,
-      mobileIcon: RadarIcon,
-      mobileIconSolid: RadarIconSolid,
-    },
-    {
-      name: 'Promoción',
-      href: '/promocion',
-      icon: FireIcon,
-      iconSolid: FireIconSolid,
-      mobileIcon: FireIcon,
-      mobileIconSolid: FireIconSolid,
-    },
+    { name: 'Explorar', href: '/principal', Icon: CompassIcon },
+    { name: 'Rankings', href: '/ranking', Icon: TrophyIcon },
+    { name: 'Promoción', href: '/promocion', Icon: RocketIcon },
+    { name: 'Ajustes', href: '/ajustes', Icon: UserIcon },
   ];
 
-  const isActive = (href: string) => pathname === href;
-
   return (
-    <div className="min-h-screen bg-white flex flex-col" style={{ minHeight: '-webkit-fill-available' } as React.CSSProperties}>
+    <div className="flex min-h-[100dvh] flex-col bg-surface">
       <WelcomeTutorial
         tutorialCompleted={tutorialCompleted}
         onClose={async () => {
-          console.log('📚 Tutorial cerrado, actualizando estado');
           setTutorialCompleted(true);
           if (typeof window !== 'undefined') {
             localStorage.setItem('tutorialCompleted', 'true');
           }
-          // Sincronizar con backend si el usuario está autenticado
           const token = getAuthToken();
           if (token && user?.id) {
             try {
               const { userAPI } = await import('@/lib/api');
               await userAPI.markTutorialCompleted();
-              console.log('✅ Tutorial marcado como completado en backend');
-            } catch (error) {
-              console.error('❌ Error marcando tutorial como completado en backend:', error);
-            }
+            } catch { /* silent */ }
           }
         }}
       />
-      
-      {/* Pestañas de navegación - Parte superior FIJAS (solo desktop) */}
-      <nav className={`hidden md:flex fixed top-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-sm`}>
-        <div className="max-w-7xl mx-auto px-4 w-full">
-          <div className="flex justify-center space-x-1 md:space-x-2">
-            {tabs.map((tab) => {
-              const Icon = isActive(tab.href) ? tab.iconSolid : tab.icon;
-              return (
-                <Link
-                  key={tab.name}
-                  href={tab.href}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (typeof window !== 'undefined') {
-                      setPathname(tab.href);
-                      window.location.href = tab.href;
-                    }
-                  }}
-                  className={`
-                    flex items-center justify-center px-6 py-4 text-sm font-medium transition-colors cursor-pointer
-                    ${isActive(tab.href)
-                      ? 'text-primary-600 border-b-2 border-primary-600'
-                      : 'text-gray-600 hover:text-gray-900'
-                    }
-                  `}
-                >
-                  <Icon className="h-5 w-5 mr-2" />
-                  {tab.name}
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      </nav>
 
-      {/* Contenido principal */}
-      <main className={`flex-1 pt-0 md:pt-0 pb-24 md:pb-20 flex items-center justify-center overflow-hidden`} style={{ minHeight: 'calc(100vh - 4rem)' }}>
+      {/* Content — no overflow-hidden so pages can scroll freely */}
+      <main className="flex-1">
         {children}
       </main>
 
-      {/* Navegación móvil - Parte inferior FIJA (solo móvil) */}
-      <div 
-        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-sm" 
-        style={{ 
-          paddingBottom: 'env(safe-area-inset-bottom)'
-        } as React.CSSProperties}
+      {/* Bottom Navigation - Mobile */}
+      <nav
+        className="fixed bottom-0 left-0 right-0 z-40 border-t border-surface-300/60 bg-white/95 backdrop-blur-xl"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
-        <div className="flex justify-around items-center h-16">
-          {/* Promoción - Izquierda */}
-          <Link
-            href="/promocion"
-            onClick={(e) => {
-              e.preventDefault();
-              if (typeof window !== 'undefined') {
-                setPathname('/promocion');
-                window.location.href = '/promocion';
-              }
-            }}
-            className={`
-              flex flex-col items-center justify-center flex-1 h-full transition-colors py-1.5 cursor-pointer
-              ${isActive('/promocion')
-                ? 'text-primary-600'
-                : 'text-gray-600'
-              }
-            `}
-          >
-            <FireIcon className={`h-6 w-6 ${isActive('/promocion') ? 'text-primary-600' : 'text-gray-600'}`} />
-            <span className="text-xs font-medium mt-1">Promoción</span>
-          </Link>
-
-          {/* Principal - Centro con radar */}
-          <Link
-            href="/principal"
-            onClick={(e) => {
-              e.preventDefault();
-              if (typeof window !== 'undefined') {
-                setPathname('/principal');
-                window.location.href = '/principal';
-              }
-            }}
-            className={`
-              flex flex-col items-center justify-center flex-1 h-full transition-colors py-1.5 cursor-pointer
-              ${isActive('/principal')
-                ? 'text-primary-600'
-                : 'text-gray-600'
-              }
-            `}
-          >
-            {isActive('/principal') ? (
-              <RadarIconSolid className="h-6 w-6 text-primary-600" />
-            ) : (
-              <RadarIcon className="h-6 w-6 text-gray-600" />
-            )}
-            <span className="text-xs font-medium mt-1">Principal</span>
-          </Link>
-
-          {/* Ajustes - Derecha con martillo y llave */}
-          <Link
-            href="/ajustes"
-            onClick={(e) => {
-              e.preventDefault();
-              if (typeof window !== 'undefined') {
-                setPathname('/ajustes');
-                window.location.href = '/ajustes';
-              }
-            }}
-            className={`
-              flex flex-col items-center justify-center flex-1 h-full transition-colors py-1.5 cursor-pointer
-              ${isActive('/ajustes')
-                ? 'text-primary-600'
-                : 'text-gray-600'
-              }
-            `}
-          >
-            {isActive('/ajustes') ? (
-              <CogIconSolid className="h-6 w-6 text-primary-600" />
-            ) : (
-              <CogIcon className="h-6 w-6 text-gray-600" />
-            )}
-            <span className="text-xs font-medium mt-1">Ajustes</span>
-          </Link>
+        <div className="mx-auto flex h-[3.75rem] max-w-lg items-center justify-around px-1">
+          {tabs.map((tab) => {
+            const active = currentPathname === tab.href || currentPathname.startsWith(tab.href + '/');
+            return (
+              <Link
+                key={tab.name}
+                href={tab.href}
+                className="flex flex-1 flex-col items-center justify-center gap-0.5 py-1 transition-opacity active:opacity-70"
+              >
+                <tab.Icon active={active} />
+                <span className={`text-[9px] font-semibold tracking-tight ${active ? 'text-primary-600' : 'text-ink-muted'}`}>
+                  {tab.name}
+                </span>
+              </Link>
+            );
+          })}
         </div>
-      </div>
-
-      {/* Botón de ajustes - Parte inferior FIJA (solo desktop) */}
-      <div className="hidden md:flex fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 w-full">
-          <Link
-            href="/ajustes"
-            onClick={(e) => {
-              e.preventDefault();
-              if (typeof window !== 'undefined') {
-                setPathname('/ajustes');
-                window.location.href = '/ajustes';
-              }
-            }}
-            className={`
-              flex items-center justify-center px-6 py-4 text-sm font-medium transition-colors cursor-pointer
-              ${isActive('/ajustes')
-                ? 'text-primary-600'
-                : 'text-gray-600 hover:text-gray-900'
-              }
-            `}
-          >
-            <Cog6ToothIcon className="h-5 w-5 mr-2" />
-            Ajustes
-          </Link>
-        </div>
-      </div>
+      </nav>
     </div>
   );
 }
-

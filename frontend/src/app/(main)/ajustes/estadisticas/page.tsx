@@ -43,7 +43,7 @@ export default function EstadisticasPage() {
         paddingRight: 'env(safe-area-inset-right)'
       } as React.CSSProperties}
     >
-      <div className="max-w-6xl mx-auto w-full h-full overflow-y-auto overflow-x-hidden flex flex-col" style={{ paddingTop: '1rem', paddingBottom: '1rem' }}>
+      <div className="max-w-lg mx-auto w-full h-full overflow-y-auto overflow-x-hidden flex flex-col" style={{ paddingTop: '1rem', paddingBottom: 'calc(5rem + env(safe-area-inset-bottom))' }}>
         
         {/* Botón Atrás */}
         <div className="mb-4 px-4 flex-shrink-0">

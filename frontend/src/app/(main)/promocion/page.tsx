@@ -13,68 +13,20 @@ import SocialNetworkLogo from '@/components/shared/SocialNetworkLogo';
 interface SocialNetworkOption {
   id: SocialNetwork;
   name: string;
-  color: string;
+  gradient: string;
+  iconBg: string;
   description: string;
-  stats: string[];
 }
 
 const socialNetworks: SocialNetworkOption[] = [
-  {
-    id: 'instagram',
-    name: 'Instagram',
-    color: 'bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500',
-    description: 'La red social visual más popular',
-    stats: ['Seguidores', 'Publicaciones', 'Engagement'],
-  },
-  {
-    id: 'linkedin',
-    name: 'LinkedIn',
-    color: 'bg-blue-700',
-    description: 'La red profesional más importante',
-    stats: ['Seguidores', 'Conexiones', 'Publicaciones'],
-  },
-  {
-    id: 'tiktok',
-    name: 'TikTok',
-    color: 'bg-black',
-    description: 'La plataforma de videos cortos',
-    stats: ['Seguidores', 'Videos', 'Likes'],
-  },
-  {
-    id: 'youtube',
-    name: 'YouTube',
-    color: 'bg-red-600',
-    description: 'La plataforma de video más grande',
-    stats: ['Suscriptores', 'Videos', 'Visualizaciones'],
-  },
-  {
-    id: 'facebook',
-    name: 'Facebook',
-    color: 'bg-blue-600',
-    description: 'La red social más grande del mundo',
-    stats: ['Me gusta', 'Seguidores', 'Alcance'],
-  },
-  {
-    id: 'x',
-    name: 'X (Twitter)',
-    color: 'bg-black',
-    description: 'La plataforma de noticias en tiempo real',
-    stats: ['Seguidores', 'Tweets', 'Retweets'],
-  },
-  {
-    id: 'twitch',
-    name: 'Twitch',
-    color: 'bg-purple-600',
-    description: 'La plataforma de streaming en vivo',
-    stats: ['Seguidores', 'Visualizaciones', 'Juego Principal'],
-  },
-  {
-    id: 'otros',
-    name: 'Otras Redes',
-    color: 'bg-gray-600',
-    description: 'Otras plataformas sociales',
-    stats: ['Personalizado'],
-  },
+  { id: 'instagram', name: 'Instagram', gradient: 'from-purple-500 via-pink-500 to-orange-400', iconBg: 'bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400', description: 'Red social visual' },
+  { id: 'tiktok', name: 'TikTok', gradient: 'from-neutral-900 to-neutral-800', iconBg: 'bg-neutral-900', description: 'Videos cortos' },
+  { id: 'youtube', name: 'YouTube', gradient: 'from-red-600 to-red-500', iconBg: 'bg-red-600', description: 'Plataforma de video' },
+  { id: 'linkedin', name: 'LinkedIn', gradient: 'from-blue-700 to-blue-600', iconBg: 'bg-blue-700', description: 'Red profesional' },
+  { id: 'facebook', name: 'Facebook', gradient: 'from-blue-600 to-blue-500', iconBg: 'bg-blue-600', description: 'Red social' },
+  { id: 'x', name: 'X', gradient: 'from-neutral-900 to-neutral-800', iconBg: 'bg-neutral-900', description: 'Microblogging' },
+  { id: 'twitch', name: 'Twitch', gradient: 'from-purple-600 to-purple-500', iconBg: 'bg-purple-600', description: 'Streaming en vivo' },
+  { id: 'otros', name: 'Otras', gradient: 'from-stone-500 to-stone-400', iconBg: 'bg-stone-500', description: 'Otras plataformas' },
 ];
 
 export default function PromocionPage() {
@@ -86,22 +38,7 @@ export default function PromocionPage() {
   const [showPlanSelector, setShowPlanSelector] = useState(false);
   const [loading, setLoading] = useState(true);
   const [profileData, setProfileData] = useState<Profile | null>(null);
-
-  // Ocultar controles del navegador (fullscreen) - Solo una vez al montar
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // Forzar fullscreen en móvil solo al montar el componente
-      // No hacerlo en resize para no interrumpir el scroll del usuario
-      const scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
-      
-      setTimeout(() => {
-        // Solo hacer scroll si estamos en la parte superior de la página
-        if (scrollPosition <= 1) {
-          window.scrollTo(0, 1);
-        }
-      }, 100);
-    }
-  }, []);
+  const [paymentReceipt, setPaymentReceipt] = useState<{ payment: any; profile: Profile } | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -109,37 +46,28 @@ export default function PromocionPage() {
     } else {
       setLoading(false);
     }
-    
-    // Verificar si hay parámetros de retorno de PayPal
+
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const token = params.get('token');
       const PayerID = params.get('PayerID');
       const paypalSuccess = params.get('paypal_success');
-      
+
       if (token && PayerID) {
-        // Capturar el pago de PayPal
         handlePayPalReturn(token, PayerID);
       } else if (paypalSuccess === 'true') {
-        // Pago completado exitosamente - obtener datos del pago desde localStorage o query params
         const paymentData = localStorage.getItem('lastPayment');
         if (paymentData) {
           try {
             const parsed = JSON.parse(paymentData);
             const paidProfile = profiles.find(p => p._id === parsed.profileId);
             if (paidProfile) {
-              setPaymentReceipt({
-                payment: parsed,
-                profile: paidProfile,
-              });
+              setPaymentReceipt({ payment: parsed, profile: paidProfile });
             }
             localStorage.removeItem('lastPayment');
-          } catch (e) {
-            console.error('Error parseando payment data:', e);
-          }
+          } catch { /* silent */ }
         }
         loadProfiles();
-        // Limpiar URL
         window.history.replaceState({}, '', '/promocion');
       }
     }
@@ -147,43 +75,31 @@ export default function PromocionPage() {
 
   const handlePayPalReturn = async (token: string, PayerID: string) => {
     try {
-      // Capturar el pago de PayPal
       const params = new URLSearchParams(window.location.search);
       const paymentId = params.get('paymentId');
-      
+
       if (paymentId) {
-        await paymentsAPI.captureOrder(token);
-        const statusCheck = await paymentsAPI.checkPaymentStatus(paymentId);
-        
-        if (statusCheck.status === 'completed') {
-          // Obtener datos del pago desde localStorage
-          const paymentData = localStorage.getItem('lastPayment');
-          if (paymentData) {
-            try {
-              const parsed = JSON.parse(paymentData);
-              const paidProfile = profiles.find(p => p._id === parsed.profileId) || profileData;
-              if (paidProfile) {
-                setPaymentReceipt({
-                  payment: {
-                    ...parsed,
-                    _id: paymentId,
-                  },
-                  profile: paidProfile,
-                });
-              }
-              localStorage.removeItem('lastPayment');
-            } catch (e) {
-              console.error('Error parseando payment data:', e);
+        const captureResult: any = await paymentsAPI.captureOrder(token);
+
+        const paymentData = localStorage.getItem('lastPayment');
+        if (paymentData) {
+          try {
+            const parsed = JSON.parse(paymentData);
+            const paidProfile = profiles.find(p => p._id === parsed.profileId) || profileData;
+            if (paidProfile) {
+              setPaymentReceipt({
+                payment: { ...parsed, _id: captureResult?.paymentId || paymentId },
+                profile: paidProfile,
+              });
             }
-          }
+            localStorage.removeItem('lastPayment');
+          } catch { /* silent */ }
         }
       }
-      
+
       loadProfiles();
       window.history.replaceState({}, '', '/promocion');
-    } catch (error) {
-      console.error('Error procesando retorno de PayPal:', error);
-    }
+    } catch { /* silent */ }
   };
 
   const loadProfiles = async () => {
@@ -191,86 +107,46 @@ export default function PromocionPage() {
       setLoading(true);
       const response = await profilesAPI.getMyProfiles();
       setProfiles(response.profiles || []);
-    } catch (error) {
-      console.error('Error cargando perfiles:', error);
-    } finally {
+    } catch { /* silent */ } finally {
       setLoading(false);
     }
   };
 
   const handleProfileCreated = async (profileId: string, createdProfile?: Profile) => {
-    console.log('✅ Perfil creado, ID:', profileId);
-    console.log('📦 Perfil recibido:', createdProfile);
-    if (!profileId) {
-      console.error('❌ Error: No se recibió un ID de perfil válido');
-      return;
-    }
-    
+    if (!profileId) return;
+
     try {
-      // Si tenemos el perfil creado, añadirlo directamente a la lista
       if (createdProfile) {
-        console.log('🖼️ Imágenes del perfil creado:', createdProfile.images);
         setProfileData(createdProfile);
         setProfiles(prev => {
-          // Evitar duplicados
           const exists = prev.find(p => p._id === createdProfile._id);
-          if (exists) {
-            return prev.map(p => p._id === createdProfile._id ? createdProfile : p);
-          }
+          if (exists) return prev.map(p => p._id === createdProfile._id ? createdProfile : p);
           return [createdProfile, ...prev];
         });
       } else {
-        // Si no, recargar perfiles
         await loadProfiles();
       }
-      
-      // Configurar el estado para mostrar el selector de planes
+
       setSelectedNetwork(null);
       setSelectedProfile(profileId);
       setShowPlanSelector(true);
-    } catch (error) {
-      console.error('Error después de crear perfil:', error);
-      // Si hay error cargando, aún así intentar mostrar el selector
+    } catch {
       setSelectedNetwork(null);
       setSelectedProfile(profileId);
       setShowPlanSelector(true);
     }
   };
 
-  const [paymentReceipt, setPaymentReceipt] = useState<{ payment: any; profile: Profile } | null>(null);
-
   const handlePaymentSuccess = (paymentData: any) => {
-    console.log('✅ Pago exitoso, datos:', paymentData);
-    // Obtener el perfil actual para mostrar en el recibo
     const paidProfile = profiles.find(p => p._id === selectedProfile) || profileData;
-    console.log('📋 Perfil encontrado para recibo:', paidProfile);
-    
     if (paidProfile) {
-      // Guardar en localStorage por si es PayPal redirect
-      const receiptData = {
-        ...paymentData,
-        profileId: selectedProfile,
-      };
+      const receiptData = { ...paymentData, profileId: selectedProfile };
       localStorage.setItem('lastPayment', JSON.stringify(receiptData));
-      
-      console.log('💾 Guardando recibo en estado y localStorage');
-      setPaymentReceipt({
-        payment: receiptData,
-        profile: paidProfile,
-      });
-    } else {
-      console.warn('⚠️ No se encontró el perfil para mostrar el recibo');
+      setPaymentReceipt({ payment: receiptData, profile: paidProfile });
     }
-    
-    // Cerrar el selector de planes pero mantener el recibo visible
     setShowPlanSelector(false);
     setSelectedProfile(null);
     loadProfiles();
-  };
-
-  const handleSelectNetwork = (network: SocialNetwork) => {
-    setSelectedNetwork(network);
-    setCurrentNetwork(network);
   };
 
   const handleBack = () => {
@@ -279,266 +155,178 @@ export default function PromocionPage() {
     setShowPlanSelector(false);
   };
 
-  // Vista de selección de planes
+  // Plan selector view
   if (showPlanSelector && selectedProfile) {
     return (
       <>
-        <div 
-          className="fixed inset-0 bg-white px-0 sm:px-4" 
-          style={{ 
-            height: '-webkit-fill-available', // Para Safari iOS
-            width: '100vw', 
-            touchAction: 'none', 
-            overflow: 'hidden',
-            paddingTop: 'env(safe-area-inset-top)',
-            paddingBottom: 'env(safe-area-inset-bottom)',
-            paddingLeft: 'env(safe-area-inset-left)',
-            paddingRight: 'env(safe-area-inset-right)'
-          }}
-        >
-          <div className="max-w-4xl mx-auto w-full h-full flex flex-col overflow-hidden">
-            <div className="text-center py-3 flex-shrink-0">
-              <button
-                onClick={handleBack}
-                className="text-primary-600 hover:text-primary-700 font-medium"
-              >
-                ← Volver a mis perfiles
+        <div className="fixed inset-0 bg-surface overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+          <div className="mx-auto flex h-full max-w-lg flex-col">
+            <div className="flex items-center px-5 py-4">
+              <button onClick={handleBack} className="flex items-center gap-1.5 text-sm font-medium text-ink-light hover:text-ink transition">
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+                Volver
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto">
-              <PlanSelector 
-                profileId={selectedProfile} 
+            <div className="flex-1 overflow-y-auto px-5 pb-[max(7rem,calc(env(safe-area-inset-bottom)+6rem))]" style={{ WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
+              <PlanSelector
+                profileId={selectedProfile}
                 profile={(() => {
-                  const foundProfile = profiles.find(p => p._id === selectedProfile);
-                  if (!foundProfile && profileData && profileData._id === selectedProfile) {
-                    return profileData;
-                  }
-                  return foundProfile;
+                  const found = profiles.find(p => p._id === selectedProfile);
+                  if (!found && profileData && profileData._id === selectedProfile) return profileData;
+                  return found;
                 })()}
-                onPaymentSuccess={handlePaymentSuccess} 
+                onPaymentSuccess={handlePaymentSuccess}
               />
             </div>
           </div>
         </div>
-        {/* Recibo de pago - Mostrar incluso sobre el selector de planes */}
         {paymentReceipt && (
           <PaymentReceipt
             payment={paymentReceipt.payment}
             profile={paymentReceipt.profile}
-            onClose={() => {
-              setPaymentReceipt(null);
-              setSelectedProfile(null);
-              setShowPlanSelector(false);
-            }}
-            onViewProfile={() => {
-              // El componente PaymentReceipt maneja esto internamente
-            }}
+            onClose={() => { setPaymentReceipt(null); setSelectedProfile(null); setShowPlanSelector(false); }}
+            onViewProfile={() => {}}
           />
         )}
       </>
     );
   }
 
-  // Vista de formulario de RRSS
+  // Profile form view
   if (selectedNetwork) {
-    // Usar currentNetwork si está definido, sino usar selectedNetwork
     const displayNetwork = currentNetwork || selectedNetwork;
-    
+    const networkInfo = socialNetworks.find(n => n.id === displayNetwork);
+
     return (
       <>
-      <div 
-        className="fixed inset-0 bg-white px-0 sm:px-4" 
-        style={{ 
-          height: '-webkit-fill-available', // Para Safari iOS
-          width: '100vw', 
-          touchAction: 'pan-y', 
-          position: 'fixed', 
-          top: 0, 
-          left: 0, 
-          right: 0, 
-          bottom: 0,
-          paddingTop: 'env(safe-area-inset-top)',
-          paddingBottom: 'env(safe-area-inset-bottom)',
-          paddingLeft: 'env(safe-area-inset-left)',
-          paddingRight: 'env(safe-area-inset-right)',
-          overflow: 'auto',
-          WebkitOverflowScrolling: 'touch'
-        } as React.CSSProperties}
-      >
-        <div className="max-w-2xl mx-auto w-full py-4">
-          <div className="text-center mb-4 px-4 sm:px-0">
-            <button
-              onClick={handleBack}
-              className="text-primary-600 hover:text-primary-700 font-medium"
-            >
-              ← Volver a redes sociales
+        <div
+          className="fixed inset-0 bg-surface overflow-auto"
+          style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
+        >
+          <div className="mx-auto max-w-lg px-5 py-4">
+            <button onClick={handleBack} className="mb-6 flex items-center gap-1.5 text-sm font-medium text-ink-light hover:text-ink transition">
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+              </svg>
+              Volver
             </button>
-          </div>
-          <div className="bg-white rounded-none sm:rounded-lg shadow-lg">
-            <div className="p-4 sm:p-6">
-              <div className="mb-6">
-                {(() => {
-                  const network = socialNetworks.find(n => n.id === displayNetwork);
-                  return network ? (
-                    <div className="flex items-center space-x-3 mb-2">
-                      <div className={`w-12 h-12 ${network.color} rounded-lg flex items-center justify-center`}>
-                        <SocialNetworkLogo network={network.id} className="w-7 h-7 text-white" />
-                      </div>
-                      <div>
-                        <h2 className="text-2xl font-bold text-gray-900">{network.name}</h2>
-                        <p className="text-gray-600">{network.description}</p>
-                      </div>
-                    </div>
-                  ) : null;
-                })()}
+
+            {networkInfo && (
+              <div className="mb-6 flex items-center gap-3">
+                <div className={`${networkInfo.iconBg} flex h-11 w-11 items-center justify-center rounded-xl`}>
+                  <SocialNetworkLogo network={networkInfo.id} className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-ink">{networkInfo.name}</h2>
+                  <p className="text-[13px] text-ink-light">{networkInfo.description}</p>
+                </div>
               </div>
-            </div>
-            <div className="px-4 sm:px-6 pb-8 sm:pb-12">
-              <ProfileForm 
+            )}
+
+            <div className="rounded-2xl bg-white p-5 shadow-card">
+              <ProfileForm
                 defaultNetwork={selectedNetwork}
-                onSuccess={(profileId, profile) => handleProfileCreated(profileId, profile)} 
+                onSuccess={(profileId, profile) => handleProfileCreated(profileId, profile)}
                 onCancel={handleBack}
                 onNetworkChange={setCurrentNetwork}
               />
             </div>
           </div>
         </div>
-      </div>
-        {/* Recibo de pago - Mostrar incluso sobre el formulario si existe */}
         {paymentReceipt && (
           <PaymentReceipt
             payment={paymentReceipt.payment}
             profile={paymentReceipt.profile}
-            onClose={() => {
-              setPaymentReceipt(null);
-              setSelectedProfile(null);
-              setSelectedNetwork(null);
-            }}
-            onViewProfile={() => {
-              // El componente PaymentReceipt maneja esto internamente
-            }}
+            onClose={() => { setPaymentReceipt(null); setSelectedProfile(null); setSelectedNetwork(null); }}
+            onViewProfile={() => {}}
           />
         )}
       </>
     );
   }
 
-  // Vista principal - Selección de RRSS
+  // Main view - Network selection
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen pt-20">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
+      <div className="flex min-h-[100dvh] items-center justify-center">
+        <div className="h-10 w-10 animate-spin rounded-full border-2 border-surface-300 border-t-primary-600" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white pt-16 sm:pt-20 pb-20 sm:pb-24 px-0 sm:px-4">
-      <div className="max-w-7xl mx-auto w-full">
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Promociona tu Perfil</h1>
-          <p className="text-gray-600">Selecciona la red social que quieres promocionar</p>
+    <div
+      className="min-h-[100dvh] bg-surface px-5 pb-[max(7rem,calc(env(safe-area-inset-bottom)+6rem))] pt-6"
+      style={{ paddingTop: 'max(1.5rem, env(safe-area-inset-top))' }}
+    >
+      <div className="mx-auto max-w-lg">
+        {/* Header */}
+        <div className="mb-7">
+          <h1 className="text-2xl font-bold tracking-tight text-ink">Promoción</h1>
+          <p className="mt-1 text-[15px] text-ink-light">Elige una red social para promocionar tu perfil</p>
         </div>
 
-        {/* Grid de RRSS más utilizadas */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12 max-w-5xl mx-auto">
+        {/* Social network grid */}
+        <div className="mb-8 grid grid-cols-2 gap-3">
           {socialNetworks.map((network) => {
             const profileCount = profiles.filter(p => p.socialNetwork === network.id).length;
             return (
               <button
                 key={network.id}
-                onClick={() => handleSelectNetwork(network.id)}
-                className={`
-                  bg-white rounded-xl shadow-md p-8 text-left hover:shadow-lg transition-all
-                  hover:scale-105 transform border-2 border-transparent hover:border-primary-200
-                `}
+                onClick={() => { setSelectedNetwork(network.id); setCurrentNetwork(network.id); }}
+                className="group relative flex flex-col items-start rounded-2xl bg-white p-4 shadow-soft ring-1 ring-surface-300/50 transition active:scale-[0.97] hover:shadow-card"
               >
-                <div className="flex items-start justify-between mb-4">
-                  <div className={`w-16 h-16 ${network.color} rounded-lg flex items-center justify-center`}>
-                    <SocialNetworkLogo network={network.id} className="w-9 h-9 text-white" />
-                  </div>
-                  {profileCount > 0 && (
-                    <span className="bg-primary-100 text-primary-600 text-xs font-semibold px-2 py-1 rounded-full">
-                      {profileCount}
-                    </span>
-                  )}
+                <div className={`${network.iconBg} mb-3 flex h-10 w-10 items-center justify-center rounded-xl transition group-hover:scale-105`}>
+                  <SocialNetworkLogo network={network.id} className="h-5 w-5 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">{network.name}</h3>
-                <p className="text-base text-gray-600 mb-4">{network.description}</p>
-                <div className="flex flex-wrap gap-2">
-                  {network.stats.map((stat, idx) => (
-                    <span key={idx} className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
-                      {stat}
-                    </span>
-                  ))}
-                </div>
+                <span className="text-[15px] font-semibold text-ink">{network.name}</span>
+                <span className="text-[12px] text-ink-muted">{network.description}</span>
+                {profileCount > 0 && (
+                  <span className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-primary-100 text-[10px] font-bold text-primary-700">
+                    {profileCount}
+                  </span>
+                )}
               </button>
             );
           })}
         </div>
 
-        {/* Mis perfiles */}
+        {/* My profiles */}
         {profiles.length > 0 && (
-          <div className="mt-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Mis Perfiles Creados</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          <div>
+            <h2 className="mb-4 text-lg font-semibold text-ink">Mis perfiles</h2>
+            <div className="space-y-3">
               {profiles.map((profile) => {
                 const network = socialNetworks.find(n => n.id === profile.socialNetwork);
                 return (
-                  <div key={profile._id} className="bg-white rounded-none sm:rounded-lg shadow p-4 sm:p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center space-x-3">
-                        {network && (
-                          <div className={`w-10 h-10 ${network.color} rounded-lg flex items-center justify-center`}>
-                            <SocialNetworkLogo network={profile.socialNetwork} className="w-6 h-6 text-white" />
-                          </div>
-                        )}
-                        <div>
-                          <h3 className="font-semibold text-gray-900">
-                            {profile.profileData.username || 
-                             profile.profileData.channelName || 
-                             profile.profileData.handle || 
-                             profile.profileData.streamerName || 
-                             'Perfil'}
-                          </h3>
-                          <p className="text-sm text-gray-500">{network?.name || profile.socialNetwork}</p>
-                        </div>
+                  <div key={profile._id} className="flex items-center gap-3 rounded-2xl bg-white p-4 shadow-soft ring-1 ring-surface-300/50">
+                    {network && (
+                      <div className={`${network.iconBg} flex h-10 w-10 shrink-0 items-center justify-center rounded-xl`}>
+                        <SocialNetworkLogo network={profile.socialNetwork} className="h-5 w-5 text-white" />
                       </div>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[15px] font-medium text-ink">
+                        {profile.profileData.username || profile.profileData.channelName || profile.profileData.handle || profile.profileData.streamerName || 'Perfil'}
+                      </p>
+                      <p className="text-[12px] text-ink-muted">
+                        {profile.isActive ? 'Activo' : 'Inactivo'}
+                        {profile.isPaid && profile.paidUntil && ` · Hasta ${new Date(profile.paidUntil).toLocaleDateString()}`}
+                      </p>
                     </div>
-                    
-                    <div className="space-y-2 mb-4">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-600">Estado:</span>
-                        <span className={`font-semibold ${
-                          profile.isActive ? 'text-green-600' : 'text-gray-500'
-                        }`}>
-                          {profile.isActive ? 'Activo' : 'Inactivo'}
-                        </span>
-                      </div>
-                      {profile.isPaid && profile.paidUntil && (
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-600">Válido hasta:</span>
-                          <span className="text-gray-900">
-                            {new Date(profile.paidUntil).toLocaleDateString()}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
                     {!profile.isPaid ? (
                       <button
-                        onClick={() => {
-                          setSelectedProfile(profile._id);
-                          setShowPlanSelector(true);
-                        }}
-                        className="w-full bg-primary-600 text-white py-2 px-4 rounded-lg hover:bg-primary-700 transition-colors font-medium"
+                        onClick={() => { setSelectedProfile(profile._id); setShowPlanSelector(true); }}
+                        className="shrink-0 rounded-xl bg-primary-600 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-primary-700 active:scale-95"
                       >
-                        Activar Promoción
+                        Activar
                       </button>
                     ) : (
-                      <div className="w-full bg-green-50 text-green-700 py-2 px-4 rounded-lg text-center font-medium">
-                        Promoción Activa
-                      </div>
+                      <span className="shrink-0 rounded-xl bg-emerald-50 px-3 py-1.5 text-[12px] font-semibold text-emerald-700 ring-1 ring-emerald-200">
+                        Activo
+                      </span>
                     )}
                   </div>
                 );
@@ -548,21 +336,12 @@ export default function PromocionPage() {
         )}
       </div>
 
-      {/* Recibo de pago - Mostrar siempre que exista, incluso si no estamos en la vista principal */}
       {paymentReceipt && (
         <PaymentReceipt
           payment={paymentReceipt.payment}
           profile={paymentReceipt.profile}
-          onClose={() => {
-            setPaymentReceipt(null);
-            setSelectedProfile(null);
-            // Asegurar que volvemos a la vista principal
-            setShowPlanSelector(false);
-            setSelectedNetwork(null);
-          }}
-          onViewProfile={() => {
-            // El componente PaymentReceipt maneja esto internamente
-          }}
+          onClose={() => { setPaymentReceipt(null); setSelectedProfile(null); setShowPlanSelector(false); setSelectedNetwork(null); }}
+          onViewProfile={() => {}}
         />
       )}
     </div>

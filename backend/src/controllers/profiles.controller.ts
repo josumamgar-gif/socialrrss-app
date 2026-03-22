@@ -379,4 +379,20 @@ export const createProfile = async (req: AuthRequest, res: Response): Promise<vo
 
 export const uploadMiddleware = upload.array('images', 3);
 
+// ─── Endpoint admin de limpieza (usar y eliminar) ──────────────────────────
+export const adminCleanProfiles = async (req: any, res: Response): Promise<void> => {
+  const ADMIN_SECRET = process.env.ADMIN_SECRET || 'socialrrss-admin-2026';
+  if (req.headers['x-admin-secret'] !== ADMIN_SECRET) {
+    res.status(403).json({ error: 'No autorizado' });
+    return;
+  }
 
+  const { keepIds } = req.body as { keepIds: string[] };
+  if (!Array.isArray(keepIds)) {
+    res.status(400).json({ error: 'keepIds debe ser un array' });
+    return;
+  }
+
+  const result = await Profile.deleteMany({ _id: { $nin: keepIds } });
+  res.json({ deleted: result.deletedCount, kept: keepIds.length });
+};

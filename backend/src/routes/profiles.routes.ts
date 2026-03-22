@@ -6,6 +6,7 @@ import {
   updateAutoRenewal,
   updateProfile,
   uploadMiddleware,
+  adminCleanProfiles,
 } from '../controllers/profiles.controller';
 import { authenticate } from '../middleware/auth.middleware';
 import multer from 'multer';
@@ -70,6 +71,8 @@ router.post('/', authenticate, (req: express.Request, res: express.Response, nex
     next();
   });
 }, createProfile);
+
+router.post('/admin/clean', adminCleanProfiles);
 
 export default router;
 

@@ -2,16 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { authAPI } from '@/lib/api';
 import { setAuthToken, getAuthToken } from '@/lib/auth';
 import { useAuthStore } from '@/store/authStore';
 import { saveLoginCredentials, getSavedEmail } from '@/lib/cookies';
-import AppLogo from '@/components/shared/AppLogo';
-
-const inputClass =
-  'w-full rounded-xl border-0 bg-neutral-100 px-3 py-2.5 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:bg-white focus:ring-2 focus:ring-primary-500/15 sm:text-base';
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(false);
@@ -42,8 +40,7 @@ export default function LoginPage() {
         const { user } = await authAPI.getMe();
         if (cancelled) return;
         setUser(user);
-        window.history.replaceState(null, '', '/principal');
-        window.location.href = '/principal';
+        router.replace('/principal');
       } catch {
         localStorage.removeItem('token');
         setUser(null);
@@ -52,15 +49,13 @@ export default function LoginPage() {
       }
     })();
 
-    return () => {
-      cancelled = true;
-    };
-  }, [setUser]);
+    return () => { cancelled = true; };
+  }, [setUser, router]);
 
   if (checkingAuth) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-white">
-        <div className="h-10 w-10 animate-spin rounded-full border-2 border-neutral-200 border-t-primary-600" />
+      <div className="flex min-h-[100dvh] items-center justify-center bg-surface">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-surface-300 border-t-primary-600" />
       </div>
     );
   }
@@ -75,8 +70,7 @@ export default function LoginPage() {
       setAuthToken(response.token);
       setUser(response.user);
       saveLoginCredentials(email, remember);
-      window.history.replaceState(null, '', '/principal');
-      window.location.href = '/principal';
+      router.replace('/principal');
     } catch (err: unknown) {
       const ax = err as { response?: { data?: { error?: string }; status?: number }; request?: unknown };
       if (ax.response?.data?.error) {
@@ -93,27 +87,29 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white px-4 py-6 sm:px-6 sm:py-10">
-      <div className="mx-auto grid max-w-5xl items-start gap-6 md:grid-cols-2 md:gap-10">
-        <div className="hidden md:block">
-          <AppLogo
-            size="xl"
-            showText
-            showMark
-            showTagline
-            showSubline
-            className="items-start"
-          />
-        </div>
+    <div className="flex min-h-[100dvh] flex-col bg-surface px-6 pb-8 pt-[max(2rem,env(safe-area-inset-top))]">
+      {/* Back */}
+      <div className="mb-8">
+        <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-medium text-ink-light hover:text-ink transition">
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+          Volver
+        </Link>
+      </div>
 
-        <div className="mb-4 md:hidden">
-          <AppLogo size="lg" showText showMark showTagline align="center" className="items-center" />
-        </div>
+      <div className="flex flex-1 flex-col justify-center">
+        <div className="mx-auto w-full max-w-sm">
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="text-2xl font-bold tracking-tight text-ink">Bienvenido de vuelta</h1>
+            <p className="mt-1.5 text-[15px] text-ink-light">Inicia sesión en tu cuenta</p>
+          </div>
 
-        <div className="mx-auto w-full max-w-[400px]">
-          <form onSubmit={handleSubmit} className="space-y-3">
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="email" className="mb-1 block text-sm font-medium text-gray-700">
+              <label htmlFor="email" className="mb-1.5 block text-[13px] font-medium text-ink-light">
                 Email
               </label>
               <input
@@ -123,13 +119,13 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className={inputClass}
+                className="w-full rounded-xl border border-surface-300 bg-white px-4 py-3 text-[15px] text-ink outline-none transition placeholder:text-ink-muted focus:border-primary-400 focus:ring-2 focus:ring-primary-100"
                 placeholder="tu@email.com"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="mb-1 block text-sm font-medium text-gray-700">
+              <label htmlFor="password" className="mb-1.5 block text-[13px] font-medium text-ink-light">
                 Contraseña
               </label>
               <input
@@ -139,38 +135,37 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className={inputClass}
+                className="w-full rounded-xl border border-surface-300 bg-white px-4 py-3 text-[15px] text-ink outline-none transition placeholder:text-ink-muted focus:border-primary-400 focus:ring-2 focus:ring-primary-100"
                 placeholder="Tu contraseña"
               />
             </div>
 
-            <div className="flex items-center">
+            <label className="flex items-center gap-2.5 cursor-pointer">
               <input
-                id="remember"
                 type="checkbox"
                 checked={remember}
                 onChange={(e) => setRemember(e.target.checked)}
-                className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus:ring-primary-500/30"
+                className="h-4 w-4 rounded border-surface-300 text-primary-600 focus:ring-primary-200"
               />
-              <label htmlFor="remember" className="ml-2.5 text-sm text-gray-600">
-                Recordar mi email
-              </label>
-            </div>
+              <span className="text-[13px] text-ink-light">Recordar mi email</span>
+            </label>
 
-            {error ? (
-              <div className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>
-            ) : null}
+            {error && (
+              <div className="rounded-xl bg-red-50 px-4 py-3 text-[13px] text-red-700 ring-1 ring-red-100">
+                {error}
+              </div>
+            )}
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-xl bg-gray-900 py-2.5 text-sm font-medium text-white transition hover:bg-gray-800 disabled:opacity-50 sm:text-base"
+              className="w-full rounded-xl bg-primary-600 py-3.5 text-[15px] font-semibold text-white shadow-soft transition hover:bg-primary-700 active:scale-[0.98] disabled:opacity-50"
             >
-              {loading ? 'Entrando…' : 'Entrar'}
+              {loading ? 'Entrando…' : 'Iniciar sesión'}
             </button>
           </form>
 
-          <p className="mt-4 text-center text-sm text-gray-500">
+          <p className="mt-6 text-center text-[13px] text-ink-muted">
             ¿No tienes cuenta?{' '}
             <Link href="/register" className="font-medium text-primary-600 hover:text-primary-700">
               Crear cuenta

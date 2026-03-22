@@ -1,25 +1,6 @@
 import { Response } from 'express';
-import nodemailer from 'nodemailer';
 import { OptionalAuthRequest } from '../middleware/optionalAuth.middleware';
-
-// Configurar transporter de nodemailer
-const createTransporter = () => {
-  const supportEmail = process.env.SUPPORT_EMAIL || 'oficialsocialrrss@gmail.com';
-  const supportPassword = process.env.SUPPORT_EMAIL_PASSWORD;
-
-  if (!supportPassword) {
-    throw new Error('SUPPORT_EMAIL_PASSWORD no está configurado. Por favor, configura la contraseña de aplicación de Gmail en las variables de entorno.');
-  }
-
-  // Usar Gmail SMTP
-  return nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: supportEmail,
-      pass: supportPassword,
-    },
-  });
-};
+import { createTransporter, getSupportEmail } from '../utils/email';
 
 export const sendSupportEmail = async (req: OptionalAuthRequest, res: Response): Promise<void> => {
   try {
@@ -30,40 +11,21 @@ export const sendSupportEmail = async (req: OptionalAuthRequest, res: Response):
       return;
     }
 
-    const supportEmail = process.env.SUPPORT_EMAIL || 'oficialsocialrrss@gmail.com';
-    
-    // Verificar que la contraseña esté configurada
-    if (!process.env.SUPPORT_EMAIL_PASSWORD) {
-      console.error('❌ SUPPORT_EMAIL_PASSWORD no está configurado en las variables de entorno');
-      res.status(500).json({
-        error: 'El servicio de email no está configurado correctamente. Por favor, contacta al administrador.',
-      });
-      return;
-    }
+    const supportEmail = getSupportEmail();
 
     let transporter;
     try {
-      transporter = createTransporter();
-      
-      // Verificar la conexión
-      await transporter.verify();
+      transporter = await createTransporter();
     } catch (transporterError: any) {
       console.error('❌ Error configurando el transporter de email:', transporterError);
-      
       if (transporterError.message?.includes('SUPPORT_EMAIL_PASSWORD')) {
-        res.status(500).json({
-          error: 'El servicio de email no está configurado. Por favor, contacta al administrador.',
-        });
+        res.status(500).json({ error: 'El servicio de email no está configurado. Contacta al administrador.' });
         return;
       }
-      
       if (transporterError.code === 'EAUTH') {
-        res.status(500).json({
-          error: 'Error de autenticación con el servidor de email. Verifica las credenciales.',
-        });
+        res.status(500).json({ error: 'Error de autenticación con el servidor de email. Verifica las credenciales.' });
         return;
       }
-      
       throw transporterError;
     }
 
@@ -104,7 +66,7 @@ export const sendSupportEmail = async (req: OptionalAuthRequest, res: Response):
           </div>
           ` : ''}
           <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 12px;">
-            <p>Este email fue enviado desde el formulario de soporte de Promoción RRSS.</p>
+            <p>Este email fue enviado desde el formulario de soporte de SocialRRSS.</p>
             <p>Para responder, utiliza el email de respuesta: ${userEmail || req.user?.email || supportEmail}</p>
           </div>
         </div>
