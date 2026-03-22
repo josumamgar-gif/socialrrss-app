@@ -63,16 +63,6 @@ export const getAllProfiles = async (_req: any, res: Response): Promise<void> =>
   }
 };
 
-/** Admin: borrar todos los perfiles (Mongo). Protegido con x-admin-secret. */
-export const adminDeleteAllProfiles = async (req: any, res: Response): Promise<void> => {
-  const ADMIN_SECRET = process.env.ADMIN_SECRET || 'socialrrss-admin-2026';
-  if (req.headers['x-admin-secret'] !== ADMIN_SECRET) {
-    res.status(403).json({ error: 'No autorizado' });
-    return;
-  }
-  const result = await Profile.deleteMany({});
-  res.json({ deleted: result.deletedCount, message: 'Todos los perfiles eliminados' });
-};
 
 export const getMyProfiles = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
