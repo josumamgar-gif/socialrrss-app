@@ -154,19 +154,17 @@ export default function PrincipalPage() {
           },
         ];
 
-        // Show demos first (always, until discarded), then real profiles after
+        // Solo 3 perfiles tutorial (cliente). Los reales vienen de la API cuando existan.
         const activeDemos = demoProfiles.filter(p => !discardedProfiles.includes(p._id));
 
         let realProfiles: Profile[] = [];
         try {
           const response = await profilesAPI.getAll();
-          realProfiles = (response.profiles || []).filter((p: Profile) => {
-            const isDemo = p._id?.startsWith('demo-') || (p.userId as any)?.username === 'demo';
-            return !isDemo && !discardedProfiles.includes(p._id);
-          });
+          realProfiles = (response.profiles || []).filter(
+            (p: Profile) => !discardedProfiles.includes(String(p._id))
+          );
         } catch { /* silent */ }
 
-        // Demos always go first, then real profiles shuffled
         const available = [
           ...activeDemos,
           ...[...realProfiles].sort(() => Math.random() - 0.5),

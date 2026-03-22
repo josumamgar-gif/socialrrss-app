@@ -1,4 +1,5 @@
 import { Response } from 'express';
+import mongoose from 'mongoose';
 import { AuthRequest } from '../middleware/auth.middleware';
 import Profile from '../models/Profile';
 import multer from 'multer';
@@ -34,56 +35,43 @@ const shuffleArray = <T>(array: T[]): T[] => {
   return shuffled;
 };
 
+const DEMO_USER_OID = new mongoose.Types.ObjectId('000000000000000000000000');
+
 export const getAllProfiles = async (_req: any, res: Response): Promise<void> => {
   try {
-    const DEMO_USER_ID = '000000000000000000000000';
-    
-    // Obtener todos los perfiles activos (reales y demo)
-    const allProfiles = await Profile.find({ isActive: true })
+    // Solo perfiles de clientes reales (excluye seed/demo de BD)
+    const allProfiles = await Profile.find({
+      isActive: true,
+      userId: { $nin: [null, DEMO_USER_OID] },
+    })
       .populate({
         path: 'userId',
         select: 'username',
         options: { lean: true },
       })
-      .lean(); // Usar lean() para mejor rendimiento
+      .lean();
 
-    // Separar perfiles demo y reales
-    const demoProfiles: any[] = [];
-    const realProfiles: any[] = [];
-
-    allProfiles.forEach((profile: any) => {
-      // Si el userId es null o no se pudo poblar (perfil demo), usar un objeto por defecto
-      if (!profile.userId || profile.userId.toString() === DEMO_USER_ID) {
-        demoProfiles.push({
-          ...profile,
-          userId: {
-            _id: DEMO_USER_ID,
-            username: 'demo',
-          },
-        });
-      } else {
-        realProfiles.push(profile);
-      }
+    const realProfiles = allProfiles.filter((p: any) => {
+      const uid = p.userId?._id?.toString?.() ?? p.userId?.toString?.();
+      return uid && uid !== '000000000000000000000000';
     });
 
-    // LIMITAR DEMOS A MÁXIMO 10
-    const limitedDemoProfiles = demoProfiles.slice(0, 10);
-
-    // Mezclar aleatoriamente los perfiles reales
-    const shuffledRealProfiles = shuffleArray(realProfiles);
-    
-    // Mezclar aleatoriamente los demos limitados
-    const shuffledDemoProfiles = shuffleArray(limitedDemoProfiles);
-
-    // Combinar: primero mezclar todo junto para que los reales pagados aparezcan mezclados con los demos
-    const combinedProfiles = [...shuffledRealProfiles, ...shuffledDemoProfiles];
-    const finalShuffledProfiles = shuffleArray(combinedProfiles);
-
-    res.json({ profiles: finalShuffledProfiles });
+    res.json({ profiles: shuffleArray(realProfiles) });
   } catch (error: any) {
     console.error('Error obteniendo perfiles:', error);
     res.status(500).json({ error: 'Error al obtener perfiles' });
   }
+};
+
+/** Admin: borrar todos los perfiles (Mongo). Protegido con x-admin-secret. */
+export const adminDeleteAllProfiles = async (req: any, res: Response): Promise<void> => {
+  const ADMIN_SECRET = process.env.ADMIN_SECRET || 'socialrrss-admin-2026';
+  if (req.headers['x-admin-secret'] !== ADMIN_SECRET) {
+    res.status(403).json({ error: 'No autorizado' });
+    return;
+  }
+  const result = await Profile.deleteMany({});
+  res.json({ deleted: result.deletedCount, message: 'Todos los perfiles eliminados' });
 };
 
 export const getMyProfiles = async (req: AuthRequest, res: Response): Promise<void> => {

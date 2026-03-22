@@ -6,6 +6,7 @@ import {
   updateAutoRenewal,
   updateProfile,
   uploadMiddleware,
+  adminDeleteAllProfiles,
 } from '../controllers/profiles.controller';
 import { authenticate } from '../middleware/auth.middleware';
 import multer from 'multer';
@@ -13,6 +14,7 @@ import multer from 'multer';
 const router = express.Router();
 
 router.get('/', getAllProfiles);
+router.post('/admin/delete-all', adminDeleteAllProfiles);
 router.get('/my-profiles', authenticate, getMyProfiles);
 router.put('/:profileId/auto-renewal', authenticate, updateAutoRenewal);
 router.put('/:profileId', authenticate, (req: express.Request, res: express.Response, next: express.NextFunction) => {
