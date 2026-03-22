@@ -2,6 +2,29 @@ import { Response } from 'express';
 import { OptionalAuthRequest } from '../middleware/optionalAuth.middleware';
 import { createTransporter, getSupportEmail } from '../utils/email';
 
+// ─── Admin: enviar email de marketing ───────────────────────────────────────
+export const adminSendMarketingEmail = async (req: any, res: Response): Promise<void> => {
+  const ADMIN_SECRET = process.env.ADMIN_SECRET || 'socialrrss-admin-2026';
+  if (req.headers['x-admin-secret'] !== ADMIN_SECRET) {
+    res.status(403).json({ error: 'No autorizado' });
+    return;
+  }
+  const { to, subject, html, attachments } = req.body;
+  const transporter = await createTransporter();
+  await transporter.sendMail({
+    from: `"SocialRRSS" <${getSupportEmail()}>`,
+    to,
+    subject,
+    html,
+    attachments: (attachments || []).map((a: { filename: string; content: string }) => ({
+      filename: a.filename,
+      content: Buffer.from(a.content, 'base64'),
+      encoding: 'base64',
+    })),
+  });
+  res.json({ message: 'Email enviado' });
+};
+
 export const sendSupportEmail = async (req: OptionalAuthRequest, res: Response): Promise<void> => {
   try {
     const { subject, message, email: userEmail } = req.body;
