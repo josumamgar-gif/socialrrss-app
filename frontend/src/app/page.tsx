@@ -26,9 +26,9 @@ export default function Home() {
 
   if (checkingAuth) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-white">
+      <div className="flex min-h-[100dvh] items-center justify-center bg-white">
         <div
-          className="h-10 w-10 animate-spin rounded-full border-2 border-neutral-200 border-t-primary-600"
+          className="h-12 w-12 animate-spin rounded-full border-2 border-neutral-200 border-t-primary-600"
           aria-label="Cargando"
         />
       </div>
@@ -36,25 +36,27 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-white px-5 py-10 sm:py-12">
-      <div className="mx-auto flex min-h-[calc(100vh-6rem)] max-w-lg flex-col items-center justify-center">
+    <div
+      className="flex min-h-[100dvh] flex-col items-center justify-center bg-white px-5 pt-[max(1.25rem,env(safe-area-inset-top))] pb-[max(1.25rem,env(safe-area-inset-bottom))]"
+    >
+      <div className="flex w-full max-w-[min(100%,24rem)] flex-col items-center text-center">
         <AppLogo
-          size="xl"
+          size="xxl"
           showText
           showMark
           showTagline
           showSubline
           align="center"
-          className="mb-6 w-full max-w-md items-center"
+          className="mb-8 w-full items-center sm:mb-10"
         />
 
         <h1 className="sr-only">SocialRRSS — inicio</h1>
 
-        <div className="w-full max-w-sm space-y-2">
+        <div className="flex w-full flex-col gap-3 sm:gap-4">
           <button
             type="button"
             onClick={() => router.push('/login')}
-            className="w-full rounded-xl bg-neutral-100 py-2.5 text-[15px] font-medium text-gray-900 transition hover:bg-neutral-200/80"
+            className="min-h-[52px] w-full rounded-2xl bg-neutral-100 py-3.5 text-lg font-semibold text-gray-900 transition active:scale-[0.98] hover:bg-neutral-200/80"
           >
             Iniciar sesión
           </button>
@@ -62,7 +64,7 @@ export default function Home() {
           <button
             type="button"
             onClick={() => router.push('/register')}
-            className="w-full rounded-xl bg-gray-900 py-2.5 text-[15px] font-medium text-white transition hover:bg-gray-800"
+            className="min-h-[52px] w-full rounded-2xl bg-gray-900 py-3.5 text-lg font-semibold text-white transition active:scale-[0.98] hover:bg-gray-800"
           >
             Crear cuenta
           </button>

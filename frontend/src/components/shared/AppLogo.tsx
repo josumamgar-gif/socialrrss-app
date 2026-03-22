@@ -4,7 +4,7 @@ import SocialBrandMark from '@/components/shared/SocialBrandMark';
 import { BRAND_HEADLINE, BRAND_SUBLINE } from '@/lib/brand';
 
 interface AppLogoProps {
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
   /** Muestra el nombre completo; si es false, solo isotipo + monograma compacto */
   showText?: boolean;
   /** Isotipo junto al nombre (recomendado en landing y cabeceras) */
@@ -23,6 +23,7 @@ const textSize: Record<NonNullable<AppLogoProps['size']>, string> = {
   md: 'text-xl',
   lg: 'text-2xl',
   xl: 'text-3xl sm:text-4xl',
+  xxl: 'text-4xl sm:text-5xl',
 };
 
 const markSize: Record<NonNullable<AppLogoProps['size']>, string> = {
@@ -30,6 +31,7 @@ const markSize: Record<NonNullable<AppLogoProps['size']>, string> = {
   md: 'h-9 w-9',
   lg: 'h-11 w-11',
   xl: 'h-14 w-14',
+  xxl: 'h-20 w-20 sm:h-24 sm:w-24',
 };
 
 export default function AppLogo({
@@ -47,6 +49,15 @@ export default function AppLogo({
     align === 'center'
       ? 'flex-col items-center text-center'
       : 'flex-col items-center text-center sm:flex-row sm:items-center sm:justify-start sm:text-left';
+
+  const taglineClass =
+    size === 'xxl'
+      ? 'mt-2 max-w-[min(100%,20rem)] text-base font-medium leading-snug tracking-tight text-gray-800 sm:text-lg'
+      : 'mt-1 max-w-md text-[14px] font-medium leading-snug tracking-tight text-gray-800 sm:text-[15px]';
+  const sublineClass =
+    size === 'xxl'
+      ? 'mt-2 max-w-[min(100%,20rem)] text-sm leading-relaxed text-gray-500 sm:text-base'
+      : 'mt-1 max-w-md text-xs leading-relaxed text-gray-500 sm:text-sm';
 
   if (!showText) {
     return (
@@ -67,18 +78,12 @@ export default function AppLogo({
   if (showMark) {
     return (
       <div className={`flex flex-col gap-2 ${className}`}>
-        <div className={`flex gap-2 sm:gap-3 ${rowAlign}`}>
+        <div className={`flex gap-3 sm:gap-4 ${rowAlign}`}>
           <SocialBrandMark className={`${iconClass} shrink-0`} />
           <div className="min-w-0">
             {wordmark}
-            {showTagline ? (
-              <p className="mt-1 max-w-md text-[14px] font-medium leading-snug tracking-tight text-gray-800 sm:text-[15px]">
-                {BRAND_HEADLINE}
-              </p>
-            ) : null}
-            {showSubline ? (
-              <p className="mt-1 max-w-md text-xs leading-relaxed text-gray-500 sm:text-sm">{BRAND_SUBLINE}</p>
-            ) : null}
+            {showTagline ? <p className={taglineClass}>{BRAND_HEADLINE}</p> : null}
+            {showSubline ? <p className={sublineClass}>{BRAND_SUBLINE}</p> : null}
           </div>
         </div>
       </div>
@@ -88,12 +93,8 @@ export default function AppLogo({
   return (
     <div className={`inline-flex flex-col ${className}`}>
       {wordmark}
-      {showTagline ? (
-        <p className="mt-1 max-w-md text-[14px] font-medium leading-snug text-gray-800 sm:text-[15px]">{BRAND_HEADLINE}</p>
-      ) : null}
-      {showSubline ? (
-        <p className="mt-1 max-w-md text-xs leading-relaxed text-gray-500 sm:text-sm">{BRAND_SUBLINE}</p>
-      ) : null}
+      {showTagline ? <p className={taglineClass}>{BRAND_HEADLINE}</p> : null}
+      {showSubline ? <p className={sublineClass}>{BRAND_SUBLINE}</p> : null}
     </div>
   );
 }
